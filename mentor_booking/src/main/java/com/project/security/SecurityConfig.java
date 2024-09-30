@@ -43,12 +43,14 @@ public class SecurityConfig {
     private final String[] MENTOR_LIST = {"api/mentor/**"};
     private final String[] ADMINUSER_LIST ={"/api/user/**"};
     private final String[] PUBLIC_LIST = {"api/auth/**","api/public/**"};
+    private final String[] SWAGGERUI = {"/swagger-ui/**", "/v3/api-docs/**","/swagger-ui.html"};
     
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception{
         httpSecurity.csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(request -> request
+                        .requestMatchers(SWAGGERUI).permitAll()
                         .requestMatchers(PUBLIC_LIST).permitAll()
                         .requestMatchers(ADMIN_LIST).hasAuthority("ADMIN")
                         .requestMatchers(MENTOR_LIST).hasAuthority("MENTOR")

@@ -30,16 +30,16 @@ public class UsersService {
 
     @Autowired
     private UsersRepository usersRepository;
-
+    
     @Autowired
     private RoleRepository roleRepository;
-
+    
     @Autowired
     private MentorsRepository mentorsRepository;
-
+    
     @Autowired
     private StudentsRepository studentsRepository;
-
+    
     @Autowired
     private PasswordEncoder passwordEncoder;
 
@@ -49,7 +49,7 @@ public class UsersService {
      * @param registerRequest
      * @return Đối tượng Response chứa thông tin về kết quả tạo user
      */
-    public Response createUser(Response registerRequest) {
+    public Response createUser(UsersDTO registerRequest) {
         Response response = new Response();
         try {
             // Kiểm tra nếu username hoặc email đã tồn tại
@@ -59,9 +59,9 @@ public class UsersService {
             if (usersRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
                 throw new OurException("Email already exists");
             }
-            // Lấy vai trò người dùng từ request (ADMIN/STUDENT/MENTOR)
-            Role role = roleRepository.findByRoleName(registerRequest.getRole())
-                    .orElseThrow(() -> new OurException("No role name: " + registerRequest.getRoleDTO().getRoleName()));
+            
+            Role role = roleRepository.findByRoleName(registerRequest.getRoleString())
+                    .orElseThrow(() -> new OurException("No role name: " + registerRequest.getRole().getRoleName()));
             // Mã hóa mật khẩu
             String encodedPassword = passwordEncoder.encode(registerRequest.getPassword());
 
@@ -70,12 +70,17 @@ public class UsersService {
             newUser.setUsername(registerRequest.getUsername());
             newUser.setEmail(registerRequest.getEmail());
             newUser.setPassword(encodedPassword);
+            newUser.setBirthDate(registerRequest.getBirthDate());
+            newUser.setAvatar(registerRequest.getAvarta());
+            newUser.setAddress(registerRequest.getAddress());
+            newUser.setPhone(registerRequest.getPhone());
+            newUser.setGender(registerRequest.getGender());
             newUser.setDateCreated(LocalDateTime.now());
             newUser.setRole(role);
 
             // Lưu người dùng vào database
             usersRepository.save(newUser);
-
+            
             if (role.getRoleName().equalsIgnoreCase("STUDENT")) {
                 Students student = new Students();
                 student.setUser(newUser);
@@ -86,7 +91,7 @@ public class UsersService {
                 newUser.setStudent(student);
                 usersRepository.save(newUser);
             }
-
+            
             if (role.getRoleName().equalsIgnoreCase("MENTOR")) {
                 Mentors mentor = new Mentors();
                 mentor.setUser(newUser);
@@ -95,14 +100,14 @@ public class UsersService {
                 newUser.setMentor(mentor);
                 usersRepository.save(newUser);
             }
-
+            
             if (newUser.getId() > 0) {
                 UsersDTO usersDTO = userToUserDTO(newUser);
                 response.setUsersDTO(usersDTO);
                 response.setStatusCode(200);
                 response.setMessage("User created successfully");
             }
-
+            
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -122,7 +127,7 @@ public class UsersService {
                 List<UsersDTO> listDTO = list.stream()
                         .map(this::userToUserDTO)
                         .collect(Collectors.toList());
-
+                
                 response.setUsersDTOList(listDTO);
                 response.setStatusCode(200);
                 response.setMessage("Users fetched successfully");
@@ -134,7 +139,7 @@ public class UsersService {
             response.setStatusCode(500);
             response.setMessage("Error occured during get all user " + e.getMessage());
         }
-
+        
         return response;
     }
 
@@ -152,7 +157,7 @@ public class UsersService {
             }
         } catch (OurException e) {
             response.setStatusCode(400);
-            response.getMessage();
+            response.setMessage("Error occured during get user by id " + id);
         } catch (Exception e) {
             response.setStatusCode(500);
             response.setMessage("Error occured during get user by id " + id);
@@ -172,6 +177,16 @@ public class UsersService {
             Users user = usersRepository.findById(id)
                     .orElseThrow(
                             () -> new OurException("User not found with id: " + id));
+            
+            Mentors deleteMentor = mentorsRepository.findByUser_Id(user.getId());
+            if (deleteMentor != null) {
+                mentorsRepository.delete(deleteMentor);
+            }
+            
+            Students deleteStudent = studentsRepository.findByUser_Id(user.getId());
+            if (deleteStudent != null) {
+                studentsRepository.delete(deleteStudent);
+            }
             usersRepository.delete(user);
             response.setStatusCode(200);
             response.setMessage("User deleted successfully");
@@ -212,7 +227,7 @@ public class UsersService {
             response.setStatusCode(500);
             response.setMessage("Error occurred while updating user: " + e.getMessage());
         }
-
+        
         return response;
     }
 
@@ -247,13 +262,13 @@ public class UsersService {
         userDTO.setEmail(user.getEmail());
         userDTO.setUsername(user.getUsername());
         userDTO.setBirthDate(user.getBirthDate());
-        userDTO.setAvatar(user.getAvatar());
+        userDTO.setAvarta(user.getAvatar());
         userDTO.setAddress(user.getAddress());
         userDTO.setPhone(user.getPhone());
         userDTO.setGender(user.getGender());
         userDTO.setDateUpdated(user.getDateUpdated());
         userDTO.setDateCreated(user.getDateCreated());
-
+        
         RoleDTO roleDTO = new RoleDTO();
         roleDTO.setId(user.getRole().getId());
         roleDTO.setRoleName(user.getRole().getRoleName());

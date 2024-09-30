@@ -2,6 +2,7 @@
 package com.project.controller;
 
 import com.project.dto.Response;
+import com.project.dto.UsersDTO;
 import com.project.model.Users;
 import com.project.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ public class UsersController {
     private UsersService userService;
     
     @PostMapping("/admin/create-user")
-    public ResponseEntity<Response> createUser(@RequestBody Response createRes){
+    public ResponseEntity<Response> createUser(@RequestBody UsersDTO createRes){
         Response response = userService.createUser(createRes);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }

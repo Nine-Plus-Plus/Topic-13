@@ -42,7 +42,8 @@ public class SkillsService {
         Response response = new Response();
         try {
             List<Skills> skillsList = skillsRepository.findAll();
-            List<SkillsDTO> skillsDTOList = skillsList.stream()
+            List<SkillsDTO> skillsDTOList = skillsList
+                    .stream()
                     .map(this::skillsToSkillsDTO)
                     .collect(Collectors.toList());
 

@@ -27,7 +27,7 @@ public class NotificationService {
 
     @Autowired
     @Lazy
-    private ModelMapper modelMapper;
+    private ModelMapper modelMapperNotification;
 
     // Phương thức tạo notification mới
     public Response createNotification (NotificationsDTO notificationsDTO, String usernameReciver) {
@@ -160,7 +160,7 @@ public class NotificationService {
 
     // Chuyển đổi từ Notifications sang NotificationsDTO
     public NotificationsDTO convertNotificationsToNotificationsDTO(Notifications notification) {
-        NotificationsDTO notificationsDTO = modelMapper.map(notification, NotificationsDTO.class);
+        NotificationsDTO notificationsDTO = modelMapperNotification.map(notification, NotificationsDTO.class);
 
         return notificationsDTO;
     }

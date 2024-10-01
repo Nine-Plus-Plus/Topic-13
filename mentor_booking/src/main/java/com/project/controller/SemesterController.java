@@ -1,9 +1,11 @@
+/*
 
+ */
 package com.project.controller;
 
 import com.project.dto.Response;
-import com.project.model.Class;
-import com.project.service.ClassService;
+import com.project.model.Semester;
+import com.project.service.SemesterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,38 +23,38 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api")
-public class ClassController {
+public class SemesterController {
     
     @Autowired
-    private ClassService classService;
+    private SemesterService semesterService;
     
-    @PostMapping("/admin/create-class")
-    public ResponseEntity<Response> createClass(@RequestBody Response createResponse){
-        Response response = classService.createClass(createResponse);
+    @PostMapping("/admin/create-semester")
+    public ResponseEntity<Response> createSemester(@RequestBody Response createResponse){
+        Response response = semesterService.createSemester(createResponse);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
     
-    @GetMapping("/admin/get-all-class")
-    public ResponseEntity<Response> getAllClass(){
-        Response response = classService.getAllClasses();
+    @GetMapping("/admin/get-all-semesters")
+    public ResponseEntity<Response> getAllSemesters(){
+        Response response = semesterService.getAllSemesters();
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
     
-    @GetMapping("/admin/get-class-by-id/{id}")
-    public ResponseEntity<Response> getClassById(@PathVariable Long id){
-        Response response = classService.getClassById(id);
+    @GetMapping("/admin/get-semester-by-id/{id}")
+    public ResponseEntity<Response> getSemesterById(@PathVariable Long id){
+        Response response = semesterService.getSemesterById(id);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
     
-    @PutMapping("/admin/update-class/{id}")
-    public ResponseEntity<Response> updateClass(@PathVariable Long id, @RequestBody Class newClass){
-        Response response = classService.updateClass(id, newClass);
+    @PutMapping("/admin/update-semester/{id}")
+    public ResponseEntity<Response> updateSemester(@PathVariable Long id, @RequestBody Semester newSemester){
+        Response response = semesterService.updateSemester(id, newSemester);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
     
-    @DeleteMapping("/admin/delete-class/{id}")
-    public ResponseEntity<Response> deleteClass(@PathVariable Long id){
-        Response response = classService.deleteClass(id);
+    @DeleteMapping("/admin/delete-semester/{id}")
+    public ResponseEntity<Response> deleteSemester(@PathVariable Long id){
+        Response response = semesterService.deleteSemester(id);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }

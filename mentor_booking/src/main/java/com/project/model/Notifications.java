@@ -43,4 +43,9 @@ public class Notifications {
     @ManyToOne
     @JoinColumn(name = "user_id") // Thiết lập cột khóa ngoại
     private Users user;
+
+    // Thêm thông tin người nhận
+    @ManyToOne
+    @JoinColumn(name = "receiver_id")
+    private Users receiver;
 }

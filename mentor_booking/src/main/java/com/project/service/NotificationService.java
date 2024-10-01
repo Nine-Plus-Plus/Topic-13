@@ -2,21 +2,19 @@ package com.project.service;
 
 import com.project.dto.NotificationsDTO;
 import com.project.dto.Response;
-import com.project.dto.SkillsDTO;
 import com.project.exception.OurException;
 import com.project.model.Notifications;
-import com.project.model.Skills;
 import com.project.model.Users;
 import com.project.repository.NotificationRepository;
 import com.project.repository.UsersRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static com.project.ultis.Converter.convertNotificationsListToNotificationsDTOList;
-import static com.project.ultis.Converter.convertNotificationsToNotificationsDTO;
 
 @Service
 public class NotificationService {
@@ -26,6 +24,10 @@ public class NotificationService {
 
     @Autowired
     UsersRepository usersRepository;
+
+    @Autowired
+    @Lazy
+    private ModelMapper modelMapper;
 
     // Phương thức tạo notification mới
     public Response createNotification (NotificationsDTO notificationsDTO, String usernameReciver) {
@@ -87,11 +89,10 @@ public class NotificationService {
             Notifications notifications = notificationRepository.findById(id)
                     .orElseThrow( () -> new OurException("Notification not found"));
 
-            if(notifications!=null){
-                response.setNotificationsDTO(convertNotificationsToNotificationsDTO(notifications));
-                response.setMessage("Successfully");
-                response.setStatusCode(200);
-            }
+            response.setNotificationsDTO(convertNotificationsToNotificationsDTO(notifications));
+            response.setMessage("Successfully");
+            response.setStatusCode(200);
+
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -150,5 +151,24 @@ public class NotificationService {
             response.setMessage("Error occured during update notification by Id " + e.getMessage());
         }
         return response;
+    }
+
+    @Bean
+    public ModelMapper modelMapper() {
+        return new ModelMapper();
+    }
+
+    // Chuyển đổi từ Notifications sang NotificationsDTO
+    public NotificationsDTO convertNotificationsToNotificationsDTO(Notifications notification) {
+        NotificationsDTO notificationsDTO = modelMapper.map(notification, NotificationsDTO.class);
+
+        return notificationsDTO;
+    }
+
+    // Chuyển đổi danh sách Notifications sang danh sách NotificationsDTO
+    public List<NotificationsDTO> convertNotificationsListToNotificationsDTOList(List<Notifications> notifications) {
+        return notifications.stream()
+                .map(this::convertNotificationsToNotificationsDTO)
+                .collect(Collectors.toList());
     }
 }

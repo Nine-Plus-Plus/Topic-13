@@ -47,7 +47,7 @@ public class ClassService {
     @Lazy
     private ModelMapper modelMapper;
 
-    public Response createClass(Response inputRequest) {
+    public Response CreateClass(Response inputRequest) {
         Response response = new Response();
         try {
             if (classRepository.findByMentorId(inputRequest.getMentorsDTO().getId()).isPresent()) {
@@ -68,7 +68,6 @@ public class ClassService {
             newClass.setSemester(semester);
             newClass.setMentor(mentor);
             newClass.setStudents(studentsList);
-            classRepository.save(newClass);
 
             if (newClass.getId() > 0) {
                 ClassDTO classDto = convertClassToClassDto(newClass);
@@ -114,7 +113,6 @@ public class ClassService {
             Class findClass = classRepository.findById(id).orElse(null);
             if (findClass != null) {
                 ClassDTO dto = modelMapper.map(findClass, ClassDTO.class);
-                response.setClassDTO(dto);
                 response.setStatusCode(200);
                 response.setMessage("Successfully");
             }else throw new OurException("Cannot find class");
@@ -123,7 +121,7 @@ public class ClassService {
             response.setMessage(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
-            response.setMessage("Error occured during get class " + e.getMessage());
+            response.setMessage("Error occured during get all classes " + e.getMessage());
         }
         return response;
     }
@@ -152,12 +150,6 @@ public class ClassService {
         try {
             Class presentClass = classRepository.findById(id)
                     .orElseThrow(() -> new OurException("Cannot find class with id: "+id));
-            if (classRepository.findByMentorId(newClass.getMentor().getId()).isPresent()) {
-                throw new OurException("Mentor has already have a class");
-            }
-            if (classRepository.findBySemesterId(newClass.getSemester().getId()).isPresent()) {
-                throw new OurException("Class have already existed in this semester");
-            }
             
             presentClass.setClassName(newClass.getClassName());
             presentClass.setSemester(presentClass.getSemester());

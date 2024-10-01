@@ -1,4 +1,6 @@
+/*
 
+ */
 package com.project.controller;
 
 import com.project.dto.Response;
@@ -28,7 +30,7 @@ public class ClassController {
     
     @PostMapping("/admin/create-class")
     public ResponseEntity<Response> createClass(@RequestBody Response createResponse){
-        Response response = classService.createClass(createResponse);
+        Response response = classService.CreateClass(createResponse);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
     

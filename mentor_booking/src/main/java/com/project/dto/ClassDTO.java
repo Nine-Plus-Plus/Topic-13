@@ -14,5 +14,6 @@ public class ClassDTO {
     private SemesterDTO semester;
     private LocalDateTime dateCreated;
     private List<StudentsDTO> students;
-    private MentorsDTO mentor; 
+    private MentorsDTO mentor;
+    private List<GroupDTO> groupDTOS;
 }

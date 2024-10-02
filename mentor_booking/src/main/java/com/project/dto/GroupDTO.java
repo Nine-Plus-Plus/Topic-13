@@ -17,4 +17,5 @@ public class GroupDTO {
     private List<StudentsDTO> students;  // Một nhóm có thể chứa nhiều sinh viên
     private ProjectsDTO project;
     private List<BookingDTO> bookings;
+    private ClassDTO classDTO;
 }

@@ -29,7 +29,10 @@ public class Topic {
     private List<String> actor;
     
     @Column(name = "requirement")
-    private String requirement;
+    private List<String> requirement;
+
+    @Column(name = "non-function-requirement")
+    private List<String> nonFunctionRequirement;
     
     @Column(name = "date_created")
     private LocalDateTime dateCreated;

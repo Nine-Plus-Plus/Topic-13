@@ -15,7 +15,8 @@ public class TopicDTO {
     private String context;
     private String problems;
     private List<String> actor;
-    private String requirement;
+    private List<String> requirement;
+    private List<String> nonFunctionRequirement;
     private LocalDateTime dateCreated;
     private LocalDateTime dateUpdated;
     private ProjectsDTO project;

@@ -30,7 +30,7 @@ public class ClassController {
     
     @PostMapping("/admin/create-class")
     public ResponseEntity<Response> createClass(@RequestBody Response createResponse){
-        Response response = classService.CreateClass(createResponse);
+        Response response = classService.createClass(createResponse);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
     

@@ -1,15 +1,11 @@
 
 package com.project.model;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
+import java.util.List;
+
 import lombok.Data;
 
 @Data
@@ -30,7 +26,7 @@ public class Topic {
     private String problems;
     
     @Column(name = "actor")
-    private String actor;
+    private List<String> actor;
     
     @Column(name = "requirement")
     private String requirement;
@@ -43,6 +39,12 @@ public class Topic {
     
     @OneToOne(mappedBy = "topic", cascade = CascadeType.ALL)
     private Projects project;
-    
 
+    @ManyToOne
+    @JoinColumn(name = "mentor_id")
+    private Mentors mentor;
+
+    @ManyToOne
+    @JoinColumn(name = "semester_id")
+    private Semester semester;
 }

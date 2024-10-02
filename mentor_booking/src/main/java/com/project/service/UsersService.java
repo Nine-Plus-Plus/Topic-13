@@ -71,7 +71,7 @@ public class UsersService {
             newUser.setEmail(registerRequest.getEmail());
             newUser.setPassword(encodedPassword);
             newUser.setBirthDate(registerRequest.getBirthDate());
-            newUser.setAvatar(registerRequest.getAvarta());
+            newUser.setAvatar(registerRequest.getAvatar());
             newUser.setAddress(registerRequest.getAddress());
             newUser.setPhone(registerRequest.getPhone());
             newUser.setGender(registerRequest.getGender());
@@ -262,7 +262,7 @@ public class UsersService {
         userDTO.setEmail(user.getEmail());
         userDTO.setUsername(user.getUsername());
         userDTO.setBirthDate(user.getBirthDate());
-        userDTO.setAvarta(user.getAvatar());
+        userDTO.setAvatar(user.getAvatar());
         userDTO.setAddress(user.getAddress());
         userDTO.setPhone(user.getPhone());
         userDTO.setGender(user.getGender());

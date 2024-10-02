@@ -18,10 +18,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-/**
- *
- * @author Thịnh Đạt
- */
 @Service
 public class SemesterService {
 
@@ -35,6 +31,7 @@ public class SemesterService {
     @Lazy
     private ModelMapper modelMapper;
 
+    // phương thức tạo mới Semester
     public Response createSemester(Response createRequest) {
         Response response = new Response();
 
@@ -66,7 +63,8 @@ public class SemesterService {
 
         return response;
     }
-    
+
+    // phương thức tìm tất cả Semester
     public Response getAllSemesters(){
         Response response = new Response();
         try {
@@ -87,14 +85,15 @@ public class SemesterService {
         }
         return response;
     }
-    
+
+    // phương thức tìm Semester theo Id
     public Response getSemesterById(Long id){
         Response response = new Response();
         try {
             Semester findSemester = semesterRepository.findById(id).orElse(null);
             if (findSemester != null) {
                 SemesterDTO dto = modelMapper.map(findSemester, SemesterDTO.class);
-                
+
                 response.setSemesterDTO(dto);
                 response.setStatusCode(200);
                 response.setMessage("Successfully");
@@ -108,7 +107,8 @@ public class SemesterService {
         }
         return response;
     }
-    
+
+    // phương thức cập nhập mới Semester
     public Response updateSemester(Long id, Semester newSemester){
         Response response = new Response();
         try {
@@ -117,12 +117,12 @@ public class SemesterService {
             if (semesterRepository.findBySemesterName(newSemester.getSemesterName()).isPresent()) {
                 throw new OurException("Semester has already existed");
             }
-            
+
             presentSemester.setSemesterName(newSemester.getSemesterName());
             presentSemester.setClasses(newSemester.getClasses());
-            
+
             semesterRepository.save(presentSemester);
-            
+
             SemesterDTO dto = modelMapper.map(presentSemester, SemesterDTO.class);
             response.setSemesterDTO(dto);
             response.setStatusCode(200);
@@ -136,14 +136,15 @@ public class SemesterService {
         }
         return response;
     }
-    
+
+    // phương thức xóa Semester
     public Response deleteSemester(Long id) {
         Response response = new Response();
         try {
             Semester deleteSemester = semesterRepository.findById(id)
                     .orElseThrow(() -> new OurException("Cannot find semester with id: " + id));
             semesterRepository.delete(deleteSemester);
-            
+
             response.setStatusCode(200);
             response.setMessage("Semester deleted successfully");
         } catch (OurException e) {
@@ -168,9 +169,10 @@ public class SemesterService {
         }
         return result;
     }
-    
+
     @Bean
     public ModelMapper modelMapper() {
         return new ModelMapper();
     }
+
 }

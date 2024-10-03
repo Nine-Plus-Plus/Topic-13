@@ -152,13 +152,14 @@ public class ClassService {
         try {
             Class presentClass = classRepository.findById(id)
                     .orElseThrow(() -> new OurException("Cannot find class with id: "+id));
+
             if (classRepository.findByMentorId(newClass.getMentor().getId()).isPresent()) {
                 throw new OurException("Mentor has already have a class");
             }
             if (classRepository.findBySemesterId(newClass.getSemester().getId()).isPresent()) {
                 throw new OurException("Class have already existed in this semester");
             }
-            
+
             presentClass.setClassName(newClass.getClassName());
             presentClass.setSemester(presentClass.getSemester());
             presentClass.setMentor(newClass.getMentor());

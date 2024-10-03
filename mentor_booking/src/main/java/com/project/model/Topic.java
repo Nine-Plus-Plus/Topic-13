@@ -1,18 +1,12 @@
 
 package com.project.model;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+
+import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 import java.util.List;
+
 import lombok.Data;
 
 @Data
@@ -37,7 +31,7 @@ public class Topic {
     
     @Column(name = "requirement")
     private List<String> requirement;
-    
+  
     @Column(name = "non_function_requirement")
     private List<String> nonFunctionRequirement;
     
@@ -53,7 +47,7 @@ public class Topic {
     @ManyToOne
     @JoinColumn(name = "mentor_id")
     private Mentors mentor;
-    
+
     @ManyToOne
     @JoinColumn(name = "semester_id")
     private Semester semester;

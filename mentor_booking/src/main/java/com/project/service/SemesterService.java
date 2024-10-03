@@ -35,22 +35,23 @@ public class SemesterService {
     @Lazy
     private ModelMapper modelMapper;
 
-    public Response createSemester(Response createRequest) {
+    public Response createSemester(SemesterDTO createRequest) {
         Response response = new Response();
 
         try {
-            if (semesterRepository.findBySemesterName(createRequest.getSemesterDTO().getSemesterName()).isPresent()) {
+            if (semesterRepository.findBySemesterName(createRequest.getSemesterName()).isPresent()) {
                 throw new OurException("Semester has already existed");
             }
 
             Semester semester = new Semester();
             semester.setDateCreated(LocalDateTime.now());
-            semester.setSemesterName(createRequest.getSemesterDTO().getSemesterName());
-            semester.setClasses(convertClassDtoListToClass(createRequest.getClassDTOList()));
+            semester.setSemesterName(createRequest.getSemesterName());
+            semester.setClasses(convertClassDtoListToClass(createRequest.getClasses()));
             semesterRepository.save(semester);
 
             if (semester.getId() > 0) {
                 SemesterDTO dto = modelMapper.map(semester, SemesterDTO.class);
+                dto.setClasses(createRequest.getClasses());
                 response.setSemesterDTO(dto);
                 response.setStatusCode(201);
                 response.setMessage("Semester added successfully");
@@ -126,13 +127,13 @@ public class SemesterService {
             SemesterDTO dto = modelMapper.map(presentSemester, SemesterDTO.class);
             response.setSemesterDTO(dto);
             response.setStatusCode(200);
-            response.setMessage("Class updated successfully");
+            response.setMessage("Semester updated successfully");
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
-            response.setMessage("Error occurred while updating class: " + e.getMessage());
+            response.setMessage("Error occurred while updating semester: " + e.getMessage());
         }
         return response;
     }

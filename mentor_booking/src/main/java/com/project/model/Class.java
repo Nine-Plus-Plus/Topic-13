@@ -1,5 +1,6 @@
 package com.project.model;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -35,6 +36,9 @@ public class Class {
     
     @OneToMany(mappedBy = "aClass")
     private List<Students> students; 
+    
+    @OneToMany(mappedBy = "aClass", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Group> groups;
     
     @OneToOne
     @JoinColumn(name = "mentor_id", unique = true)  

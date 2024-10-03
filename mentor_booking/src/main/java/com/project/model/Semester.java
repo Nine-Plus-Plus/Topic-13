@@ -29,4 +29,6 @@ public class Semester {
     @OneToMany(mappedBy = "semester", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Class> classes;
     
+    @OneToMany(mappedBy = "semester", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Topic> topics;
 }

@@ -12,5 +12,6 @@ public class SemesterDTO {
     private Long id;
     private String semesterName;
     private LocalDateTime dateCreated;
-    private List<Class> classes;
+    private List<ClassDTO> classes;
+    private List<TopicDTO> topicDTOS;
 }

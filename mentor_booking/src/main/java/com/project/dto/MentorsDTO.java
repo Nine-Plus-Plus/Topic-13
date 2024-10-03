@@ -20,4 +20,5 @@ public class MentorsDTO {
     private List<BookingDTO> bookings;
     private List<MentorScheduleDTO> mentorSchedules;
     private ClassDTO assignedClass; 
+    private List<TopicDTO> topicDTOS;
 }

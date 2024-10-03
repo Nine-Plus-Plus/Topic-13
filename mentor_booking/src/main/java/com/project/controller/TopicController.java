@@ -4,9 +4,9 @@
 package com.project.controller;
 
 import com.project.dto.Response;
-import com.project.dto.SemesterDTO;
-import com.project.model.Semester;
-import com.project.service.SemesterService;
+import com.project.dto.TopicDTO;
+import com.project.model.Topic;
+import com.project.service.TopicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,38 +24,38 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api")
-public class SemesterController {
+public class TopicController {
     
     @Autowired
-    private SemesterService semesterService;
+    private TopicService topicService;
     
-    @PostMapping("/admin/create-semester")
-    public ResponseEntity<Response> createSemester(@RequestBody SemesterDTO createResponse){
-        Response response = semesterService.createSemester(createResponse);
+    @PostMapping("/admin/create-topic")
+    public ResponseEntity<Response> createTopic(@RequestBody TopicDTO createRequest){
+        Response response = topicService.createTopic(createRequest);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
     
-    @GetMapping("/admin/get-all-semesters")
-    public ResponseEntity<Response> getAllSemesters(){
-        Response response = semesterService.getAllSemesters();
+    @GetMapping("/admin/get-all-topics")
+    public ResponseEntity<Response> getAllTopics(){
+        Response response = topicService.getAllTopics();
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
     
-    @GetMapping("/admin/get-semester-by-id/{id}")
-    public ResponseEntity<Response> getSemesterById(@PathVariable Long id){
-        Response response = semesterService.getSemesterById(id);
+    @GetMapping("/admin/get-topic-by-id/{id}")
+    public ResponseEntity<Response> getTopicById(@PathVariable Long id){
+        Response response = topicService.getTopicById(id);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
     
-    @PutMapping("/admin/update-semester/{id}")
-    public ResponseEntity<Response> updateSemester(@PathVariable Long id, @RequestBody Semester newSemester){
-        Response response = semesterService.updateSemester(id, newSemester);
+    @PutMapping("/admin/update-topic/{id}")
+    public ResponseEntity<Response> updateTopic(@PathVariable Long id, @RequestBody Topic newTopic){
+        Response response = topicService.updateTopic(id, newTopic);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
     
-    @DeleteMapping("/admin/delete-semester/{id}")
-    public ResponseEntity<Response> deleteSemester(@PathVariable Long id){
-        Response response = semesterService.deleteSemester(id);
+    @DeleteMapping("/admin/delete-topic/{id}")
+    public ResponseEntity<Response> deleteTopic(@PathVariable Long id){
+        Response response = topicService.deleteTopic(id);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }

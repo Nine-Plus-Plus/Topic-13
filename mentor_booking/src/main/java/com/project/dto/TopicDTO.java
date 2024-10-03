@@ -3,6 +3,7 @@ package com.project.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.Data;
 
 @Data
@@ -12,9 +13,12 @@ public class TopicDTO {
     private String topicName;
     private String context;
     private String problems;
-    private String actor;
-    private String requirement;
+    private List<String> actor;
+    private List<String> requirement;
+    private List<String> nonFunctionRequirement;
     private LocalDateTime dateCreated;
     private LocalDateTime dateUpdated;
-    private ProjectsDTO project;
+    private ProjectsDTO projectDTO;
+    private SemesterDTO semesterDTO;
+    private MentorsDTO mentorsDTO;
 }

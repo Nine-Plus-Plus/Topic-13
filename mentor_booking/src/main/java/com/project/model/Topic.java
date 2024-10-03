@@ -7,9 +7,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.Data;
 
 @Data
@@ -30,10 +33,13 @@ public class Topic {
     private String problems;
     
     @Column(name = "actor")
-    private String actor;
+    private List<String> actor;
     
     @Column(name = "requirement")
-    private String requirement;
+    private List<String> requirement;
+    
+    @Column(name = "non_function_requirement")
+    private List<String> nonFunctionRequirement;
     
     @Column(name = "date_created")
     private LocalDateTime dateCreated;
@@ -44,5 +50,11 @@ public class Topic {
     @OneToOne(mappedBy = "topic", cascade = CascadeType.ALL)
     private Projects project;
     
-
+    @ManyToOne
+    @JoinColumn(name = "mentor_id")
+    private Mentors mentor;
+    
+    @ManyToOne
+    @JoinColumn(name = "semester_id")
+    private Semester semester;
 }

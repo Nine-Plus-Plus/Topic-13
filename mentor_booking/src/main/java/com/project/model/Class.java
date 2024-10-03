@@ -35,7 +35,4 @@ public class Class {
     @OneToOne
     @JoinColumn(name = "mentor_id", unique = true)  
     private Mentors mentor;
-
-    @OneToMany(mappedBy = "aClass", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Group> groups;
 }

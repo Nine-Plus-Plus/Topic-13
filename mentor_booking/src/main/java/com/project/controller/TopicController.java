@@ -1,10 +1,12 @@
+/*
 
+ */
 package com.project.controller;
 
-import com.project.dto.ClassDTO;
 import com.project.dto.Response;
-import com.project.model.Class;
-import com.project.service.ClassService;
+import com.project.dto.TopicDTO;
+import com.project.model.Topic;
+import com.project.service.TopicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,38 +24,38 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api")
-public class ClassController {
+public class TopicController {
     
     @Autowired
-    private ClassService classService;
+    private TopicService topicService;
     
-    @PostMapping("/admin/create-class")
-    public ResponseEntity<Response> createClass(@RequestBody ClassDTO createResponse){
-        Response response = classService.createClass(createResponse);
+    @PostMapping("/admin/create-topic")
+    public ResponseEntity<Response> createTopic(@RequestBody TopicDTO createRequest){
+        Response response = topicService.createTopic(createRequest);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
     
-    @GetMapping("/admin/get-all-class")
-    public ResponseEntity<Response> getAllClass(){
-        Response response = classService.getAllClasses();
+    @GetMapping("/admin/get-all-topics")
+    public ResponseEntity<Response> getAllTopics(){
+        Response response = topicService.getAllTopics();
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
     
-    @GetMapping("/admin/get-class-by-id/{id}")
-    public ResponseEntity<Response> getClassById(@PathVariable Long id){
-        Response response = classService.getClassById(id);
+    @GetMapping("/admin/get-topic-by-id/{id}")
+    public ResponseEntity<Response> getTopicById(@PathVariable Long id){
+        Response response = topicService.getTopicById(id);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
     
-    @PutMapping("/admin/update-class/{id}")
-    public ResponseEntity<Response> updateClass(@PathVariable Long id, @RequestBody Class newClass){
-        Response response = classService.updateClass(id, newClass);
+    @PutMapping("/admin/update-topic/{id}")
+    public ResponseEntity<Response> updateTopic(@PathVariable Long id, @RequestBody Topic newTopic){
+        Response response = topicService.updateTopic(id, newTopic);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
     
-    @DeleteMapping("/admin/delete-class/{id}")
-    public ResponseEntity<Response> deleteClass(@PathVariable Long id){
-        Response response = classService.deleteClass(id);
+    @DeleteMapping("/admin/delete-topic/{id}")
+    public ResponseEntity<Response> deleteTopic(@PathVariable Long id){
+        Response response = topicService.deleteTopic(id);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }

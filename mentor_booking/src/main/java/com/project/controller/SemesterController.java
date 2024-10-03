@@ -1,6 +1,7 @@
 package com.project.controller;
 
 import com.project.dto.Response;
+import com.project.dto.SemesterDTO;
 import com.project.model.Semester;
 import com.project.service.SemesterService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ public class SemesterController {
     private SemesterService semesterService;
 
     @PostMapping("/admin/create-semester")
-    public ResponseEntity<Response> createSemester(@RequestBody Response createResponse){
+    public ResponseEntity<Response> createSemester(@RequestBody SemesterDTO createResponse){
         Response response = semesterService.createSemester(createResponse);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }

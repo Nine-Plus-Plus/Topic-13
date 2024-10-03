@@ -1,6 +1,7 @@
 
 package com.project.model;
 
+
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -30,8 +31,8 @@ public class Topic {
     
     @Column(name = "requirement")
     private List<String> requirement;
-
-    @Column(name = "non-function-requirement")
+  
+    @Column(name = "non_function_requirement")
     private List<String> nonFunctionRequirement;
     
     @Column(name = "date_created")
@@ -42,7 +43,7 @@ public class Topic {
     
     @OneToOne(mappedBy = "topic", cascade = CascadeType.ALL)
     private Projects project;
-
+    
     @ManyToOne
     @JoinColumn(name = "mentor_id")
     private Mentors mentor;

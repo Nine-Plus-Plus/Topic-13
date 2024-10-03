@@ -47,23 +47,23 @@ public class ClassService {
     @Lazy
     private ModelMapper modelMapper;
 
-    public Response createClass(Response inputRequest) {
+    public Response createClass(ClassDTO inputRequest) {
         Response response = new Response();
         try {
-            if (classRepository.findByMentorId(inputRequest.getMentorsDTO().getId()).isPresent()) {
+            if (classRepository.findByMentorId(inputRequest.getMentor().getId()).isPresent()) {
                 throw new OurException("Mentor has already have a class");
             }
-            if (classRepository.findBySemesterId(inputRequest.getSemesterDTO().getId()).isPresent()) {
+            if (classRepository.findBySemesterId(inputRequest.getSemester().getId()).isPresent()) {
                 throw new OurException("Class have already existed in this semester");
             }
-            Semester semester = semesterRepository.findById(inputRequest.getSemesterDTO().getId())
-                    .orElseThrow(() -> new OurException("No mentor in the database: " + inputRequest.getMentorsDTO().getMentorCode()));
-            Mentors mentor = mentorsRepository.findById(inputRequest.getMentorsDTO().getId())
-                    .orElseThrow(() -> new OurException("No semester in the database: " + inputRequest.getSemesterDTO().getSemesterName()));
-            List<Students> studentsList = convertStudentsDtoListToStudents(inputRequest.getStudentsDTOList());
+            Semester semester = semesterRepository.findById(inputRequest.getSemester().getId())
+                    .orElseThrow(() -> new OurException("No mentor in the database: " + inputRequest.getMentor().getMentorCode()));
+            Mentors mentor = mentorsRepository.findById(inputRequest.getMentor().getId())
+                    .orElseThrow(() -> new OurException("No semester in the database: " + inputRequest.getSemester().getSemesterName()));
+            List<Students> studentsList = convertStudentsDtoListToStudents(inputRequest.getStudents());
 
             Class newClass = new Class();
-            newClass.setClassName(inputRequest.getClassDTO().getClassName());
+            newClass.setClassName(inputRequest.getClassName());
             newClass.setDateCreated(LocalDateTime.now());
             newClass.setSemester(semester);
             newClass.setMentor(mentor);

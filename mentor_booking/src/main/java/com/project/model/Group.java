@@ -30,7 +30,8 @@ public class Group {
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Students> students;  // Một nhóm có thể chứa nhiều sinh viên
 
-    @OneToOne(mappedBy = "group", cascade = CascadeType.ALL)
+    @OneToOne
+    @JoinColumn(name = "project_id", unique = true)
     private Projects project;
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

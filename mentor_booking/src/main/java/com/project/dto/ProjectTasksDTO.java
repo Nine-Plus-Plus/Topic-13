@@ -1,15 +1,14 @@
-
 package com.project.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.project.enums.ProjectTaskStatus;
-import java.time.LocalDateTime;
 import lombok.Data;
+
+import java.time.LocalDateTime;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProjectTasksDTO {
-
     private Long id;
     private String taskName;
     private String description;

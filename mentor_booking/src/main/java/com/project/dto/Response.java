@@ -51,4 +51,6 @@ public class Response {
     private List<TopicDTO> topicDTOList;
     private UsersDTO usersDTO;
     private List<UsersDTO> usersDTOList;
+    private MemberGroupDTO memberGroupDTO;
+    private List<MemberGroupDTO> memberGroupDTOList;
 }

@@ -10,6 +10,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,17 +28,28 @@ public class Projects {
     @Column(name = "project_name")
     private String projectName;
     
-    @Column(name = "percentage")
-    private float percentage;
+    @Column(name = "percentage", nullable = false)
+    private float percentage = 0; // default value set = 0
     
     @Column(name = "description")
     private String description;
     
-    @Column(name = "date_created")
+    @Column(name = "date_created", nullable = false, updatable = false)
     private LocalDateTime dateCreated;
     
     @Column(name = "date_updated")
     private LocalDateTime dateUpdated;
+
+    @PrePersist
+    protected void onCreate() {
+        dateCreated = LocalDateTime.now();
+        dateUpdated = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        dateUpdated = LocalDateTime.now();
+    }
     
     @OneToMany(mappedBy = "projects", cascade = CascadeType.ALL, fetch = FetchType.LAZY)  // Thiết lập mối quan hệ OneToMany
     private List<ProjectTasks> projectTasks;

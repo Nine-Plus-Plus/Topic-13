@@ -40,6 +40,7 @@ public class Projects {
     @Column(name = "date_updated")
     private LocalDateTime dateUpdated;
 
+    // Tạo thời gian khi tạo mới trước khi lưu vào database (PrePersist)
     @PrePersist
     protected void onCreate() {
         dateCreated = LocalDateTime.now();

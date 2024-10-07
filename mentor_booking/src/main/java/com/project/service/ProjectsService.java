@@ -41,6 +41,7 @@ public class ProjectsService {
                 throw new OurException("Topic ID cannot be null");
             }
 
+            // Convert ProjectsDTO Object to Projects Entity Object
             Projects project = modelMapper.map(createRequest, Projects.class);
             project.setPercentage(0); // Set percentage to 0 when creating a new project
             project.setDateCreated(LocalDateTime.now()); // Set dateCreated to current time
@@ -49,9 +50,12 @@ public class ProjectsService {
                     .orElseThrow(() -> new OurException("Topic not found"));
             project.setTopic(topic);
             projectsRepository.save(project);
-            ProjectsDTO dto = modelMapper.map(project, ProjectsDTO.class);
-            response.setProjectsDTOList(Arrays.asList(dto)); // Wrap single ProjectsDTO in a list
-            response.setStatusCode(201);
+           // ProjectsDTO dto = modelMapper.map(project, ProjectsDTO.class); // Convert Projects Entity Object to ProjectsDTO Object
+           // response.setProjectsDTOList(Arrays.asList(dto)); // Wrap single ProjectsDTO in a list
+           // response.setStatusCode(201);
+            ProjectsDTO dto = modelMapper.map(project, ProjectsDTO.class); // Convert Projects Entity Object to ProjectsDTO Object
+            response.setProjectsDTO(dto); // Set single ProjectsDTO object
+            response.setStatusCode(201); 
             response.setMessage("Project created successfully");
         } catch (OurException e) {
             response.setStatusCode(400);

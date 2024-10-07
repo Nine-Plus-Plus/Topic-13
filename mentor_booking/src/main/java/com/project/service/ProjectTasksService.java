@@ -1,6 +1,7 @@
 package com.project.service;
 
 import com.project.dto.ProjectTasksDTO;
+import com.project.dto.Response;
 import com.project.enums.ProjectTaskStatus;
 import com.project.exception.OurException;
 import com.project.model.ProjectTasks;
@@ -12,8 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ProjectTasksService {
@@ -27,56 +28,117 @@ public class ProjectTasksService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public ProjectTasksDTO createTask(ProjectTasksDTO taskDTO) {
-        ProjectTasks task = modelMapper.map(taskDTO, ProjectTasks.class);
-        task.setStatus(ProjectTaskStatus.NOT_YET);
-        task.setDateCreated(LocalDateTime.now());
-        task.setDateUpdated(LocalDateTime.now());
+    public Response createTask(ProjectTasksDTO taskDTO) {
+        Response response = new Response();
+        try {
+            ProjectTasks task = modelMapper.map(taskDTO, ProjectTasks.class);
+            task.setStatus(ProjectTaskStatus.INPROGRESS);
+            task.setDateCreated(LocalDateTime.now());
+            task.setDateUpdated(LocalDateTime.now());
 
-        Projects project = projectsRepository.findById(taskDTO.getProjects().getId())
-                .orElseThrow(() -> new OurException("Project not found"));
-        task.setProjects(project);
+            Projects project = projectsRepository.findById(taskDTO.getProjects().getId())
+                    .orElseThrow(() -> new OurException("Project not found"));
+            task.setProjects(project);
 
-        projectTasksRepository.save(task);
-        return modelMapper.map(task, ProjectTasksDTO.class);
+            projectTasksRepository.save(task);
+            ProjectTasksDTO dto = modelMapper.map(task, ProjectTasksDTO.class);
+            response.setProjectTasksDTOList(Arrays.asList(dto));
+            response.setStatusCode(201);
+            response.setMessage("Task created successfully");
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred during task creation: " + e.getMessage());
+        }
+        return response;
     }
 
-    public List<ProjectTasksDTO> getAllTasks() {
-        List<ProjectTasks> tasks = projectTasksRepository.findAll();
-        return Arrays.asList(modelMapper.map(tasks, ProjectTasksDTO[].class));
+    public Response getAllTasks() {
+        Response response = new Response();
+        try {
+            List<ProjectTasks> tasks = projectTasksRepository.findAll();
+            List<ProjectTasksDTO> taskDTOs = Arrays.asList(modelMapper.map(tasks, ProjectTasksDTO[].class));
+            response.setProjectTasksDTOList(taskDTOs);
+            response.setStatusCode(200);
+            response.setMessage("Tasks retrieved successfully");
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred during retrieving tasks: " + e.getMessage());
+        }
+        return response;
     }
 
-    public ProjectTasksDTO getTaskById(Long id) {
-        ProjectTasks task = projectTasksRepository.findById(id)
-                .orElseThrow(() -> new OurException("Task not found"));
-        return modelMapper.map(task, ProjectTasksDTO.class);
+    public Response getTaskById(Long id) {
+        Response response = new Response();
+        try {
+            ProjectTasks task = projectTasksRepository.findById(id)
+                    .orElseThrow(() -> new OurException("Task not found"));
+            ProjectTasksDTO dto = modelMapper.map(task, ProjectTasksDTO.class);
+            response.setProjectTasksDTOList(Arrays.asList(dto));
+            response.setStatusCode(200);
+            response.setMessage("Task retrieved successfully");
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred during retrieving task: " + e.getMessage());
+        }
+        return response;
     }
 
-    public ProjectTasksDTO updateTask(Long id, ProjectTasksDTO taskDTO) {
-        ProjectTasks task = projectTasksRepository.findById(id)
-                .orElseThrow(() -> new OurException("Task not found"));
+    public Response updateTask(Long id, ProjectTasksDTO taskDTO) {
+        Response response = new Response();
+        try {
+            ProjectTasks task = projectTasksRepository.findById(id)
+                    .orElseThrow(() -> new OurException("Task not found"));
 
-        if (taskDTO.getTaskName() != null) {
-            task.setTaskName(taskDTO.getTaskName());
-        }
-        if (taskDTO.getDescription() != null) {
-            task.setDescription(taskDTO.getDescription());
-        }
-        if (taskDTO.getPercentage() != 0) {
-            task.setPercentage(taskDTO.getPercentage());
-        }
-        if (taskDTO.getStatus() != null) {
-            task.setStatus(taskDTO.getStatus());
-        }
-        task.setDateUpdated(LocalDateTime.now());
+            if (taskDTO.getTaskName() != null) {
+                task.setTaskName(taskDTO.getTaskName());
+            }
+            if (taskDTO.getDescription() != null) {
+                task.setDescription(taskDTO.getDescription());
+            }
+            if (taskDTO.getPercentage() != 0) {
+                task.setPercentage(taskDTO.getPercentage());
+            }
+            if (taskDTO.getStatus() != null) {
+                task.setStatus(taskDTO.getStatus());
+            }
+            task.setDateUpdated(LocalDateTime.now());
 
-        projectTasksRepository.save(task);
-        return modelMapper.map(task, ProjectTasksDTO.class);
+            projectTasksRepository.save(task);
+            ProjectTasksDTO dto = modelMapper.map(task, ProjectTasksDTO.class);
+            response.setProjectTasksDTOList(Arrays.asList(dto));
+            response.setStatusCode(200);
+            response.setMessage("Task updated successfully");
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred during task update: " + e.getMessage());
+        }
+        return response;
     }
 
-    public void deleteTask(Long id) {
-        ProjectTasks task = projectTasksRepository.findById(id)
-                .orElseThrow(() -> new OurException("Task not found"));
-        projectTasksRepository.delete(task);
+    public Response deleteTask(Long id) {
+        Response response = new Response();
+        try {
+            ProjectTasks task = projectTasksRepository.findById(id)
+                    .orElseThrow(() -> new OurException("Task not found"));
+            projectTasksRepository.delete(task);
+            response.setStatusCode(204);
+            response.setMessage("Task deleted successfully");
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred during task deletion: " + e.getMessage());
+        }
+        return response;
     }
 }

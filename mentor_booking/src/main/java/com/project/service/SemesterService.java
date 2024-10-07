@@ -42,7 +42,6 @@ public class SemesterService {
             Semester semester = new Semester();
             semester.setDateCreated(LocalDateTime.now());
             semester.setSemesterName(createRequest.getSemesterName());
-            semester.setClasses(convertClassDtoListToClass(createRequest.getClasses()));
             semesterRepository.save(semester);
 
             if (semester.getId() > 0) {
@@ -58,7 +57,7 @@ public class SemesterService {
             response.setMessage(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
-            response.setMessage("Error occurred during class creation: " + e.getMessage());
+            response.setMessage("Error occurred during semester creation: " + e.getMessage());
         }
 
         return response;

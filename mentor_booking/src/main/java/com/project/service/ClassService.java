@@ -14,6 +14,7 @@ import com.project.repository.ClassRepository;
 import com.project.repository.MentorsRepository;
 import com.project.repository.SemesterRepository;
 import com.project.repository.StudentsRepository;
+import com.project.ultis.Converter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,17 +51,21 @@ public class ClassService {
     public Response createClass(ClassDTO inputRequest) {
         Response response = new Response();
         try {
-            if (classRepository.findByMentorId(inputRequest.getMentor().getId()).isPresent()) {
+            if (mentorsRepository.findById(inputRequest.getMentor().getId()).isPresent()) {
                 throw new OurException("Mentor has already have a class");
             }
-            if (classRepository.findBySemesterId(inputRequest.getSemester().getId()).isPresent()) {
+            if (semesterRepository.findById(inputRequest.getSemester().getId()).isPresent()) {
                 throw new OurException("Class have already existed in this semester");
             }
             Semester semester = semesterRepository.findById(inputRequest.getSemester().getId())
-                    .orElseThrow(() -> new OurException("No mentor in the database: " + inputRequest.getMentor().getMentorCode()));
-            Mentors mentor = mentorsRepository.findById(inputRequest.getMentor().getId())
                     .orElseThrow(() -> new OurException("No semester in the database: " + inputRequest.getSemester().getSemesterName()));
-            List<Students> studentsList = convertStudentsDtoListToStudents(inputRequest.getStudents());
+            Mentors mentor = mentorsRepository.findById(inputRequest.getMentor().getId())
+                    .orElseThrow(() -> new OurException("No mentor in the database: " + inputRequest.getMentor().getId()));
+            List<StudentsDTO> newDto = inputRequest.getStudents();
+            if (newDto == null){
+                newDto = new ArrayList<>();
+            }
+            List<Students> studentsList = Arrays.asList(modelMapper.map(newDto, Students[].class));
 
             Class newClass = new Class();
             newClass.setClassName(inputRequest.getClassName());
@@ -71,8 +76,8 @@ public class ClassService {
             classRepository.save(newClass);
 
             if (newClass.getId() > 0) {
-                ClassDTO classDto = convertClassToClassDto(newClass);
-                response.setClassDTO(classDto);
+                ClassDTO dto = Converter.convertClassToClassDto(newClass);
+                response.setClassDTO(dto);
                 response.setStatusCode(201);
                 response.setMessage("Class added successfully");
             }

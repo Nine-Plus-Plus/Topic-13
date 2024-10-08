@@ -1,6 +1,7 @@
 
 package com.project.model;
 
+import com.project.enums.AvailableStatus;
 import com.project.enums.MentorScheduleStatus;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -44,4 +45,7 @@ public class MentorSchedule {
     @OneToOne(mappedBy = "mentorSchedule", cascade = CascadeType.ALL)
     private Booking booking;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "available_status")
+    private AvailableStatus availableStatus;
 }

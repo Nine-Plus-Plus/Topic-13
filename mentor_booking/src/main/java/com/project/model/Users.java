@@ -1,5 +1,6 @@
 package com.project.model;
 
+import com.project.enums.AvailableStatus;
 import com.project.enums.Gender;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -90,6 +91,10 @@ public class Users implements UserDetails{
     
     @OneToOne(mappedBy = "user")
     private Mentors mentor;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "available_status")
+    private AvailableStatus availableStatus;
     
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -1,5 +1,6 @@
 package com.project.model;
 
+import com.project.enums.AvailableStatus;
 import com.project.enums.BookingStatus;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -26,7 +27,7 @@ public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private BookingStatus status;
@@ -64,4 +65,8 @@ public class Booking {
     
     @OneToMany(mappedBy = "booking")
     private List<PointHistory> pointHistories;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "available_status")
+    private AvailableStatus availableStatus;
 }

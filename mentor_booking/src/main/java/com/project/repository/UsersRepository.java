@@ -24,4 +24,8 @@ public interface UsersRepository extends JpaRepository<Users, Long>{
     // Lấy danh sách User có role là 'STUDENT'
     @Query("SELECT u FROM Users u WHERE u.role.roleName = 'STUDENT'")
     List<Users> findAllByRoleStudent();
+
+    // Truy vấn để lấy tất cả người dùng có availableStatus là ACTIVE
+    @Query("SELECT u FROM Users u WHERE u.availableStatus = 'ACTIVE'")
+    List<Users> findActiveUsers();
 }

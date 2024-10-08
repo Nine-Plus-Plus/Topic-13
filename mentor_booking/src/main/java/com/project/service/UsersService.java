@@ -1,6 +1,7 @@
 package com.project.service;
 
 import com.project.dto.*;
+import com.project.enums.AvailableStatus;
 import com.project.exception.OurException;
 import com.project.model.Class;
 import com.project.model.Role;
@@ -164,6 +165,7 @@ public class UsersService {
             newUser.setGender(request.getGender());
             newUser.setDateCreated(LocalDateTime.now());
             newUser.setRole(role);
+            newUser.setAvailableStatus(AvailableStatus.ACTIVE);
             // Lưu người dùng vào database
             usersRepository.save(newUser);
             if (newUser.getId() > 0) {
@@ -175,6 +177,7 @@ public class UsersService {
                 student.setDateCreated(LocalDate.now());
                 student.setPoint(100);
                 student.setAClass(aClass);
+                student.setAvailableStatus(AvailableStatus.ACTIVE);
                 student.setGroup(null); // Để group_id null
                 studentsRepository.save(student);
                 newUser.setStudent(student);

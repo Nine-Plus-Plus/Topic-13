@@ -1,5 +1,6 @@
 package com.project.model;
 
+import com.project.enums.AvailableStatus;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -40,4 +41,8 @@ public class Group {
     @ManyToOne
     @JoinColumn(name = "class_id")
     private Class aClass;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "available_status")
+    private AvailableStatus availableStatus;
 }

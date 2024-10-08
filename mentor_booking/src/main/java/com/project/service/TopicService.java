@@ -3,6 +3,7 @@ package com.project.service;
 
 import com.project.dto.Response;
 import com.project.dto.TopicDTO;
+import com.project.enums.AvailableStatus;
 import com.project.exception.OurException;
 import com.project.model.Mentors;
 import com.project.model.Projects;
@@ -51,6 +52,7 @@ public class TopicService {
             topic.setProject(modelMapper.map(createRequest.getProjectDTO(), Projects.class));
             topic.setMentor(modelMapper.map(createRequest.getMentorsDTO(),Mentors.class));
             topic.setSemester(modelMapper.map(createRequest.getSemesterDTO(),Semester.class));
+            topic.setAvailableStatus(AvailableStatus.ACTIVE);
             topicRepository.save(topic);
 
             if (topic.getId() > 0) {
@@ -158,7 +160,7 @@ public class TopicService {
         try {
             Topic deleteTopic = topicRepository.findById(id)
                     .orElseThrow(() -> new OurException("Cannot find topic with id: " + id));
-            topicRepository.delete(deleteTopic);
+            deleteTopic.setAvailableStatus(AvailableStatus.DELETED);
             
             response.setStatusCode(200);
             response.setMessage("Topic deleted successfully");

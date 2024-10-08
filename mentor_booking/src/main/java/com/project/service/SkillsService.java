@@ -2,6 +2,7 @@ package com.project.service;
 
 import com.project.dto.Response;
 import com.project.dto.SkillsDTO;
+import com.project.enums.AvailableStatus;
 import com.project.exception.OurException;
 import com.project.model.Skills;
 import com.project.repository.SkillsRepository;
@@ -31,6 +32,7 @@ public class SkillsService {
             Skills newSkill = new Skills();
             newSkill.setSkillName(skillsDTO.getSkillName());
             newSkill.setSkillDescription(skillsDTO.getSkillDescription());
+            newSkill.setAvailableStatus(AvailableStatus.ACTIVE);
 
             skillsRepository.save(newSkill);
             if(newSkill.getId()>0){
@@ -151,7 +153,8 @@ public class SkillsService {
         try {
             Skills skill = skillsRepository.findById(id).orElseThrow(() -> new OurException("Skill not found"));
 
-            skillsRepository.delete(skill);
+            skill.setAvailableStatus(AvailableStatus.DELETED);
+            skillsRepository.save(skill);
 
             response.setStatusCode(200);
             response.setMessage("Skill deleted successfully");

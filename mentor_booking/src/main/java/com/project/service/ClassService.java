@@ -5,6 +5,7 @@ import com.project.dto.MentorsDTO;
 import com.project.dto.Response;
 import com.project.dto.SemesterDTO;
 import com.project.dto.StudentsDTO;
+import com.project.enums.AvailableStatus;
 import com.project.model.Class;
 import com.project.exception.OurException;
 import com.project.model.Mentors;
@@ -65,6 +66,7 @@ public class ClassService {
             newClass.setClassName(inputRequest.getClassName());
             newClass.setDateCreated(LocalDateTime.now());
             newClass.setSemester(semester);
+            newClass.setAvailableStatus(AvailableStatus.ACTIVE);
             classRepository.save(newClass);
             if (newClass.getId() > 0) {
                 ClassDTO classDto = Converter.convertClassToClassDTO(newClass);
@@ -161,8 +163,8 @@ public class ClassService {
         try {
             Class deletedClass = classRepository.findById(id)
                     .orElseThrow(() -> new OurException("Cannot find class with id: " + id));
-            classRepository.delete(deletedClass);
-
+            deletedClass.setAvailableStatus(AvailableStatus.DELETED);
+            classRepository.save(deletedClass);
             response.setStatusCode(200);
             response.setMessage("Class deleted successfully");
         } catch (OurException e) {

@@ -80,6 +80,7 @@ public class UsersService {
             newUser.setGender(registerRequest.getGender());
             newUser.setDateCreated(LocalDateTime.now());
             newUser.setRole(role);
+            newUser.setAvailableStatus(AvailableStatus.ACTIVE);
 
             // Lưu người dùng vào database
             usersRepository.save(newUser);
@@ -271,14 +272,17 @@ public class UsersService {
             
             Mentors deleteMentor = mentorsRepository.findByUser_Id(user.getId());
             if (deleteMentor != null) {
-                mentorsRepository.delete(deleteMentor);
+                deleteMentor.setAvailableStatus(AvailableStatus.DELETED);
+                mentorsRepository.save(deleteMentor);
             }
             
             Students deleteStudent = studentsRepository.findByUser_Id(user.getId());
             if (deleteStudent != null) {
-                studentsRepository.delete(deleteStudent);
+                deleteStudent.setAvailableStatus(AvailableStatus.DELETED);
+                studentsRepository.save(deleteStudent);
             }
-            usersRepository.delete(user);
+            user.setAvailableStatus(AvailableStatus.DELETED);
+            usersRepository.save(user);
             response.setStatusCode(200);
             response.setMessage("User deleted successfully");
         } catch (OurException e) {

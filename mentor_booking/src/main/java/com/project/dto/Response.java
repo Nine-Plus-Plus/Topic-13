@@ -3,6 +3,8 @@ package com.project.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
+
+import com.project.enums.AvailableStatus;
 import lombok.Data;
 
 @Data
@@ -51,4 +53,5 @@ public class Response {
     private List<TopicDTO> topicDTOList;
     private UsersDTO usersDTO;
     private List<UsersDTO> usersDTOList;
+    private AvailableStatus availableStatus;
 }

@@ -1,18 +1,8 @@
 package com.project.model;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import com.project.enums.AvailableStatus;
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
 import java.util.List;
 import lombok.Data;
@@ -54,10 +44,15 @@ public class Mentors {
     
     @OneToMany(mappedBy = "mentor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<MentorSchedule> mentorSchedules;
-    
-    @OneToOne(mappedBy = "mentor") 
+
+    @OneToOne
+    @JoinColumn(name = "class_id")
     private Class assignedClass;
 
     @OneToMany(mappedBy = "mentor", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Topic> topics;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "available_status")
+    private AvailableStatus availableStatus;
 }

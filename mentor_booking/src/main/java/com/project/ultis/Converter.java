@@ -1,121 +1,104 @@
 package com.project.ultis;
 
-import com.project.dto.*;
-import com.project.exception.OurException;
+
 import com.project.model.*;
 import com.project.model.Class;
-import com.project.repository.MentorsRepository;
-import com.project.repository.UsersRepository;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Service;
+import com.project.dto.*;
+import org.springframework.stereotype.Component;
 
-/**
- *
- * @author Thịnh Đạt
- */
-@Service
+@Component
 public class Converter {
-    
-    @Autowired
-    private static MentorsRepository mentorsRepository;
-    
-    @Autowired
-    private static UsersRepository usersRepository;
 
-    public static ClassDTO convertClassToClassDto(Class inputClass) {
+    public static ClassDTO convertClassToClassDTO(Class convertClass) {
         ClassDTO classDTO = new ClassDTO();
-        List<GroupDTO> groupDtoList = new ArrayList<>();
-        List<StudentsDTO> StudentsDtoList = new ArrayList<>();
-        MentorsDTO mentorDTO = new MentorsDTO();
-        SemesterDTO semesterDTO = new SemesterDTO();
+        classDTO.setId(convertClass.getId());
+        classDTO.setClassName(convertClass.getClassName());
+        classDTO.setDateCreated(convertClass.getDateCreated());
 
-        Mentors mentor = inputClass.getMentor();
-        Semester semester = inputClass.getSemester();
-        try {
-            classDTO.setId(inputClass.getId());
-            classDTO.setClassName(inputClass.getClassName());
-            mentorDTO.setId(mentor.getId());
-            mentorDTO.setMentorCode(mentor.getMentorCode());
-            classDTO.setMentor(mentorDTO);
-
-            semesterDTO.setId(semester.getId());
-            semesterDTO.setSemesterName(semester.getSemesterName());
-            classDTO.setSemester(semesterDTO);
-
-            for (Students student : inputClass.getStudents()) {
-                StudentsDTO studentsDTO = new StudentsDTO();
-                studentsDTO.setId(student.getId());
-                studentsDTO.setStudentCode(student.getStudentCode());
-                StudentsDtoList.add(studentsDTO);
-            }
-            classDTO.setStudents(StudentsDtoList);
-
-            for (Group group : inputClass.getGroups()) {
-                GroupDTO groupDto = new GroupDTO();
-                groupDto.setId(group.getId());
-                groupDto.setGroupName(group.getGroupName());
-                groupDtoList.add(groupDto);
-            }
-            classDTO.setGroupDTOS(groupDtoList);
-        } catch (Exception e) {
-            throw new OurException(e.getMessage());
+        if(convertClass.getSemester() != null){
+            classDTO.setSemester(convertSemesterToSemesterDTO(convertClass.getSemester()));
         }
         return classDTO;
     }
-//
-//    public static GroupDTO convertGroupToGroupDto(Group inputGroup) {
-//        GroupDTO groupDto = new GroupDTO();
-//        List<StudentsDTO> StudentsDtoList = new ArrayList<>();
-//        try {
-//            groupDto.setId(inputGroup.getId());
-////            dto.setBookings(Arrays.asList(modelMapper.map(inputGroup.getBookings(), BookingDTO[].class)));
-//
-//            ClassDTO classDto = new ClassDTO();
-//            classDto.setId(inputGroup.getAClass().getId());
-//            classDto.setClassName(inputGroup.getAClass().getClassName());
-//            groupDto.setClassDTO(classDto);
-//            for (Students student : inputGroup.getStudents()) {
-//                StudentsDTO studentsDTO = new StudentsDTO();
-//                studentsDTO.setId(student.getId());
-//                studentsDTO.setStudentCode(student.getStudentCode());
-//                StudentsDtoList.add(studentsDTO);
-//            }
-//            groupDto.setStudents(StudentsDtoList);
-////            dto.setProject(modelMapper.map(inputGroup.getProject(), ProjectsDTO.class));
-//        } catch (Exception e) {
-//            throw new OurException(e.getMessage());
-//        }
-//        return groupDto;
-//    }
-//
-    public static SemesterDTO convertSemesterToSemesterDto(Semester inputSemester){
+
+    public static SemesterDTO convertSemesterToSemesterDTO(Semester convertSemester){
         SemesterDTO semesterDTO = new SemesterDTO();
-        List<ClassDTO> classDtoList = new ArrayList<>();
-        try{
-            semesterDTO.setId(inputSemester.getId());
-            semesterDTO.setDateCreated(inputSemester.getDateCreated());
-            semesterDTO.setSemesterName(inputSemester.getSemesterName());
-            
-            for (Class classes : inputSemester.getClasses()) {
-                ClassDTO classDTO = new ClassDTO();
-                classDTO.setId(classes.getId());
-                classDTO.setClassName(classes.getClassName());
-                Mentors mentor = mentorsRepository.findById(classes.getMentor().getId()).get();
-                MentorsDTO mentorDTO = new MentorsDTO();
-                mentorDTO.setMentorCode(mentor.getMentorCode());
-                classDTO.setMentor(mentorDTO);
-                classDtoList.add(classDTO);
-            }
-            semesterDTO.setClasses(classDtoList);
-            
-        }catch (Exception e){
-            throw new OurException(e.getMessage());
-        }
+        semesterDTO.setId(convertSemester.getId());
+        semesterDTO.setSemesterName(convertSemester.getSemesterName());
+        semesterDTO.setDateCreated(convertSemester.getDateCreated());
         return semesterDTO;
     }
+
+    public static MentorsDTO convertMentorToMentorDTO(Mentors convertMentor){
+        MentorsDTO mentorsDTO = new MentorsDTO();
+        mentorsDTO.setId(convertMentor.getId());
+        mentorsDTO.setMentorCode(convertMentor.getMentorCode());
+        mentorsDTO.setDateCreated(convertMentor.getDateCreated());
+        mentorsDTO.setDateUpdated(convertMentor.getDateUpdated());
+        mentorsDTO.setStar(convertMentor.getStar());
+        mentorsDTO.setTotalTimeRemain(convertMentor.getTotalTimeRemain());
+
+        if(convertMentor.getAssignedClass() != null){
+            mentorsDTO.setAssignedClass(convertClassToClassDTO(convertMentor.getAssignedClass()));
+        }
+
+        if(convertMentor.getUser() != null){
+            mentorsDTO.setUser(convertUserToUserDTO(convertMentor.getUser()));
+        }
+
+        if(convertMentor.getAssignedClass() !=null){
+            mentorsDTO.setAssignedClass(convertClassToClassDTO(convertMentor.getAssignedClass()));
+        }
+        return mentorsDTO;
+    }
+
+    public static StudentsDTO convertStudentToStudentDTO(Students convertStudent){
+        StudentsDTO studentsDTO = new StudentsDTO();
+        studentsDTO.setId(convertStudent.getId());
+        studentsDTO.setStudentCode(convertStudent.getStudentCode());
+        studentsDTO.setExpertise(convertStudent.getExpertise());
+        studentsDTO.setDateUpdated(convertStudent.getDateUpdated());
+        studentsDTO.setDateCreated(convertStudent.getDateCreated());
+        studentsDTO.setPoint(convertStudent.getPoint());
+
+        if (convertStudent.getAClass() != null) {
+            studentsDTO.setAClass(convertClassToClassDTO(convertStudent.getAClass()));
+        }
+
+        if (convertStudent.getUser() != null) {
+            studentsDTO.setUser(convertUserToUserDTO(convertStudent.getUser()));
+        }
+        return studentsDTO;
+    }
+
+    public static UsersDTO convertUserToUserDTO(Users convertUsers){
+        UsersDTO userDTO = new UsersDTO();
+        userDTO.setId(convertUsers.getId());
+        userDTO.setEmail(convertUsers.getEmail());
+        userDTO.setUsername(convertUsers.getUsername());
+        userDTO.setFullName(convertUsers.getFullName());
+        userDTO.setBirthDate(convertUsers.getBirthDate());
+        userDTO.setAvatar(convertUsers.getAvatar());
+        userDTO.setAddress(convertUsers.getAddress());
+        userDTO.setPhone(convertUsers.getPhone());
+        userDTO.setGender(convertUsers.getGender());
+        userDTO.setDateUpdated(convertUsers.getDateUpdated());
+        userDTO.setDateCreated(convertUsers.getDateCreated());
+
+        RoleDTO roleDTO = new RoleDTO();
+        roleDTO.setId(convertUsers.getRole().getId());
+        roleDTO.setRoleName(convertUsers.getRole().getRoleName());
+        userDTO.setRole(roleDTO);
+
+        return userDTO;
+    }
+
+    public static SkillsDTO convertSkillToSkillDTO(Skills convertSkill){
+        SkillsDTO skillsDTO = new SkillsDTO();
+        skillsDTO.setId(convertSkill.getId());
+        skillsDTO.setSkillName(convertSkill.getSkillName());
+        skillsDTO.setSkillDescription(convertSkill.getSkillDescription());
+        return skillsDTO;
+    }
+
 }

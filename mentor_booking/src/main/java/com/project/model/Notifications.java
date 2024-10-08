@@ -1,5 +1,6 @@
 package com.project.model;
 
+import com.project.enums.AvailableStatus;
 import com.project.enums.NoficationStatus;
 import com.project.enums.NoficationType;
 import jakarta.persistence.Column;
@@ -48,4 +49,8 @@ public class Notifications {
     @ManyToOne
     @JoinColumn(name = "receiver_id")
     private Users receiver;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "available_status")
+    private AvailableStatus availableStatus;
 }

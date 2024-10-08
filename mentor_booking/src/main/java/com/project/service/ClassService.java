@@ -19,6 +19,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import com.project.ultis.Converter;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -51,37 +54,24 @@ public class ClassService {
     public Response createClass(ClassDTO inputRequest) {
         Response response = new Response();
         try {
-            if (mentorsRepository.findById(inputRequest.getMentor().getId()).isPresent()) {
-                throw new OurException("Mentor has already have a class");
-            }
-            if (semesterRepository.findById(inputRequest.getSemester().getId()).isPresent()) {
-                throw new OurException("Class have already existed in this semester");
+
+            // Kiểm tra nếu lớp đã tồn tại trong kỳ học
+            if (classRepository.existsByClassNameAndSemesterId(inputRequest.getClassName(), inputRequest.getSemester().getId())) {
+                throw new OurException("Class already exists in this semester");
             }
             Semester semester = semesterRepository.findById(inputRequest.getSemester().getId())
-                    .orElseThrow(() -> new OurException("No semester in the database: " + inputRequest.getSemester().getSemesterName()));
-            Mentors mentor = mentorsRepository.findById(inputRequest.getMentor().getId())
-                    .orElseThrow(() -> new OurException("No mentor in the database: " + inputRequest.getMentor().getId()));
-            List<StudentsDTO> newDto = inputRequest.getStudents();
-            if (newDto == null){
-                newDto = new ArrayList<>();
-            }
-            List<Students> studentsList = Arrays.asList(modelMapper.map(newDto, Students[].class));
-
+                    .orElseThrow(() -> new OurException("No semester in the database: " + inputRequest.getSemester().getId()));
             Class newClass = new Class();
             newClass.setClassName(inputRequest.getClassName());
             newClass.setDateCreated(LocalDateTime.now());
             newClass.setSemester(semester);
-            newClass.setMentor(mentor);
-            newClass.setStudents(studentsList);
             classRepository.save(newClass);
-
             if (newClass.getId() > 0) {
-                ClassDTO dto = Converter.convertClassToClassDto(newClass);
-                response.setClassDTO(dto);
-                response.setStatusCode(201);
+                ClassDTO classDto = Converter.convertClassToClassDTO(newClass);
+                response.setClassDTO(classDto);
+                response.setStatusCode(200);
                 response.setMessage("Class added successfully");
             }
-
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -96,19 +86,50 @@ public class ClassService {
         Response response = new Response();
         try {
             List<Class> classList = classRepository.findAll();
-            List<ClassDTO> classListDTO = null;
-            if (classList != null) {
-                classListDTO = Arrays.asList(modelMapper.map(classList, ClassDTO[].class));
+            if (!classList.isEmpty()) {
+                List<ClassDTO> classListDTO = classList.stream()
+                        .map(Converter::convertClassToClassDTO)
+                        .collect(Collectors.toList());
+
+                response.setClassDTOList(classListDTO);
+                response.setStatusCode(200);
+                response.setMessage("Classes fetched successfully");
+            } else {
+                response.setStatusCode(400);
+                response.setMessage("Class not found");
             }
-            response.setClassDTOList(classListDTO);
-            response.setStatusCode(200);
-            response.setMessage("Classes fetched successfully");
         } catch (OurException e) {
             response.setStatusCode(400);
-            response.getMessage();
+            response.setMessage(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
-            response.setMessage("Error occured during get all classes " + e.getMessage());
+            response.setMessage("Error occurred during get all classes " + e.getMessage());
+        }
+        return response;
+    }
+
+    public Response getClassesSemesterId(Long semesterId) {
+        Response response = new Response();
+        try {
+            List<Class> classList = classRepository.findClassBySemesterId(semesterId);
+            if (!classList.isEmpty()) {
+                List<ClassDTO> classListDTO = classList.stream()
+                        .map(Converter::convertClassToClassDTO)
+                        .collect(Collectors.toList());
+
+                response.setClassDTOList(classListDTO);
+                response.setStatusCode(200);
+                response.setMessage("Classes fetched successfully");
+            } else {
+                response.setStatusCode(400);
+                response.setMessage("Class not found");
+            }
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred during get all classes " + e.getMessage());
         }
         return response;
     }
@@ -118,17 +139,19 @@ public class ClassService {
         try {
             Class findClass = classRepository.findById(id).orElse(null);
             if (findClass != null) {
-                ClassDTO dto = modelMapper.map(findClass, ClassDTO.class);
+                ClassDTO dto = Converter.convertClassToClassDTO(findClass);
                 response.setClassDTO(dto);
                 response.setStatusCode(200);
                 response.setMessage("Successfully");
-            }else throw new OurException("Cannot find class");
+            } else {
+                throw new OurException("Cannot find class");
+            }
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
-            response.setMessage("Error occured during get class " + e.getMessage());
+            response.setMessage("Error occurred during get class " + e.getMessage());
         }
         return response;
     }
@@ -139,7 +162,7 @@ public class ClassService {
             Class deletedClass = classRepository.findById(id)
                     .orElseThrow(() -> new OurException("Cannot find class with id: " + id));
             classRepository.delete(deletedClass);
-            
+
             response.setStatusCode(200);
             response.setMessage("Class deleted successfully");
         } catch (OurException e) {
@@ -156,7 +179,7 @@ public class ClassService {
         Response response = new Response();
         try {
             Class presentClass = classRepository.findById(id)
-                    .orElseThrow(() -> new OurException("Cannot find class with id: "+id));
+                    .orElseThrow(() -> new OurException("Cannot find class with id: " + id));
 
             if (classRepository.findByMentorId(newClass.getMentor().getId()).isPresent()) {
                 throw new OurException("Mentor has already have a class");
@@ -169,9 +192,9 @@ public class ClassService {
             presentClass.setSemester(presentClass.getSemester());
             presentClass.setMentor(newClass.getMentor());
             presentClass.setStudents(newClass.getStudents());
-            
+
             classRepository.save(presentClass);
-            
+
             ClassDTO dto = convertClassToClassDto(presentClass);
             response.setClassDTO(dto);
             response.setStatusCode(200);
@@ -208,7 +231,7 @@ public class ClassService {
         classDto.setMentor(this.modelMapper.map(insertClass.getMentor(), MentorsDTO.class));
         return classDto;
     }
-    
+
     @Bean
     public ModelMapper modelMapper() {
         return new ModelMapper();

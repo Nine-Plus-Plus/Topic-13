@@ -1,5 +1,6 @@
 package com.project.model;
 
+import com.project.enums.AvailableStatus;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -30,7 +31,8 @@ public class Group {
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Students> students;  // Một nhóm có thể chứa nhiều sinh viên
 
-    @OneToOne(mappedBy = "group", cascade = CascadeType.ALL)
+    @OneToOne
+    @JoinColumn(name = "project_id", unique = true)
     private Projects project;
 
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -39,4 +41,8 @@ public class Group {
     @ManyToOne
     @JoinColumn(name = "class_id")
     private Class aClass;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "available_status")
+    private AvailableStatus availableStatus;
 }

@@ -1,6 +1,7 @@
 package com.project.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.project.enums.AvailableStatus;
 import com.project.enums.NoficationStatus;
 import com.project.enums.NoficationType;
 import java.time.LocalDateTime;
@@ -16,4 +17,5 @@ public class NotificationsDTO {
     private LocalDateTime dateTimeCreated;
     private LocalDateTime dateTimeSent;
     private UsersDTO user;
+    private AvailableStatus availableStatus;
 }

@@ -1,5 +1,6 @@
 package com.project.model;
 
+import com.project.enums.AvailableStatus;
 import com.project.enums.PointHistoryStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,4 +38,8 @@ public class PointHistory {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booking_id") // Foreign key in PointHistory table to Booking
     private Booking booking;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "available_status")
+    private AvailableStatus availableStatus;
 }

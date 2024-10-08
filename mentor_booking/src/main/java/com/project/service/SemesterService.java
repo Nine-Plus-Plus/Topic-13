@@ -12,6 +12,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import com.project.ultis.Converter;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -27,25 +30,18 @@ public class SemesterService {
     @Autowired
     private ClassRepository classRepository;
 
-    @Autowired
-    @Lazy
-    private ModelMapper modelMapper;
-
     public Response createSemester(SemesterDTO createRequest) {
         Response response = new Response();
-
         try {
             if (semesterRepository.findBySemesterName(createRequest.getSemesterName()).isPresent()) {
                 throw new OurException("Semester has already existed");
             }
-
             Semester semester = new Semester();
             semester.setDateCreated(LocalDateTime.now());
             semester.setSemesterName(createRequest.getSemesterName());
             semesterRepository.save(semester);
-
             if (semester.getId() > 0) {
-                SemesterDTO dto = modelMapper.map(semester, SemesterDTO.class);
+                SemesterDTO dto = Converter.convertSemesterToSemesterDTO(semester);
                 dto.setClasses(createRequest.getClasses());
                 response.setSemesterDTO(dto);
                 response.setStatusCode(201);
@@ -68,19 +64,21 @@ public class SemesterService {
         Response response = new Response();
         try {
             List<Semester> semesterList = semesterRepository.findAll();
-            List<SemesterDTO> semesterListDTO = null;
-            if (semesterList != null) {
-                semesterListDTO = Arrays.asList(modelMapper.map(semesterList, SemesterDTO[].class));
+            if (!semesterList.isEmpty()) {
+                List<SemesterDTO> semesterListDTO = semesterList
+                        .stream()
+                        .map(Converter::convertSemesterToSemesterDTO)
+                        .collect(Collectors.toList());
+                response.setSemesterDTOList(semesterListDTO);
+                response.setStatusCode(200);
+                response.setMessage("Semester fetched successfully");
             }
-            response.setSemesterDTOList(semesterListDTO);
-            response.setStatusCode(200);
-            response.setMessage("Semester fetched successfully");
         } catch (OurException e) {
             response.setStatusCode(400);
-            response.getMessage();
+            response.setMessage(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
-            response.setMessage("Error occured during get all semesters " + e.getMessage());
+            response.setMessage("Error occurred during get all semesters " + e.getMessage());
         }
         return response;
     }
@@ -91,8 +89,7 @@ public class SemesterService {
         try {
             Semester findSemester = semesterRepository.findById(id).orElse(null);
             if (findSemester != null) {
-                SemesterDTO dto = modelMapper.map(findSemester, SemesterDTO.class);
-
+                SemesterDTO dto = Converter.convertSemesterToSemesterDTO(findSemester);
                 response.setSemesterDTO(dto);
                 response.setStatusCode(200);
                 response.setMessage("Successfully");
@@ -102,7 +99,7 @@ public class SemesterService {
             response.setMessage(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
-            response.setMessage("Error occured during get semester " + e.getMessage());
+            response.setMessage("Error occurred during get semester " + e.getMessage());
         }
         return response;
     }
@@ -116,13 +113,9 @@ public class SemesterService {
             if (semesterRepository.findBySemesterName(newSemester.getSemesterName()).isPresent()) {
                 throw new OurException("Semester has already existed");
             }
-
             presentSemester.setSemesterName(newSemester.getSemesterName());
-            presentSemester.setClasses(newSemester.getClasses());
-
             semesterRepository.save(presentSemester);
-
-            SemesterDTO dto = modelMapper.map(presentSemester, SemesterDTO.class);
+            SemesterDTO dto = Converter.convertSemesterToSemesterDTO(presentSemester);
             response.setSemesterDTO(dto);
             response.setStatusCode(200);
             response.setMessage("Semester updated successfully");
@@ -143,7 +136,6 @@ public class SemesterService {
             Semester deleteSemester = semesterRepository.findById(id)
                     .orElseThrow(() -> new OurException("Cannot find semester with id: " + id));
             semesterRepository.delete(deleteSemester);
-
             response.setStatusCode(200);
             response.setMessage("Semester deleted successfully");
         } catch (OurException e) {
@@ -155,23 +147,4 @@ public class SemesterService {
         }
         return response;
     }
-
-    private List<Class> convertClassDtoListToClass(List<ClassDTO> lst) {
-        List<Class> result = new ArrayList<>();
-        for (ClassDTO dto : lst) {
-            Class newClass = null;
-            newClass = classRepository.findByClassName(dto.getClassName())
-                    .orElseThrow(() -> new OurException("No student in the database: " + dto.getClassName()));
-            if (newClass != null) {
-                result.add(newClass);
-            }
-        }
-        return result;
-    }
-
-    @Bean
-    public ModelMapper modelMapper() {
-        return new ModelMapper();
-    }
-
 }

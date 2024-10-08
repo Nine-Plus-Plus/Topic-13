@@ -44,9 +44,8 @@ public class SemesterService {
             semesterRepository.save(semester);
             if (semester.getId() > 0) {
                 SemesterDTO dto = Converter.convertSemesterToSemesterDTO(semester);
-                dto.setClasses(createRequest.getClasses());
                 response.setSemesterDTO(dto);
-                response.setStatusCode(201);
+                response.setStatusCode(200);
                 response.setMessage("Semester added successfully");
             }
 

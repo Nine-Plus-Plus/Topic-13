@@ -18,6 +18,8 @@ public interface UsersRepository extends JpaRepository<Users, Long>{
     boolean existsByEmail(String email);
     Optional<Users> findByEmail(String email);
     Optional<Users> findByUsername(String username);
+    Optional<Users> findByFullName(String fullName);
+    Optional<Users> findByPhone(String phone);
 
     // Lấy danh sách User có role là 'STUDENT'
     @Query("SELECT u FROM Users u WHERE u.role.roleName = 'STUDENT'")

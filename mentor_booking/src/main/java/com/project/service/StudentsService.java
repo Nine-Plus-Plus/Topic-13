@@ -72,12 +72,12 @@ public class StudentsService {
         return response;
     }
 
-    public Response findStudentByNameAndExpertise(String name, String expertise){
+    public Response findStudentByNameAndExpertise(String name, String expertise) {
         Response response = new Response();
         try {
             List<Students> studentsList;
 
-            if(name != null && !name.isEmpty() && expertise != null && !expertise.isEmpty()){
+            if (name != null && !name.isEmpty() && expertise != null && !expertise.isEmpty()) {
                 studentsList = studentsRepository.findStudentByUserFullNameAndExpertise(name, expertise);
             } else if (name != null && !name.isEmpty()) {
                 studentsList = studentsRepository.findStudentByUserFullName(name);
@@ -89,7 +89,7 @@ public class StudentsService {
                 return response;
             }
 
-            if(!studentsList.isEmpty()){
+            if (!studentsList.isEmpty()) {
                 List<StudentsDTO> listDTO = studentsList.stream()
                         .map(Converter::convertStudentToStudentDTO)
                         .collect(Collectors.toList());
@@ -97,7 +97,7 @@ public class StudentsService {
                 response.setStudentsDTOList(listDTO);
                 response.setStatusCode(200);
                 response.setMessage("Students fetched successfully");
-            }else {
+            } else {
                 response.setStatusCode(204); // No Content
                 response.setMessage("No students found");
             }
@@ -112,18 +112,19 @@ public class StudentsService {
     }
 
     // Phương thức lấy sinh viên profile
-    public Response getStudentProfile(String username){
+    public Response getStudentProfile(String username) {
         Response response = new Response();
         try {
-            Optional<Users> userProfile = usersRepository.findByUsername(username);
-            if(userProfile.isPresent()){
-                Students studentProfile = studentsRepository.findById(userProfile.get().getId()).orElse(null);
-                if (studentProfile != null) {
-                    StudentsDTO studentsDTO = Converter.convertStudentToStudentDTO(studentProfile);
-                    response.setStudentsDTO(studentsDTO);
-                    response.setStatusCode(200);
-                    response.setMessage("Successfully");
-                }
+            Users userProfile = usersRepository.findByUsername(username)
+                    .orElseThrow(() -> new OurException("User not found"));
+            Students studentProfile = studentsRepository.findById(userProfile.getStudent().getId())
+                    .orElseThrow(() -> new OurException("Student not found"));;
+
+            if (studentProfile != null) {
+                StudentsDTO studentsDTO = Converter.convertStudentToStudentDTO(studentProfile);
+                response.setStudentsDTO(studentsDTO);
+                response.setStatusCode(200);
+                response.setMessage("Successfully");
             }
         } catch (OurException e) {
             response.setStatusCode(400);

@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.project.ultis.Converter;
 import org.modelmapper.ModelMapper;
@@ -83,19 +84,50 @@ public class ClassService {
         Response response = new Response();
         try {
             List<Class> classList = classRepository.findAll();
-            List<ClassDTO> classListDTO = null;
-            if (classList != null) {
-                classListDTO = Arrays.asList(modelMapper.map(classList, ClassDTO[].class));
+            if (!classList.isEmpty()) {
+                List<ClassDTO> classListDTO = classList.stream()
+                        .map(Converter::convertClassToClassDTO)
+                        .collect(Collectors.toList());
+
+                response.setClassDTOList(classListDTO);
+                response.setStatusCode(200);
+                response.setMessage("Classes fetched successfully");
+            }else{
+                response.setStatusCode(400);
+                response.setMessage("Class not found");
             }
-            response.setClassDTOList(classListDTO);
-            response.setStatusCode(200);
-            response.setMessage("Classes fetched successfully");
         } catch (OurException e) {
             response.setStatusCode(400);
-            response.getMessage();
+            response.setMessage(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
-            response.setMessage("Error occured during get all classes " + e.getMessage());
+            response.setMessage("Error occurred during get all classes " + e.getMessage());
+        }
+        return response;
+    }
+
+    public Response getClassesSemesterId(Long semesterId) {
+        Response response = new Response();
+        try {
+            List<Class> classList = classRepository.findClassBySemesterId(semesterId);
+            if (!classList.isEmpty()) {
+                List<ClassDTO> classListDTO = classList.stream()
+                        .map(Converter::convertClassToClassDTO)
+                        .collect(Collectors.toList());
+
+                response.setClassDTOList(classListDTO);
+                response.setStatusCode(200);
+                response.setMessage("Classes fetched successfully");
+            }else{
+                response.setStatusCode(400);
+                response.setMessage("Class not found");
+            }
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred during get all classes " + e.getMessage());
         }
         return response;
     }
@@ -105,7 +137,7 @@ public class ClassService {
         try {
             Class findClass = classRepository.findById(id).orElse(null);
             if (findClass != null) {
-                ClassDTO dto = modelMapper.map(findClass, ClassDTO.class);
+                ClassDTO dto = Converter.convertClassToClassDTO(findClass);
                 response.setClassDTO(dto);
                 response.setStatusCode(200);
                 response.setMessage("Successfully");
@@ -115,7 +147,7 @@ public class ClassService {
             response.setMessage(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
-            response.setMessage("Error occured during get class " + e.getMessage());
+            response.setMessage("Error occurred during get class " + e.getMessage());
         }
         return response;
     }

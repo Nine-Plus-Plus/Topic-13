@@ -49,12 +49,7 @@ public class UsersService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    /**
-     * Phương thức taọ mới user
-     *
-     * @param registerRequest
-     * @return Đối tượng Response chứa thông tin về kết quả tạo user
-     */
+    // Phương thức tạo user
     public Response createUser(UsersDTO registerRequest) {
         Response response = new Response();
         try {
@@ -137,14 +132,25 @@ public class UsersService {
             if (usersRepository.findByEmail(request.getEmail()).isPresent()) {
                 throw new OurException("Email already exists");
             }
+            // Kiểm tra FullName
+            if (usersRepository.findByFullName(request.getFullName()).isPresent()) {
+                throw new OurException("FullName already exists");
+            }
+            if(usersRepository.findByPhone(request.getPhone()).isPresent()){
+                throw new OurException("Phone already exists");
+            }
+            if(studentsRepository.findByStudentCode(request.getStudentCode()).isPresent()){
+                throw new OurException("StudentCode already exists");
+            }
             // Kiểm tra Class
-            Class aClass = classRepository.findByClassName(request.getClassName())
+            Class aClass = classRepository.findById(request.getAClass().getId())
                     .orElseThrow(() -> new OurException("Class not found"));
             // Kiểm tra Role
             Role role = roleRepository.findByRoleName("STUDENT")
                     .orElseThrow(() -> new OurException("No role name"));
             // Mã hóa mật khẩu
             String encodedPassword = passwordEncoder.encode(request.getPassword());
+
             // Tạo đối tượng User mới
             Users newUser = new Users();
             newUser.setUsername(request.getUsername());
@@ -250,11 +256,6 @@ public class UsersService {
             response.setMessage("Error occurred during get user by id " + id);
         }
         return response;
-    }
-
-    // Phương thức lưu người dùng
-    public Users saveUsers(Users user) {
-        return usersRepository.save(user);
     }
 
     // Phương thức xóa người dùng theo id

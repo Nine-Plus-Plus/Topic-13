@@ -54,8 +54,9 @@ public class Mentors {
     
     @OneToMany(mappedBy = "mentor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<MentorSchedule> mentorSchedules;
-    
-    @OneToOne(mappedBy = "mentor") 
+
+    @OneToOne
+    @JoinColumn(name = "class_id")
     private Class assignedClass;
 
     @OneToMany(mappedBy = "mentor", cascade = CascadeType.ALL, orphanRemoval = true)

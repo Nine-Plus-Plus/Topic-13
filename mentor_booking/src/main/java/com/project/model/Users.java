@@ -49,6 +49,9 @@ public class Users implements UserDetails{
     @ManyToOne
     @JoinColumn(name = "role_id")
     private Role role;
+
+    @Column(name = "fullName")
+    private String fullName;
     
     @Column(name = "birth_date")
     private LocalDate birthDate;

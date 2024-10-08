@@ -10,7 +10,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ClassRepository extends JpaRepository<com.project.model.Class, Long>{
-    Optional<Mentors> findByMentorId(Long mentorId);
-    Optional<Semester> findBySemesterId(Long semesterId);
+    Optional<com.project.model.Class> findByMentorId(Long mentorId);
+    Optional<com.project.model.Class> findBySemesterId(Long semesterId);
     Optional<com.project.model.Class> findByClassName(String className);
+    boolean existsByClassNameAndSemesterId(String className, Long semesterId);
 }

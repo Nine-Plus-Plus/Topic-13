@@ -1,21 +1,21 @@
 package com.project.service;
 
-import com.project.dto.Response;
-import com.project.dto.RoleDTO;
-import com.project.dto.UsersDTO;
+import com.project.dto.*;
 import com.project.exception.OurException;
+import com.project.model.Class;
 import com.project.model.Role;
 import com.project.model.Users;
 import com.project.model.Students;
 import com.project.model.Mentors;
-import com.project.repository.MentorsRepository;
-import com.project.repository.RoleRepository;
-import com.project.repository.StudentsRepository;
+import com.project.repository.*;
+
 import java.util.List;
 import java.util.Optional;
+
+import com.project.ultis.Converter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.project.repository.UsersRepository;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
@@ -39,6 +39,12 @@ public class UsersService {
     
     @Autowired
     private StudentsRepository studentsRepository;
+
+    @Autowired
+    private ClassRepository classRepository;
+
+    @Autowired
+    private SemesterRepository semesterRepository;
     
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -70,6 +76,7 @@ public class UsersService {
             newUser.setUsername(registerRequest.getUsername());
             newUser.setEmail(registerRequest.getEmail());
             newUser.setPassword(encodedPassword);
+            newUser.setFullName(registerRequest.getFullName());
             newUser.setBirthDate(registerRequest.getBirthDate());
             newUser.setAvatar(registerRequest.getAvatar());
             newUser.setAddress(registerRequest.getAddress());
@@ -118,6 +125,86 @@ public class UsersService {
         return response;
     }
 
+    // Phương thức tạo học sinh
+    public Response createStudents(CreateStudentRequest request){
+        Response response = new Response();
+        try {
+            // Kiểm tra nếu username hoặc email đã tồn tại
+            if (usersRepository.findByUsername(request.getUsername()).isPresent()) {
+                throw new OurException("Username already exists");
+            }
+            // Kiểm tra email
+            if (usersRepository.findByEmail(request.getEmail()).isPresent()) {
+                throw new OurException("Email already exists");
+            }
+            // Kiểm tra Class
+            Class aClass = classRepository.findByClassName(request.getClassName())
+                    .orElseThrow(() -> new OurException("Class not found"));
+            // Kiểm tra Role
+            Role role = roleRepository.findByRoleName("STUDENT")
+                    .orElseThrow(() -> new OurException("No role name"));
+            // Mã hóa mật khẩu
+            String encodedPassword = passwordEncoder.encode(request.getPassword());
+            // Tạo đối tượng User mới
+            Users newUser = new Users();
+            newUser.setUsername(request.getUsername());
+            newUser.setEmail(request.getEmail());
+            newUser.setPassword(encodedPassword);
+            newUser.setFullName(request.getFullName());
+            newUser.setBirthDate(request.getBirthDate());
+            newUser.setAvatar(request.getAvatar());
+            newUser.setAddress(request.getAddress());
+            newUser.setPhone(request.getPhone());
+            newUser.setGender(request.getGender());
+            newUser.setDateCreated(LocalDateTime.now());
+            newUser.setRole(role);
+            // Lưu người dùng vào database
+            usersRepository.save(newUser);
+            if (newUser.getId() > 0) {
+                // Tạo đối tượng Student mới
+                Students student = new Students();
+                student.setUser(newUser);
+                student.setExpertise(request.getExpertise());
+                student.setStudentCode(request.getStudentCode());
+                student.setDateCreated(LocalDate.now());
+                student.setPoint(100);
+                student.setAClass(aClass);
+                student.setGroup(null); // Để group_id null
+                studentsRepository.save(student);
+                newUser.setStudent(student);
+                usersRepository.save(newUser);
+                if (student.getId() > 0) {
+                    StudentsDTO studentsDTO = Converter.convertStudentToStudentDTO(student);
+                    response.setStudentsDTO(studentsDTO);
+                    response.setStatusCode(200);
+                    response.setMessage("Student created successfully");
+                }
+            }
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred during student creation: " + e.getMessage());
+        }
+        return response;
+    }
+
+    // Phương thức tạo học sinh
+    public Response createMentors(Response request){
+        Response response = new Response();
+        try {
+
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred during user creation: " + e.getMessage());
+        }
+        return response;
+    }
+
     // Phương thức trả về tất cả người dùng
     public Response getAllUser() {
         Response response = new Response();
@@ -137,7 +224,7 @@ public class UsersService {
             response.getMessage();
         } catch (Exception e) {
             response.setStatusCode(500);
-            response.setMessage("Error occured during get all user " + e.getMessage());
+            response.setMessage("Error occurred during get all user " + e.getMessage());
         }
         
         return response;
@@ -153,14 +240,14 @@ public class UsersService {
                 UsersDTO userDTO = userToUserDTO(user);
                 response.setUsersDTO(userDTO);
                 response.setStatusCode(200);
-                response.setMessage("Succesfully");
+                response.setMessage("Successfully");
             }
         } catch (OurException e) {
             response.setStatusCode(400);
-            response.setMessage("Error occured during get user by id " + id);
+            response.setMessage("Error occurred during get user by id " + id);
         } catch (Exception e) {
             response.setStatusCode(500);
-            response.setMessage("Error occured during get user by id " + id);
+            response.setMessage("Error occurred during get user by id " + id);
         }
         return response;
     }
@@ -240,7 +327,7 @@ public class UsersService {
                 UsersDTO userDTO = userToUserDTO(userProfile.get());
                 response.setUsersDTO(userDTO);
                 response.setStatusCode(200);
-                response.setMessage("Succesfully");
+                response.setMessage("Successfully");
             } else {
                 response.setStatusCode(404);
                 response.setMessage("User not found");

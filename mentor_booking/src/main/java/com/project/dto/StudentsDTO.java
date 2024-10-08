@@ -16,5 +16,5 @@ public class StudentsDTO {
     private LocalDate dateCreated;
     private UsersDTO user;
     private GroupDTO group;  // Mỗi sinh viên chỉ thuộc 1 nhóm
-    private Class aClass;
+    private ClassDTO aClass;
 }

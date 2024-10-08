@@ -1,6 +1,7 @@
 
 package com.project.controller;
 
+import com.project.dto.CreateStudentRequest;
 import com.project.dto.Response;
 import com.project.dto.UsersDTO;
 import com.project.model.Users;
@@ -27,6 +28,12 @@ public class UsersController {
     @PostMapping("/admin/create-user")
     public ResponseEntity<Response> createUser(@RequestBody UsersDTO createRes){
         Response response = userService.createUser(createRes);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @PostMapping("/admin/create-student")
+    public ResponseEntity<Response> createStudentRequestResponseEntity(@RequestBody CreateStudentRequest createStudentRequest){
+        Response response = userService.createStudents(createStudentRequest);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
     

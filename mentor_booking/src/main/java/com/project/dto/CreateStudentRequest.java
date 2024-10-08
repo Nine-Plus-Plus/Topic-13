@@ -1,16 +1,17 @@
-
 package com.project.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.project.enums.Gender;
+import lombok.Data;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import lombok.Data;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UsersDTO {
+public class CreateStudentRequest {
+    //User
     private Long id;
     private String email;
     private String username;
@@ -28,6 +29,16 @@ public class UsersDTO {
     private List<NotificationsDTO> notifications;
     private List<ReviewsDTO> reviews;
     private StudentsDTO student;
-    private MentorsDTO mentor;
-    private CreateStudentRequest createStudentRequest;
+
+    //Student
+    private String className;
+    private String expertise;
+    private String studentCode;
+    private int point;
+    private LocalDate dateUpdatedStudent;
+    private LocalDate dateCreatedStudent;
+    private UsersDTO user;
+    private GroupDTO group;  // Mỗi sinh viên chỉ thuộc 1 nhóm
+    private ClassDTO aClass;
+
 }

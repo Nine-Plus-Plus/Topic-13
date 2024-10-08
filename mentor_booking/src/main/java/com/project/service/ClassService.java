@@ -18,6 +18,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import com.project.ultis.Converter;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -50,33 +52,23 @@ public class ClassService {
     public Response createClass(ClassDTO inputRequest) {
         Response response = new Response();
         try {
-            if (classRepository.findByMentorId(inputRequest.getMentor().getId()).isPresent()) {
-                throw new OurException("Mentor has already have a class");
-            }
-            if (classRepository.findBySemesterId(inputRequest.getSemester().getId()).isPresent()) {
-                throw new OurException("Class have already existed in this semester");
+            // Kiểm tra nếu lớp đã tồn tại trong kỳ học
+            if (classRepository.existsByClassNameAndSemesterId(inputRequest.getClassName(), inputRequest.getSemester().getId())) {
+                throw new OurException("Class already exists in this semester");
             }
             Semester semester = semesterRepository.findById(inputRequest.getSemester().getId())
-                    .orElseThrow(() -> new OurException("No mentor in the database: " + inputRequest.getMentor().getMentorCode()));
-            Mentors mentor = mentorsRepository.findById(inputRequest.getMentor().getId())
-                    .orElseThrow(() -> new OurException("No semester in the database: " + inputRequest.getSemester().getSemesterName()));
-            List<Students> studentsList = convertStudentsDtoListToStudents(inputRequest.getStudents());
-
+                    .orElseThrow(() -> new OurException("No semester in the database: " + inputRequest.getSemester().getId()));
             Class newClass = new Class();
             newClass.setClassName(inputRequest.getClassName());
             newClass.setDateCreated(LocalDateTime.now());
             newClass.setSemester(semester);
-            newClass.setMentor(mentor);
-            newClass.setStudents(studentsList);
             classRepository.save(newClass);
-
             if (newClass.getId() > 0) {
-                ClassDTO classDto = convertClassToClassDto(newClass);
+                ClassDTO classDto = Converter.convertClassToClassDTO(newClass);
                 response.setClassDTO(classDto);
-                response.setStatusCode(201);
+                response.setStatusCode(200);
                 response.setMessage("Class added successfully");
             }
-
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());

@@ -4,6 +4,8 @@ package com.project.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.project.enums.AvailableStatus;
 import lombok.Data;
 
 @Data
@@ -21,4 +23,5 @@ public class TopicDTO {
     private ProjectsDTO projectDTO;
     private SemesterDTO semesterDTO;
     private MentorsDTO mentorsDTO;
+    private AvailableStatus availableStatus;
 }

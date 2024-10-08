@@ -1,6 +1,7 @@
 package com.project.model;
 
 
+import com.project.enums.AvailableStatus;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -31,8 +32,11 @@ public class Class {
     
     @OneToMany(mappedBy = "aClass", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Group> groups;
-    
-    @OneToOne
-    @JoinColumn(name = "mentor_id", unique = true)  
+
+    @OneToOne(mappedBy = "assignedClass")
     private Mentors mentor;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "available_status")
+    private AvailableStatus availableStatus;
 }

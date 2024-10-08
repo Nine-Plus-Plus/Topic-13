@@ -2,6 +2,7 @@
 package com.project.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.project.enums.AvailableStatus;
 import com.project.enums.ProjectTaskStatus;
 import java.time.LocalDateTime;
 import lombok.Data;
@@ -18,4 +19,5 @@ public class ProjectTasksDTO {
     private LocalDateTime dateCreated;
     private LocalDateTime dateUpdated;
     private ProjectsDTO projects;
+    private AvailableStatus availableStatus;
 }

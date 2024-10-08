@@ -2,6 +2,7 @@
 package com.project.model;
 
 
+import com.project.enums.AvailableStatus;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -51,4 +52,8 @@ public class Topic {
     @ManyToOne
     @JoinColumn(name = "semester_id")
     private Semester semester;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "available_status")
+    private AvailableStatus availableStatus;
 }

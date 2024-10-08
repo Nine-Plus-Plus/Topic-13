@@ -2,6 +2,7 @@
 package com.project.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.project.enums.AvailableStatus;
 import com.project.enums.PointHistoryStatus;
 import java.time.LocalDateTime;
 import lombok.Data;
@@ -16,4 +17,5 @@ public class PointHistoryDTO {
     private LocalDateTime dateUpdated;
     private LocalDateTime dateCreated;
     private BookingDTO booking;
+    private AvailableStatus availableStatus;
 }

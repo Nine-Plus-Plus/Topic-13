@@ -2,6 +2,7 @@
 package com.project.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.project.enums.AvailableStatus;
 import com.project.enums.MeetingStatus;
 import java.time.LocalDateTime;
 import lombok.Data;
@@ -14,4 +15,5 @@ public class MeetingDTO {
     private String linkURL;
     private LocalDateTime dateCreated;
     private BookingDTO booking;
+    private AvailableStatus availableStatus;
 }

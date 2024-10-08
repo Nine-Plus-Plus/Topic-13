@@ -1,5 +1,6 @@
 package com.project.model;
 
+import com.project.enums.AvailableStatus;
 import com.project.enums.MeetingStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,4 +35,8 @@ public class Meeting {
     @OneToOne
     @JoinColumn(name = "booking_id", unique = true)  // Mỗi meeting liên kết với 1 booking
     private Booking booking;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "available_status")
+    private AvailableStatus availableStatus;
 }

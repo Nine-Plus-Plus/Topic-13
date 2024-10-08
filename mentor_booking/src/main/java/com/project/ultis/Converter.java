@@ -13,6 +13,7 @@ public class Converter {
         classDTO.setId(convertClass.getId());
         classDTO.setClassName(convertClass.getClassName());
         classDTO.setDateCreated(convertClass.getDateCreated());
+        classDTO.setAvailableStatus(convertClass.getAvailableStatus());
 
         if(convertClass.getSemester() != null){
             classDTO.setSemester(convertSemesterToSemesterDTO(convertClass.getSemester()));
@@ -25,6 +26,7 @@ public class Converter {
         semesterDTO.setId(convertSemester.getId());
         semesterDTO.setSemesterName(convertSemester.getSemesterName());
         semesterDTO.setDateCreated(convertSemester.getDateCreated());
+        semesterDTO.setAvailableStatus(convertSemester.getAvailableStatus());
         return semesterDTO;
     }
 
@@ -36,6 +38,7 @@ public class Converter {
         mentorsDTO.setDateUpdated(convertMentor.getDateUpdated());
         mentorsDTO.setStar(convertMentor.getStar());
         mentorsDTO.setTotalTimeRemain(convertMentor.getTotalTimeRemain());
+        mentorsDTO.setAvailableStatus(convertMentor.getAvailableStatus());
 
         if(convertMentor.getAssignedClass() != null){
             mentorsDTO.setAssignedClass(convertClassToClassDTO(convertMentor.getAssignedClass()));
@@ -59,6 +62,7 @@ public class Converter {
         studentsDTO.setDateUpdated(convertStudent.getDateUpdated());
         studentsDTO.setDateCreated(convertStudent.getDateCreated());
         studentsDTO.setPoint(convertStudent.getPoint());
+        studentsDTO.setAvailableStatus(convertStudent.getAvailableStatus());
 
         if (convertStudent.getAClass() != null) {
             studentsDTO.setAClass(convertClassToClassDTO(convertStudent.getAClass()));
@@ -83,6 +87,7 @@ public class Converter {
         userDTO.setGender(convertUsers.getGender());
         userDTO.setDateUpdated(convertUsers.getDateUpdated());
         userDTO.setDateCreated(convertUsers.getDateCreated());
+        userDTO.setAvailableStatus(convertUsers.getAvailableStatus());
 
         RoleDTO roleDTO = new RoleDTO();
         roleDTO.setId(convertUsers.getRole().getId());
@@ -97,6 +102,7 @@ public class Converter {
         skillsDTO.setId(convertSkill.getId());
         skillsDTO.setSkillName(convertSkill.getSkillName());
         skillsDTO.setSkillDescription(convertSkill.getSkillDescription());
+        skillsDTO.setAvailableStatus(convertSkill.getAvailableStatus());
         return skillsDTO;
     }
 }

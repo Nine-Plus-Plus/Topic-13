@@ -1,6 +1,7 @@
 package com.project.service;
 
 import com.project.dto.ClassDTO;
+import com.project.enums.AvailableStatus;
 import com.project.model.Class;
 import com.project.dto.Response;
 import com.project.dto.SemesterDTO;
@@ -39,6 +40,7 @@ public class SemesterService {
             Semester semester = new Semester();
             semester.setDateCreated(LocalDateTime.now());
             semester.setSemesterName(createRequest.getSemesterName());
+            semester.setAvailableStatus(AvailableStatus.ACTIVE);
             semesterRepository.save(semester);
             if (semester.getId() > 0) {
                 SemesterDTO dto = Converter.convertSemesterToSemesterDTO(semester);
@@ -135,7 +137,8 @@ public class SemesterService {
         try {
             Semester deleteSemester = semesterRepository.findById(id)
                     .orElseThrow(() -> new OurException("Cannot find semester with id: " + id));
-            semesterRepository.delete(deleteSemester);
+            deleteSemester.setAvailableStatus(AvailableStatus.DELETED);
+            semesterRepository.save(deleteSemester);
             response.setStatusCode(200);
             response.setMessage("Semester deleted successfully");
         } catch (OurException e) {

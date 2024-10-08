@@ -110,29 +110,4 @@ public class StudentsService {
         }
         return response;
     }
-
-    // Phương thức lấy sinh viên profile
-    public Response getStudentProfile(String username) {
-        Response response = new Response();
-        try {
-            Users userProfile = usersRepository.findByUsername(username)
-                    .orElseThrow(() -> new OurException("User not found"));
-            Students studentProfile = studentsRepository.findById(userProfile.getStudent().getId())
-                    .orElseThrow(() -> new OurException("Student not found"));;
-
-            if (studentProfile != null) {
-                StudentsDTO studentsDTO = Converter.convertStudentToStudentDTO(studentProfile);
-                response.setStudentsDTO(studentsDTO);
-                response.setStatusCode(200);
-                response.setMessage("Successfully");
-            }
-        } catch (OurException e) {
-            response.setStatusCode(400);
-            response.setMessage(e.getMessage());
-        } catch (Exception e) {
-            response.setStatusCode(500);
-            response.setMessage("Error occurred while getting user profile: " + e.getMessage());
-        }
-        return response;
-    }
 }

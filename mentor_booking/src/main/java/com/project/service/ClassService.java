@@ -5,6 +5,7 @@ import com.project.dto.MentorsDTO;
 import com.project.dto.Response;
 import com.project.dto.SemesterDTO;
 import com.project.dto.StudentsDTO;
+import com.project.enums.AvailableStatus;
 import com.project.model.Class;
 import com.project.exception.OurException;
 import com.project.model.Mentors;
@@ -63,6 +64,7 @@ public class ClassService {
             newClass.setClassName(inputRequest.getClassName());
             newClass.setDateCreated(LocalDateTime.now());
             newClass.setSemester(semester);
+            newClass.setAvailableStatus(AvailableStatus.ACTIVE);
             classRepository.save(newClass);
             if (newClass.getId() > 0) {
                 ClassDTO classDto = Converter.convertClassToClassDTO(newClass);
@@ -157,8 +159,8 @@ public class ClassService {
         try {
             Class deletedClass = classRepository.findById(id)
                     .orElseThrow(() -> new OurException("Cannot find class with id: " + id));
-            classRepository.delete(deletedClass);
-            
+            deletedClass.setAvailableStatus(AvailableStatus.DELETED);
+            classRepository.save(deletedClass);
             response.setStatusCode(200);
             response.setMessage("Class deleted successfully");
         } catch (OurException e) {
@@ -191,7 +193,7 @@ public class ClassService {
             
             classRepository.save(presentClass);
             
-            ClassDTO dto = convertClassToClassDto(presentClass);
+            ClassDTO dto = Converter.convertClassToClassDTO(presentClass);
             response.setClassDTO(dto);
             response.setStatusCode(200);
             response.setMessage("Class updated successfully");
@@ -203,33 +205,5 @@ public class ClassService {
             response.setMessage("Error occurred while updating class: " + e.getMessage());
         }
         return response;
-    }
-
-    private List<Students> convertStudentsDtoListToStudents(List<StudentsDTO> lst) {
-        List<Students> result = new ArrayList<>();
-        for (StudentsDTO dto : lst) {
-            Students student = null;
-            student = studentsRepository.findByStudentCode(dto.getStudentCode())
-                    .orElseThrow(() -> new OurException("No student in the database: " + dto.getStudentCode()));
-            if (student != null) {
-                result.add(student);
-            }
-        }
-        return result;
-    }
-
-    private ClassDTO convertClassToClassDto(Class insertClass) {
-        ClassDTO classDto = new ClassDTO();
-        classDto.setClassName(insertClass.getClassName());
-        classDto.setSemester(this.modelMapper.map(insertClass.getSemester(), SemesterDTO.class));
-        classDto.setDateCreated(insertClass.getDateCreated());
-        classDto.setStudents(Arrays.asList(modelMapper.map(insertClass.getStudents(), StudentsDTO[].class)));
-        classDto.setMentor(this.modelMapper.map(insertClass.getMentor(), MentorsDTO.class));
-        return classDto;
-    }
-    
-    @Bean
-    public ModelMapper modelMapper() {
-        return new ModelMapper();
     }
 }

@@ -80,38 +80,19 @@ public class UsersService {
             newUser.setPhone(registerRequest.getPhone());
             newUser.setGender(registerRequest.getGender());
             newUser.setDateCreated(LocalDateTime.now());
+            newUser.setAvailableStatus(AvailableStatus.ACTIVE);
             newUser.setRole(role);
 
             // Lưu người dùng vào database
             usersRepository.save(newUser);
-            
-            if (role.getRoleName().equalsIgnoreCase("STUDENT")) {
-                Students student = new Students();
-                student.setUser(newUser);
-                student.setDateCreated(LocalDate.now());
-                student.setAClass(null); // Để class_id null
-                student.setGroup(null); // Để group_id null
-                studentsRepository.save(student);
-                newUser.setStudent(student);
-                usersRepository.save(newUser);
-            }
-            
-            if (role.getRoleName().equalsIgnoreCase("MENTOR")) {
-                Mentors mentor = new Mentors();
-                mentor.setUser(newUser);
-                mentor.setDateCreated(LocalDate.now());
-                mentorsRepository.save(mentor);
-                newUser.setMentor(mentor);
-                usersRepository.save(newUser);
-            }
-            
+
             if (newUser.getId() > 0) {
                 UsersDTO usersDTO = Converter.convertUserToUserDTO(newUser);
                 response.setUsersDTO(usersDTO);
                 response.setStatusCode(200);
                 response.setMessage("User created successfully");
             }
-            
+
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -219,7 +200,7 @@ public class UsersService {
     public Response getAllUser() {
         Response response = new Response();
         try {
-            List<Users> list = usersRepository.findAll();
+            List<Users> list = usersRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
             if (!list.isEmpty()) {
                 List<UsersDTO> listDTO = list.stream()
                         .map(Converter::convertUserToUserDTO)
@@ -228,6 +209,9 @@ public class UsersService {
                 response.setUsersDTOList(listDTO);
                 response.setStatusCode(200);
                 response.setMessage("Users fetched successfully");
+            }else{
+                response.setMessage("No data found");
+                response.setStatusCode(400);
             }
         } catch (OurException e) {
             response.setStatusCode(400);
@@ -244,13 +228,15 @@ public class UsersService {
     public Response getUserById(Long id) {
         Response response = new Response();
         try {
-            Users user = usersRepository.findById(id).orElseThrow(
-                    () -> new OurException("User not found"));
+            Users user = usersRepository.findByIdAndAvailableStatus(id, AvailableStatus.ACTIVE);
             if (user != null) {
                 UsersDTO userDTO = Converter.convertUserToUserDTO(user);
                 response.setUsersDTO(userDTO);
                 response.setStatusCode(200);
                 response.setMessage("Successfully");
+            }else{
+                response.setMessage("No data found");
+                response.setStatusCode(400);
             }
         } catch (OurException e) {
             response.setStatusCode(400);

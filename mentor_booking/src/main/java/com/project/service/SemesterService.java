@@ -48,7 +48,6 @@ public class SemesterService {
                 response.setStatusCode(200);
                 response.setMessage("Semester added successfully");
             }
-
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -64,7 +63,7 @@ public class SemesterService {
     public Response getAllSemesters(){
         Response response = new Response();
         try {
-            List<Semester> semesterList = semesterRepository.findAll();
+            List<Semester> semesterList = semesterRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
             if (!semesterList.isEmpty()) {
                 List<SemesterDTO> semesterListDTO = semesterList
                         .stream()
@@ -73,6 +72,9 @@ public class SemesterService {
                 response.setSemesterDTOList(semesterListDTO);
                 response.setStatusCode(200);
                 response.setMessage("Semester fetched successfully");
+            }else{
+                response.setStatusCode(400);
+                response.setMessage("No data found");
             }
         } catch (OurException e) {
             response.setStatusCode(400);
@@ -88,13 +90,16 @@ public class SemesterService {
     public Response getSemesterById(Long id){
         Response response = new Response();
         try {
-            Semester findSemester = semesterRepository.findById(id).orElse(null);
+            Semester findSemester = semesterRepository.findByIdAndAvailableStatus(id,AvailableStatus.ACTIVE);
             if (findSemester != null) {
                 SemesterDTO dto = Converter.convertSemesterToSemesterDTO(findSemester);
                 response.setSemesterDTO(dto);
                 response.setStatusCode(200);
                 response.setMessage("Successfully");
-            }else throw new OurException("Cannot find semester");
+            }else{
+                response.setStatusCode(400);
+                response.setMessage("No data found");
+            }
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());

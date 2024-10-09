@@ -85,7 +85,7 @@ public class ClassService {
     public Response getAllClasses() {
         Response response = new Response();
         try {
-            List<Class> classList = classRepository.findAll();
+            List<Class> classList = classRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
             if (!classList.isEmpty()) {
                 List<ClassDTO> classListDTO = classList.stream()
                         .map(Converter::convertClassToClassDTO)
@@ -111,7 +111,7 @@ public class ClassService {
     public Response getClassesSemesterId(Long semesterId) {
         Response response = new Response();
         try {
-            List<Class> classList = classRepository.findClassBySemesterId(semesterId);
+            List<Class> classList = classRepository.findClassBySemesterId(semesterId, AvailableStatus.ACTIVE);
             if (!classList.isEmpty()) {
                 List<ClassDTO> classListDTO = classList.stream()
                         .map(Converter::convertClassToClassDTO)
@@ -143,7 +143,10 @@ public class ClassService {
                 response.setClassDTO(dto);
                 response.setStatusCode(200);
                 response.setMessage("Successfully");
-            }else throw new OurException("Cannot find class");
+            }else{
+                response.setStatusCode(400);
+                response.setMessage("Class not found");
+            }
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());

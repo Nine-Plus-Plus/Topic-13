@@ -3,6 +3,7 @@ package com.project.service;
 import com.project.dto.Response;
 import com.project.dto.StudentsDTO;
 import com.project.dto.UsersDTO;
+import com.project.enums.AvailableStatus;
 import com.project.exception.OurException;
 import com.project.model.Students;
 import com.project.model.Users;
@@ -30,7 +31,7 @@ public class StudentsService {
     public Response getAllStudents() {
         Response response = new Response();
         try {
-            List<Students> list = studentsRepository.findAll();
+            List<Students> list = studentsRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
             if (!list.isEmpty()) {
                 List<StudentsDTO> listDTO = list.stream()
                         .map(Converter::convertStudentToStudentDTO)
@@ -39,6 +40,9 @@ public class StudentsService {
                 response.setStudentsDTOList(listDTO);
                 response.setStatusCode(200);
                 response.setMessage("Students fetched successfully");
+            }else{
+                response.setStatusCode(400);
+                response.setMessage("No data found");
             }
         } catch (OurException e) {
             response.setStatusCode(400);
@@ -54,14 +58,16 @@ public class StudentsService {
     public Response getStudentById(Long id) {
         Response response = new Response();
         try {
-            Students student = studentsRepository.findById(id)
-                    .orElseThrow(() -> new OurException("Student not found with id: " + id));
-
-            StudentsDTO studentsDTO = Converter.convertStudentToStudentDTO(student);
-
-            response.setStudentsDTO(studentsDTO);
-            response.setStatusCode(200);
-            response.setMessage("Student fetched successfully");
+            Students student = studentsRepository.findByIdAndAvailableStatus(id, AvailableStatus.ACTIVE);
+            if(student != null){
+                StudentsDTO studentsDTO = Converter.convertStudentToStudentDTO(student);
+                response.setStudentsDTO(studentsDTO);
+                response.setStatusCode(200);
+                response.setMessage("Student fetched successfully");
+            }else{
+                response.setStatusCode(400);
+                response.setMessage("No data found");
+            }
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -78,17 +84,16 @@ public class StudentsService {
             List<Students> studentsList;
 
             if (name != null && !name.isEmpty() && expertise != null && !expertise.isEmpty()) {
-                studentsList = studentsRepository.findStudentByUserFullNameAndExpertise(name, expertise);
+                studentsList = studentsRepository.findStudentByUserFullNameAndExpertise(name, expertise, AvailableStatus.ACTIVE);
             } else if (name != null && !name.isEmpty()) {
-                studentsList = studentsRepository.findStudentByUserFullName(name);
+                studentsList = studentsRepository.findStudentByUserFullName(name, AvailableStatus.ACTIVE);
             } else if (expertise != null && !expertise.isEmpty()) {
-                studentsList = studentsRepository.findByExpertise(expertise);
+                studentsList = studentsRepository.findByExpertise(expertise, AvailableStatus.ACTIVE);
             } else {
                 response.setStatusCode(400);
                 response.setMessage("Both name and expertise cannot be empty");
                 return response;
             }
-
             if (!studentsList.isEmpty()) {
                 List<StudentsDTO> listDTO = studentsList.stream()
                         .map(Converter::convertStudentToStudentDTO)
@@ -98,8 +103,8 @@ public class StudentsService {
                 response.setStatusCode(200);
                 response.setMessage("Students fetched successfully");
             } else {
-                response.setStatusCode(204); // No Content
-                response.setMessage("No students found");
+                response.setStatusCode(400);
+                response.setMessage("No data found");
             }
         } catch (OurException e) {
             response.setStatusCode(400);

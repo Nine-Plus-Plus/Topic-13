@@ -137,7 +137,7 @@ public class ClassService {
     public Response getClassById(Long id) {
         Response response = new Response();
         try {
-            Class findClass = classRepository.findById(id).orElse(null);
+            Class findClass = classRepository.findByIdAndAvailableStatus(id, AvailableStatus.ACTIVE);
             if (findClass != null) {
                 ClassDTO dto = Converter.convertClassToClassDTO(findClass);
                 response.setClassDTO(dto);

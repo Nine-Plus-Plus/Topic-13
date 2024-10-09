@@ -58,9 +58,9 @@ public class ProjectTasksService {
     public Response getAllTasks() {
         Response response = new Response();
         try {
-            List<ProjectTasks> tasks = projectTasksRepository.findAll();
-            List<ProjectTasksDTO> taskDTOs = Arrays.asList(modelMapper.map(tasks, ProjectTasksDTO[].class));
-            response.setProjectTasksDTOList(taskDTOs);
+            List<ProjectTasks> tasksList = projectTasksRepository.findAll();
+            List<ProjectTasksDTO> tasksDTOList = Arrays.asList(modelMapper.map(tasksList, ProjectTasksDTO[].class));
+            response.setProjectTasksDTOList(tasksDTOList);
             response.setStatusCode(200);
             response.setMessage("Tasks retrieved successfully");
         } catch (Exception e) {

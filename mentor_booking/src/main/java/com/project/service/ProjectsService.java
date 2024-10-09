@@ -5,8 +5,10 @@ import com.project.dto.Response;
 import com.project.exception.OurException;
 import com.project.model.Projects;
 import com.project.model.Topic;
+import com.project.model.Group;
 import com.project.repository.ProjectsRepository;
 import com.project.repository.TopicRepository;
+import com.project.repository.GroupRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,9 @@ public class ProjectsService {
     private TopicRepository topicRepository;
 
     @Autowired
+    private GroupRepository groupsRepository;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     public Response createProject(ProjectsDTO createRequest) {
@@ -40,22 +45,33 @@ public class ProjectsService {
             if (createRequest.getTopic() == null || createRequest.getTopic().getId() == null) {
                 throw new OurException("Topic ID cannot be null");
             }
+            if (createRequest.getGroup() == null || createRequest.getGroup().getId() == null) {
+                throw new OurException("Group ID cannot be null");
+            }
 
             // Convert ProjectsDTO Object to Projects Entity Object
             Projects project = modelMapper.map(createRequest, Projects.class);
             project.setPercentage(0); // Set percentage to 0 when creating a new project
             project.setDateCreated(LocalDateTime.now()); // Set dateCreated to current time
             project.setDateUpdated(LocalDateTime.now()); // Set dateUpdated to current time
+
+            // Fetch and set the topic
             Topic topic = topicRepository.findById(createRequest.getTopic().getId())
                     .orElseThrow(() -> new OurException("Topic not found"));
             project.setTopic(topic);
+
+            // Fetch and set the group
+            Group group = groupsRepository.findById(createRequest.getGroup().getId())
+                    .orElseThrow(() -> new OurException("Group not found"));
+            project.setGroup(group);
+
+            // Save the project
             projectsRepository.save(project);
-           // ProjectsDTO dto = modelMapper.map(project, ProjectsDTO.class); // Convert Projects Entity Object to ProjectsDTO Object
-           // response.setProjectsDTOList(Arrays.asList(dto)); // Wrap single ProjectsDTO in a list
-           // response.setStatusCode(201);
-            ProjectsDTO dto = modelMapper.map(project, ProjectsDTO.class); // Convert Projects Entity Object to ProjectsDTO Object
+
+            // Convert Projects Entity Object to ProjectsDTO Object
+            ProjectsDTO dto = modelMapper.map(project, ProjectsDTO.class);
             response.setProjectsDTO(dto); // Set single ProjectsDTO object
-            response.setStatusCode(201); 
+            response.setStatusCode(201);
             response.setMessage("Project created successfully");
         } catch (OurException e) {
             response.setStatusCode(400);
@@ -88,7 +104,7 @@ public class ProjectsService {
             Projects project = projectsRepository.findById(id)
                     .orElseThrow(() -> new OurException("Project not found"));
             ProjectsDTO dto = modelMapper.map(project, ProjectsDTO.class);
-            response.setProjectsDTOList(Arrays.asList(dto)); // Wrap single ProjectsDTO in a list
+            response.setProjectsDTO(dto); // Set single ProjectsDTO object
             response.setStatusCode(200);
             response.setMessage("Project retrieved successfully");
         } catch (OurException e) {
@@ -120,7 +136,7 @@ public class ProjectsService {
             projectsRepository.save(project);
 
             ProjectsDTO dto = modelMapper.map(project, ProjectsDTO.class);
-            response.setProjectsDTOList(Arrays.asList(dto));
+            response.setProjectsDTO(dto); // Set single ProjectsDTO object
             response.setStatusCode(200);
             response.setMessage("Project updated successfully");
         } catch (OurException e) {

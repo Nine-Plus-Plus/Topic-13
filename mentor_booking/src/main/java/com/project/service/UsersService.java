@@ -43,9 +43,6 @@ public class UsersService {
 
     @Autowired
     private ClassRepository classRepository;
-
-    @Autowired
-    private SemesterRepository semesterRepository;
     
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -91,6 +88,7 @@ public class UsersService {
                 student.setDateCreated(LocalDate.now());
                 student.setAClass(null); // Để class_id null
                 student.setGroup(null); // Để group_id null
+                student.setAvailableStatus(AvailableStatus.ACTIVE);
                 studentsRepository.save(student);
                 newUser.setStudent(student);
                 usersRepository.save(newUser);
@@ -100,6 +98,7 @@ public class UsersService {
                 Mentors mentor = new Mentors();
                 mentor.setUser(newUser);
                 mentor.setDateCreated(LocalDate.now());
+                mentor.setAvailableStatus(AvailableStatus.ACTIVE);
                 mentorsRepository.save(mentor);
                 newUser.setMentor(mentor);
                 usersRepository.save(newUser);
@@ -228,7 +227,7 @@ public class UsersService {
                 response.setUsersDTOList(listDTO);
                 response.setStatusCode(200);
                 response.setMessage("Users fetched successfully");
-            }
+            }else throw new OurException("There is no user in the database!");
         } catch (OurException e) {
             response.setStatusCode(400);
             response.getMessage();

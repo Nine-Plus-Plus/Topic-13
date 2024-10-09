@@ -67,7 +67,7 @@ public class SemesterService {
                 response.setSemesterDTOList(semesterListDTO);
                 response.setStatusCode(200);
                 response.setMessage("Semester fetched successfully");
-            }
+            }else throw new OurException("There is no semester in the database");
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());

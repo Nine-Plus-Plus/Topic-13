@@ -2,7 +2,6 @@ package com.project.service;
 
 import com.project.dto.Response;
 import com.project.dto.StudentsDTO;
-import com.project.dto.UsersDTO;
 import com.project.exception.OurException;
 import com.project.model.Students;
 import com.project.model.Users;
@@ -12,9 +11,7 @@ import com.project.ultis.Converter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service

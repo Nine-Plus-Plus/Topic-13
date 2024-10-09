@@ -34,7 +34,7 @@ public class SemesterService {
     public Response createSemester(SemesterDTO createRequest) {
         Response response = new Response();
         try {
-            if (semesterRepository.findBySemesterName(createRequest.getSemesterName()).isPresent()) {
+            if (semesterRepository.findBySemesterName(createRequest.getSemesterName(), AvailableStatus.ACTIVE).isPresent()) {
                 throw new OurException("Semester has already existed");
             }
             Semester semester = new Semester();
@@ -116,7 +116,7 @@ public class SemesterService {
         try {
             Semester presentSemester = semesterRepository.findById(id)
                     .orElseThrow(() -> new OurException("Cannot find semester with id: "+id));
-            if (semesterRepository.findBySemesterName(newSemester.getSemesterName()).isPresent()) {
+            if (semesterRepository.findBySemesterName(newSemester.getSemesterName(), AvailableStatus.ACTIVE).isPresent()) {
                 throw new OurException("Semester has already existed");
             }
             presentSemester.setSemesterName(newSemester.getSemesterName());

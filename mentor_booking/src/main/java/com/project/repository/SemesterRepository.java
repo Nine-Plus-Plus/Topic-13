@@ -17,7 +17,8 @@ import org.springframework.stereotype.Repository;
 public interface SemesterRepository extends JpaRepository<Semester, Long>{
     Optional<Semester> findById(Long id);
 
-    Optional<Semester> findBySemesterName(String semesterName);
+    @Query("SELECT s FROM Semester s WHERE s.semesterName = :semesterName AND s.availableStatus = :availableStatus")
+    Optional<Semester> findBySemesterName(@Param("semesterName")String semesterName, @Param("availableStatus") AvailableStatus status);
 
     List<Semester> findByAvailableStatus(AvailableStatus availableStatus);
 

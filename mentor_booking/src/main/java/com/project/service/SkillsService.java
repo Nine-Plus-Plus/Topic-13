@@ -135,10 +135,6 @@ public class SkillsService {
         Response response = new Response();
         try {
             Skills skill = skillsRepository.findById(id).orElseThrow(() -> new OurException("Skill not found"));
-
-            if (skillsRepository.findBySkillName(skillsDTO.getSkillName(), AvailableStatus.ACTIVE) != null) {
-                throw new OurException("Name already exists");
-            }
             skill.setSkillName(skillsDTO.getSkillName());
             skill.setSkillDescription(skillsDTO.getSkillDescription());
             skillsRepository.save(skill);

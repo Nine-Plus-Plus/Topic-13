@@ -1,24 +1,18 @@
 package com.project.service;
 
-import com.project.dto.ClassDTO;
-import com.project.model.Class;
 import com.project.dto.Response;
 import com.project.dto.SemesterDTO;
+import com.project.enums.AvailableStatus;
 import com.project.exception.OurException;
 import com.project.model.Semester;
 import com.project.repository.ClassRepository;
 import com.project.repository.SemesterRepository;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.project.ultis.Converter;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -39,6 +33,7 @@ public class SemesterService {
             Semester semester = new Semester();
             semester.setDateCreated(LocalDateTime.now());
             semester.setSemesterName(createRequest.getSemesterName());
+            semester.setAvailableStatus(AvailableStatus.ACTIVE);
             semesterRepository.save(semester);
             if (semester.getId() > 0) {
                 SemesterDTO dto = Converter.convertSemesterToSemesterDTO(semester);
@@ -72,7 +67,7 @@ public class SemesterService {
                 response.setSemesterDTOList(semesterListDTO);
                 response.setStatusCode(200);
                 response.setMessage("Semester fetched successfully");
-            }
+            }else throw new OurException("There is no semester in the database");
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -135,7 +130,8 @@ public class SemesterService {
         try {
             Semester deleteSemester = semesterRepository.findById(id)
                     .orElseThrow(() -> new OurException("Cannot find semester with id: " + id));
-            semesterRepository.delete(deleteSemester);
+            deleteSemester.setAvailableStatus(AvailableStatus.DELETED);
+            semesterRepository.save(deleteSemester);
             response.setStatusCode(200);
             response.setMessage("Semester deleted successfully");
         } catch (OurException e) {

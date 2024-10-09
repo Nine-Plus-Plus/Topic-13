@@ -18,6 +18,8 @@ public class Converter {
         if(convertClass.getSemester() != null){
             classDTO.setSemester(convertSemesterToSemesterDTO(convertClass.getSemester()));
         }
+        
+        classDTO.setAvailableStatus(convertClass.getAvailableStatus());
         return classDTO;
     }
 
@@ -26,6 +28,7 @@ public class Converter {
         semesterDTO.setId(convertSemester.getId());
         semesterDTO.setSemesterName(convertSemester.getSemesterName());
         semesterDTO.setDateCreated(convertSemester.getDateCreated());
+        semesterDTO.setAvailableStatus(convertSemester.getAvailableStatus());
         return semesterDTO;
     }
 
@@ -49,6 +52,8 @@ public class Converter {
         if(convertMentor.getAssignedClass() !=null){
             mentorsDTO.setAssignedClass(convertClassToClassDTO(convertMentor.getAssignedClass()));
         }
+        
+        mentorsDTO.setAvailableStatus(convertMentor.getAvailableStatus());
         return mentorsDTO;
     }
 
@@ -68,6 +73,7 @@ public class Converter {
         if (convertStudent.getUser() != null) {
             studentsDTO.setUser(convertUserToUserDTO(convertStudent.getUser()));
         }
+        studentsDTO.setAvailableStatus(convertStudent.getAvailableStatus());
         return studentsDTO;
     }
 
@@ -90,6 +96,7 @@ public class Converter {
         roleDTO.setRoleName(convertUsers.getRole().getRoleName());
         userDTO.setRole(roleDTO);
 
+        userDTO.setAvailableStatus(convertUsers.getAvailableStatus());
         return userDTO;
     }
 
@@ -98,7 +105,27 @@ public class Converter {
         skillsDTO.setId(convertSkill.getId());
         skillsDTO.setSkillName(convertSkill.getSkillName());
         skillsDTO.setSkillDescription(convertSkill.getSkillDescription());
+        
+        skillsDTO.setAvailableStatus(convertSkill.getAvailableStatus());
         return skillsDTO;
+    }
+    
+    public static TopicDTO convertTopicToTopicDTO(Topic convertTopic){
+        TopicDTO topicDTO = new TopicDTO();
+        topicDTO.setId(convertTopic.getId());
+        topicDTO.setTopicName(convertTopic.getTopicName());
+        topicDTO.setDateCreated(convertTopic.getDateCreated());
+        topicDTO.setContext(convertTopic.getContext());
+        topicDTO.setProblems(convertTopic.getProblems());
+        topicDTO.setActor(convertTopic.getActor());
+        topicDTO.setNonFunctionRequirement(convertTopic.getNonFunctionRequirement());
+        topicDTO.setRequirement(convertTopic.getRequirement());
+        
+        topicDTO.setSemesterDTO(convertSemesterToSemesterDTO(convertTopic.getSemester()));
+        topicDTO.setMentorsDTO(convertMentorToMentorDTO(convertTopic.getMentor()));
+        
+        topicDTO.setAvailableStatus(convertTopic.getAvailableStatus());
+        return topicDTO;
     }
 
 }

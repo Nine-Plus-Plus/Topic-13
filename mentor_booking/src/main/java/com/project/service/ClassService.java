@@ -5,16 +5,15 @@ import com.project.dto.MentorsDTO;
 import com.project.dto.Response;
 import com.project.dto.SemesterDTO;
 import com.project.dto.StudentsDTO;
+import com.project.enums.AvailableStatus;
 import com.project.model.Class;
 import com.project.exception.OurException;
-import com.project.model.Mentors;
 import com.project.model.Semester;
 import com.project.model.Students;
 import com.project.repository.ClassRepository;
 import com.project.repository.MentorsRepository;
 import com.project.repository.SemesterRepository;
 import com.project.repository.StudentsRepository;
-import com.project.ultis.Converter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,6 +64,7 @@ public class ClassService {
             newClass.setClassName(inputRequest.getClassName());
             newClass.setDateCreated(LocalDateTime.now());
             newClass.setSemester(semester);
+            newClass.setAvailableStatus(AvailableStatus.ACTIVE);
             classRepository.save(newClass);
             if (newClass.getId() > 0) {
                 ClassDTO classDto = Converter.convertClassToClassDTO(newClass);
@@ -94,10 +94,7 @@ public class ClassService {
                 response.setClassDTOList(classListDTO);
                 response.setStatusCode(200);
                 response.setMessage("Classes fetched successfully");
-            } else {
-                response.setStatusCode(400);
-                response.setMessage("Class not found");
-            }
+            } else throw new OurException("Cannot find any classes in the database");
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -120,10 +117,7 @@ public class ClassService {
                 response.setClassDTOList(classListDTO);
                 response.setStatusCode(200);
                 response.setMessage("Classes fetched successfully");
-            } else {
-                response.setStatusCode(400);
-                response.setMessage("Class not found");
-            }
+            } else throw new OurException("Cannot find class with semester id: "+semesterId);
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -161,8 +155,8 @@ public class ClassService {
         try {
             Class deletedClass = classRepository.findById(id)
                     .orElseThrow(() -> new OurException("Cannot find class with id: " + id));
-            classRepository.delete(deletedClass);
-
+            deletedClass.setAvailableStatus(AvailableStatus.DELETED);
+            classRepository.save(deletedClass);
             response.setStatusCode(200);
             response.setMessage("Class deleted successfully");
         } catch (OurException e) {

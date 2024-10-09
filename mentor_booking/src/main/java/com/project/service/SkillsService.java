@@ -33,8 +33,8 @@ public class SkillsService {
             newSkill.setSkillName(skillsDTO.getSkillName());
             newSkill.setSkillDescription(skillsDTO.getSkillDescription());
             newSkill.setAvailableStatus(AvailableStatus.ACTIVE);
-
             skillsRepository.save(newSkill);
+
             if(newSkill.getId()>0){
                 response.setSkillsDTO(Converter.convertSkillToSkillDTO(newSkill));
                 response.setStatusCode(200);

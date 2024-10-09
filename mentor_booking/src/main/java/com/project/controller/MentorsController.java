@@ -14,13 +14,6 @@ public class MentorsController {
     @Autowired
     private MentorsService mentorsService;
 
-    // Tạo mentor mới
-    @PostMapping("/admin/create-mentor")
-    public ResponseEntity<Response> createMentor(@RequestBody MentorsDTO mentorsDTO) {
-        Response response = mentorsService.createMentor(mentorsDTO);
-        return ResponseEntity.status(response.getStatusCode()).body(response);
-    }
-
     // Lấy tất cả mentors
     @GetMapping("/admin/get-all-mentors")
     public ResponseEntity<Response> getAllMentors() {

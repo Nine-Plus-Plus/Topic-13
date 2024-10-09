@@ -5,6 +5,9 @@ import com.project.model.*;
 import com.project.model.Class;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 public class Converter {
 
@@ -50,6 +53,13 @@ public class Converter {
 
         if(convertMentor.getAssignedClass() !=null){
             mentorsDTO.setAssignedClass(convertClassToClassDTO(convertMentor.getAssignedClass()));
+        }
+
+        if(convertMentor.getSkills() != null){
+            List<SkillsDTO> skillsDTOList = convertMentor.getSkills().stream()
+                    .map(Converter::convertSkillToSkillDTO)
+                    .collect(Collectors.toList());
+            mentorsDTO.setSkills(skillsDTOList);
         }
         return mentorsDTO;
     }
@@ -104,5 +114,14 @@ public class Converter {
         skillsDTO.setSkillDescription(convertSkill.getSkillDescription());
         skillsDTO.setAvailableStatus(convertSkill.getAvailableStatus());
         return skillsDTO;
+    }
+
+    public static Skills convertSkillDTOToSkill(SkillsDTO skillsDTO) {
+        Skills skill = new Skills();
+        skill.setId(skillsDTO.getId()); // Nếu bạn có một ID, nếu không, có thể bỏ qua
+        skill.setSkillName(skillsDTO.getSkillName());
+        skill.setSkillDescription(skillsDTO.getSkillDescription());
+        skill.setAvailableStatus(skillsDTO.getAvailableStatus());
+        return skill;
     }
 }

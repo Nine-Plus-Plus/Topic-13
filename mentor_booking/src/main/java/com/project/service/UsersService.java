@@ -3,11 +3,8 @@ package com.project.service;
 import com.project.dto.*;
 import com.project.enums.AvailableStatus;
 import com.project.exception.OurException;
+import com.project.model.*;
 import com.project.model.Class;
-import com.project.model.Role;
-import com.project.model.Users;
-import com.project.model.Students;
-import com.project.model.Mentors;
 import com.project.repository.*;
 
 import java.util.List;
@@ -115,10 +112,6 @@ public class UsersService {
             if (usersRepository.findByEmail(request.getEmail()).isPresent()) {
                 throw new OurException("Email already exists");
             }
-            // Kiểm tra FullName
-            if (usersRepository.findByFullName(request.getFullName()).isPresent()) {
-                throw new OurException("FullName already exists");
-            }
             if(usersRepository.findByPhone(request.getPhone()).isPresent()){
                 throw new OurException("Phone already exists");
             }
@@ -181,10 +174,70 @@ public class UsersService {
         return response;
     } // done
 
-    // Phương thức tạo học sinh
-    public Response createMentors(Response request){
+    // Phương thức tạo mentor
+    public Response createMentors(CreateMentorRequest request) {
         Response response = new Response();
         try {
+            // Kiểm tra nếu username hoặc email đã tồn tại
+            if (usersRepository.findByUsername(request.getUsername()).isPresent()) {
+                throw new OurException("Username already exists");
+            }
+            // Kiểm tra email
+            if (usersRepository.findByEmail(request.getEmail()).isPresent()) {
+                throw new OurException("Email already exists");
+            }
+            if (usersRepository.findByPhone(request.getPhone()).isPresent()) {
+                throw new OurException("Phone already exists");
+            }
+            if (mentorsRepository.findByMentorCode(request.getMentorCode()).isPresent()) {
+                throw new OurException("MentorCode already exists");
+            }
+            // Kiểm tra Role
+            Role role = roleRepository.findByRoleName("MENTOR")
+                    .orElseThrow(() -> new OurException("No role name"));
+            // Mã hóa mật khẩu
+            String encodedPassword = passwordEncoder.encode(request.getPassword());
+            // Tạo đối tượng User mới
+            Users newUser = new Users();
+            newUser.setUsername(request.getUsername());
+            newUser.setEmail(request.getEmail());
+            newUser.setPassword(encodedPassword);
+            newUser.setFullName(request.getFullName());
+            newUser.setBirthDate(request.getBirthDate());
+            newUser.setAvatar(request.getAvatar());
+            newUser.setAddress(request.getAddress());
+            newUser.setPhone(request.getPhone());
+            newUser.setGender(request.getGender());
+            newUser.setDateCreated(LocalDateTime.now());
+            newUser.setRole(role);
+            newUser.setAvailableStatus(AvailableStatus.ACTIVE);
+            // Lưu người dùng vào database
+            usersRepository.save(newUser);
+            if (newUser.getId() > 0) {
+                // Tạo đối tượng Mentor mới
+                Mentors mentor = new Mentors();
+                mentor.setUser(newUser);
+                mentor.setMentorCode(request.getMentorCode());
+                mentor.setStar(5);
+                mentor.setTotalTimeRemain(150);
+                mentor.setDateCreated(LocalDate.now());
+                mentor.setAvailableStatus(AvailableStatus.ACTIVE);
+                List<SkillsDTO> skillsListDTO = request.getSkills();
+                List<Skills> skillsList = skillsListDTO.stream()
+                        .map(Converter::convertSkillDTOToSkill)
+                        .collect(Collectors.toList());
+                mentor.setSkills(skillsList);
+                mentorsRepository.save(mentor);
+                newUser.setMentor(mentor);
+                usersRepository.save(newUser);
+
+                if (mentor.getId() > 0) {
+                    MentorsDTO mentorsDTO = Converter.convertMentorToMentorDTO(mentor);
+                    response.setMentorsDTO(mentorsDTO);
+                    response.setStatusCode(200);
+                    response.setMessage("Mentor created successfully");
+                }
+            }
 
         } catch (OurException e) {
             response.setStatusCode(400);
@@ -195,6 +248,7 @@ public class UsersService {
         }
         return response;
     }
+
 
     // Phương thức trả về tất cả người dùng
     public Response getAllUser() {

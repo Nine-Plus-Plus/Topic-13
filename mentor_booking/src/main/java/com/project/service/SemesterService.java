@@ -121,6 +121,7 @@ public class SemesterService {
             }
             presentSemester.setSemesterName(newSemester.getSemesterName());
             semesterRepository.save(presentSemester);
+
             SemesterDTO dto = Converter.convertSemesterToSemesterDTO(presentSemester);
             response.setSemesterDTO(dto);
             response.setStatusCode(200);
@@ -143,6 +144,7 @@ public class SemesterService {
                     .orElseThrow(() -> new OurException("Cannot find semester with id: " + id));
             deleteSemester.setAvailableStatus(AvailableStatus.DELETED);
             semesterRepository.save(deleteSemester);
+
             response.setStatusCode(200);
             response.setMessage("Semester deleted successfully");
         } catch (OurException e) {

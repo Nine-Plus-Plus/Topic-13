@@ -9,4 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MentorsRepository extends JpaRepository<Mentors, Long>{
     Mentors findByUser_Id(Long userId);
+
+    Optional<Mentors> findByMentorCode(String mentorCode);
 }

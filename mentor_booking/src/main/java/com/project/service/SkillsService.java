@@ -33,6 +33,7 @@ public class SkillsService {
             newSkill.setSkillName(skillsDTO.getSkillName());
             newSkill.setSkillDescription(skillsDTO.getSkillDescription());
             newSkill.setAvailableStatus(AvailableStatus.ACTIVE);
+
             skillsRepository.save(newSkill);
 
             if(newSkill.getId()>0){
@@ -163,6 +164,7 @@ public class SkillsService {
             Skills skill = skillsRepository.findById(id).orElseThrow(() -> new OurException("Skill not found"));
             skill.setAvailableStatus(AvailableStatus.DELETED);
             skillsRepository.save(skill);
+
             response.setStatusCode(200);
             response.setMessage("Skill deleted successfully");
         } catch (OurException e) {

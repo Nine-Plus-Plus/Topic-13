@@ -5,21 +5,17 @@ import com.project.enums.AvailableStatus;
 import com.project.model.Class;
 import com.project.dto.Response;
 import com.project.dto.SemesterDTO;
+import com.project.enums.AvailableStatus;
 import com.project.exception.OurException;
 import com.project.model.Semester;
 import com.project.repository.ClassRepository;
 import com.project.repository.SemesterRepository;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.project.ultis.Converter;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -53,7 +49,7 @@ public class SemesterService {
             response.setMessage(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
-            response.setMessage("Error occurred during class creation: " + e.getMessage());
+            response.setMessage("Error occurred during semester creation: " + e.getMessage());
         }
 
         return response;

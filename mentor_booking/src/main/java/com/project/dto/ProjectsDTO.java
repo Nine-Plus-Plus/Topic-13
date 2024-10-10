@@ -4,12 +4,14 @@ package com.project.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.project.enums.AvailableStatus;
 import lombok.Data;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProjectsDTO {
-  
+
     private Long id; //primary key
     private String projectName; //User input
     private float percentage;   //default value is 0
@@ -19,5 +21,5 @@ public class ProjectsDTO {
     private List<ProjectTasksDTO> projectTasks; //one to many relationship with project tasks, foreign key
     private TopicDTO topic; //foreign key, many to one relationship with topic, user chooses from a list of topics
     private GroupDTO group; //foreign key, 
-    private String status; //soft delete purpose, default value is ACTIVE
+    private AvailableStatus availableStatus; //soft delete purpose, default value is ACTIVE
 }

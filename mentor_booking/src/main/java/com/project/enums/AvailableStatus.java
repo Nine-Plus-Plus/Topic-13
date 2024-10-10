@@ -5,3 +5,4 @@ public enum AvailableStatus {
     INACTIVE,  // Trạng thái không hoạt động
     DELETED    // Trạng thái đã bị xóa
 }
+

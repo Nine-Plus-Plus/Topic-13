@@ -44,6 +44,12 @@ public class ClassController {
         Response response = classService.getClassById(id);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
+
+    @GetMapping("/admin/get-classes-by-semester/{semesterId}")
+    public ResponseEntity<Response> getClassesBySemester(@PathVariable Long semesterId) {
+        Response response = classService.getClassesSemesterId(semesterId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
     
     @PutMapping("/admin/update-class/{id}")
     public ResponseEntity<Response> updateClass(@PathVariable Long id, @RequestBody Class newClass){

@@ -2,6 +2,7 @@
 package com.project.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.project.enums.AvailableStatus;
 import com.project.enums.MentorScheduleStatus;
 import java.time.LocalDateTime;
 import lombok.Data;
@@ -15,4 +16,5 @@ public class MentorScheduleDTO {
     private MentorScheduleStatus status;
     private MentorsDTO mentor;
     private BookingDTO booking;
+    private AvailableStatus availableStatus;
 }

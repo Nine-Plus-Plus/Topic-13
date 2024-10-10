@@ -3,6 +3,7 @@ package com.project.service;
 import com.project.dto.MentorsDTO;
 import com.project.dto.Response;
 import com.project.dto.SkillsDTO;
+import com.project.enums.AvailableStatus;
 import com.project.exception.OurException;
 import com.project.model.Mentors;
 import com.project.model.Skills;
@@ -33,6 +34,7 @@ public class MentorsService {
             newMentor.setTotalTimeRemain(mentorsDTO.getTotalTimeRemain());
             newMentor.setDateCreated(mentorsDTO.getDateCreated());
             newMentor.setDateUpdated(mentorsDTO.getDateUpdated());
+            newMentor.setAvailableStatus(AvailableStatus.ACTIVE);
 
             // Set skills
             List<Skills> skills = skillsRepository.findAllById(
@@ -141,7 +143,8 @@ public class MentorsService {
             Mentors mentor = mentorsRepository.findById(id)
                     .orElseThrow(() -> new OurException("Mentor not found"));
 
-            mentorsRepository.delete(mentor);
+            mentor.setAvailableStatus(AvailableStatus.DELETED);
+            mentorsRepository.save(mentor);
 
             response.setStatusCode(200);
             response.setMessage("Mentor deleted successfully");

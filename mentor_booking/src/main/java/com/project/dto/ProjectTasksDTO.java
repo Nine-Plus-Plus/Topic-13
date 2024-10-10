@@ -1,6 +1,7 @@
 package com.project.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.project.enums.AvailableStatus;
 import com.project.enums.ProjectTaskStatus;
 import lombok.Data;
 
@@ -16,5 +17,6 @@ public class ProjectTasksDTO {
     private ProjectTaskStatus status; //default value is INPROGRESS
     private LocalDateTime dateCreated; //default value is current time
     private LocalDateTime dateUpdated; //default value is current time
-    private ProjectsDTO projects; //foreign key, many to one relationship with projects, user chooses from a list of projects   
+    private ProjectsDTO projects; //foreign key, many to one relationship with projects, user chooses from a list of projects
+    private AvailableStatus availableStatus;
 }

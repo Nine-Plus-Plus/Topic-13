@@ -3,6 +3,8 @@ package com.project.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.List;
+
+import com.project.enums.AvailableStatus;
 import lombok.Data;
 
 @Data
@@ -12,4 +14,5 @@ public class SkillsDTO {
     private String skillName;
     private String skillDescription;
     private List<MentorsDTO> mentors;
+    private AvailableStatus availableStatus;
 }

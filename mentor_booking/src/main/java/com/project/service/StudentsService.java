@@ -4,11 +4,13 @@ import com.project.dto.Response;
 import com.project.dto.StudentsDTO;
 import com.project.exception.OurException;
 import com.project.model.Students;
+import com.project.model.Users;
 import com.project.repository.StudentsRepository;
+import com.project.repository.UsersRepository;
+import com.project.ultis.Converter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,32 +20,8 @@ public class StudentsService {
     @Autowired
     private StudentsRepository studentsRepository;
 
-    // Phương thức tạo mới sinh viên
-    public Response createStudent(StudentsDTO studentsDTO) {
-        Response response = new Response();
-        try {
-            Students student = new Students();
-            student.setStudentCode(studentsDTO.getStudentCode());
-            student.setExpertise(studentsDTO.getExpertise());
-            student.setDateCreated(LocalDate.now());
-            student.setGroup(null); // Để group_id null
-            student.setAClass(null); // Để class_id null
-
-            studentsRepository.save(student);
-
-            StudentsDTO dto = studentToStudentDTO(student);
-            response.setStudentsDTO(dto);
-            response.setStatusCode(200);
-            response.setMessage("Student created successfully");
-        } catch (OurException e) {
-            response.setStatusCode(400);
-            response.setMessage(e.getMessage());
-        } catch (Exception e) {
-            response.setStatusCode(500);
-            response.setMessage("Error occurred during student creation: " + e.getMessage());
-        }
-        return response;
-    }
+    @Autowired
+    private UsersRepository usersRepository;
 
     // Phương thức lấy tất cả sinh viên
     public Response getAllStudents() {
@@ -52,13 +30,16 @@ public class StudentsService {
             List<Students> list = studentsRepository.findAll();
             if (!list.isEmpty()) {
                 List<StudentsDTO> listDTO = list.stream()
-                        .map(this::studentToStudentDTO)
+                        .map(Converter::convertStudentToStudentDTO)
                         .collect(Collectors.toList());
 
                 response.setStudentsDTOList(listDTO);
                 response.setStatusCode(200);
                 response.setMessage("Students fetched successfully");
             }
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
             response.setMessage("Error occurred while fetching students: " + e.getMessage());
@@ -73,9 +54,9 @@ public class StudentsService {
             Students student = studentsRepository.findById(id)
                     .orElseThrow(() -> new OurException("Student not found with id: " + id));
 
-            StudentsDTO dto = studentToStudentDTO(student);
+            StudentsDTO studentsDTO = Converter.convertStudentToStudentDTO(student);
 
-            response.setStudentsDTO(dto);
+            response.setStudentsDTO(studentsDTO);
             response.setStatusCode(200);
             response.setMessage("Student fetched successfully");
         } catch (OurException e) {
@@ -88,62 +69,67 @@ public class StudentsService {
         return response;
     }
 
-    // Phương thức cập nhật sinh viên
-    public Response updateStudent(Long id, StudentsDTO studentsDTO) {
+    public Response findStudentByNameAndExpertise(String name, String expertise) {
         Response response = new Response();
         try {
-            Students student = studentsRepository.findById(id)
-                    .orElseThrow(() -> new OurException("Student not found with id: " + id));
+            List<Students> studentsList;
 
-            student.setExpertise(studentsDTO.getExpertise());
-            student.setStudentCode(studentsDTO.getStudentCode());
-            student.setDateUpdated(LocalDate.now());
+            if (name != null && !name.isEmpty() && expertise != null && !expertise.isEmpty()) {
+                studentsList = studentsRepository.findStudentByUserFullNameAndExpertise(name, expertise);
+            } else if (name != null && !name.isEmpty()) {
+                studentsList = studentsRepository.findStudentByUserFullName(name);
+            } else if (expertise != null && !expertise.isEmpty()) {
+                studentsList = studentsRepository.findByExpertise(expertise);
+            } else {
+                response.setStatusCode(400);
+                response.setMessage("Both name and expertise cannot be empty");
+                return response;
+            }
 
-            studentsRepository.save(student);
+            if (!studentsList.isEmpty()) {
+                List<StudentsDTO> listDTO = studentsList.stream()
+                        .map(Converter::convertStudentToStudentDTO)
+                        .collect(Collectors.toList());
 
-            StudentsDTO dto = studentToStudentDTO(student);
-            response.setStudentsDTO(dto);
-            response.setStatusCode(200);
-            response.setMessage("Student updated successfully");
+                response.setStudentsDTOList(listDTO);
+                response.setStatusCode(200);
+                response.setMessage("Students fetched successfully");
+            } else {
+                response.setStatusCode(204); // No Content
+                response.setMessage("No students found");
+            }
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
-            response.setMessage("Error occurred during student update: " + e.getMessage());
+            response.setMessage("Error occurred while fetching student: " + e.getMessage());
         }
         return response;
     }
 
-    // Phương thức xóa sinh viên
-    public Response deleteStudent(Long id) {
+    // Phương thức lấy sinh viên profile
+    public Response getStudentProfile(String username) {
         Response response = new Response();
         try {
-            Students student = studentsRepository.findById(id)
-                    .orElseThrow(() -> new OurException("Student not found with id: " + id));
+            Users userProfile = usersRepository.findByUsername(username)
+                    .orElseThrow(() -> new OurException("User not found"));
+            Students studentProfile = studentsRepository.findById(userProfile.getStudent().getId())
+                    .orElseThrow(() -> new OurException("Student not found"));;
 
-            studentsRepository.delete(student);
-            response.setStatusCode(200);
-            response.setMessage("Student deleted successfully");
+            if (studentProfile != null) {
+                StudentsDTO studentsDTO = Converter.convertStudentToStudentDTO(studentProfile);
+                response.setStudentsDTO(studentsDTO);
+                response.setStatusCode(200);
+                response.setMessage("Successfully");
+            }
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
-            response.setMessage("Error occurred while deleting student: " + e.getMessage());
+            response.setMessage("Error occurred while getting user profile: " + e.getMessage());
         }
         return response;
     }
-
-    // Phương thức chuyển đổi từ Students sang StudentsDTO
-    private StudentsDTO studentToStudentDTO(Students student) {
-        StudentsDTO dto = new StudentsDTO();
-        dto.setId(student.getId());
-        dto.setStudentCode(student.getStudentCode());
-        dto.setExpertise(student.getExpertise());
-        dto.setDateCreated(student.getDateCreated());
-        dto.setDateUpdated(student.getDateUpdated());
-        return dto;
-    }
-
 }

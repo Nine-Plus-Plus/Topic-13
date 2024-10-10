@@ -8,7 +8,6 @@ import com.project.dto.StudentsDTO;
 import com.project.enums.AvailableStatus;
 import com.project.model.Class;
 import com.project.exception.OurException;
-import com.project.model.Mentors;
 import com.project.model.Semester;
 import com.project.model.Students;
 import com.project.repository.ClassRepository;
@@ -54,6 +53,7 @@ public class ClassService {
     public Response createClass(ClassDTO inputRequest) {
         Response response = new Response();
         try {
+
             // Kiểm tra nếu lớp đã tồn tại trong kỳ học
             if (classRepository.existsByClassNameAndSemesterId(inputRequest.getClassName(), inputRequest.getSemester().getId())) {
                 throw new OurException("Class already exists in this semester");
@@ -203,7 +203,6 @@ public class ClassService {
                 response.setMessage("No class in the database");
                 return response;
             }
-
             if (classRepository.findByMentorId(newClass.getMentor().getId()).isPresent()) {
                 throw new OurException("Mentor has already have a class");
             }

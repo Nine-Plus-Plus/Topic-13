@@ -1,8 +1,9 @@
 package com.project.ultis;
 
-import com.project.dto.*;
+
 import com.project.model.*;
 import com.project.model.Class;
+import com.project.dto.*;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -21,7 +22,6 @@ public class Converter {
         if(convertClass.getSemester() != null){
             classDTO.setSemester(convertSemesterToSemesterDTO(convertClass.getSemester()));
         }
-
         if(convertClass.getMentor() != null){
             Mentors mentor = new Mentors();
             mentor.setId(convertClass.getId());
@@ -32,6 +32,7 @@ public class Converter {
             mentor.setAvailableStatus(convertClass.getMentor().getAvailableStatus());
             classDTO.setMentor(convertMentorToMentorDTO(mentor));
         }
+
         return classDTO;
     }
 
@@ -65,7 +66,6 @@ public class Converter {
         if(convertMentor.getAssignedClass() !=null){
             mentorsDTO.setAssignedClass(convertClassToClassDTO(convertMentor.getAssignedClass()));
         }
-
         if(convertMentor.getSkills() != null){
             List<SkillsDTO> skillsDTOList = convertMentor.getSkills().stream()
                     .map(Converter::convertSkillToSkillDTO)
@@ -92,6 +92,7 @@ public class Converter {
         if (convertStudent.getUser() != null) {
             studentsDTO.setUser(convertUserToUserDTO(convertStudent.getUser()));
         }
+        studentsDTO.setAvailableStatus(convertStudent.getAvailableStatus());
         return studentsDTO;
     }
 
@@ -115,6 +116,7 @@ public class Converter {
         roleDTO.setRoleName(convertUsers.getRole().getRoleName());
         userDTO.setRole(roleDTO);
 
+        userDTO.setAvailableStatus(convertUsers.getAvailableStatus());
         return userDTO;
     }
 
@@ -135,4 +137,23 @@ public class Converter {
         skill.setAvailableStatus(skillsDTO.getAvailableStatus());
         return skill;
     }
+    
+    public static TopicDTO convertTopicToTopicDTO(Topic convertTopic){
+        TopicDTO topicDTO = new TopicDTO();
+        topicDTO.setId(convertTopic.getId());
+        topicDTO.setTopicName(convertTopic.getTopicName());
+        topicDTO.setDateCreated(convertTopic.getDateCreated());
+        topicDTO.setContext(convertTopic.getContext());
+        topicDTO.setProblems(convertTopic.getProblems());
+        topicDTO.setActor(convertTopic.getActor());
+        topicDTO.setNonFunctionRequirement(convertTopic.getNonFunctionRequirement());
+        topicDTO.setRequirement(convertTopic.getRequirement());
+        
+        topicDTO.setSemesterDTO(convertSemesterToSemesterDTO(convertTopic.getSemester()));
+        topicDTO.setMentorsDTO(convertMentorToMentorDTO(convertTopic.getMentor()));
+        
+        topicDTO.setAvailableStatus(convertTopic.getAvailableStatus());
+        return topicDTO;
+    }
+
 }

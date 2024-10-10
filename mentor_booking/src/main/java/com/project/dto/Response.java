@@ -37,7 +37,7 @@ public class Response {
     private List<PointHistoryDTO> pointHistoryDTOList;
     private ProjectTasksDTO projectTasksDTO;
     private List<ProjectTasksDTO> projectTasksDTOList;
-    private List<ProjectsDTO> projectsDTO;
+    private ProjectsDTO projectsDTO;
     private List<ProjectsDTO> projectsDTOList;
     private ReviewsDTO reviewsDTO;
     private List<ReviewsDTO> reviewsDTOList;

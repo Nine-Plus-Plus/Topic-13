@@ -41,9 +41,6 @@ public class UsersService {
 
     @Autowired
     private ClassRepository classRepository;
-
-    @Autowired
-    private SemesterRepository semesterRepository;
     
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -79,10 +76,10 @@ public class UsersService {
             newUser.setDateCreated(LocalDateTime.now());
             newUser.setAvailableStatus(AvailableStatus.ACTIVE);
             newUser.setRole(role);
+            newUser.setAvailableStatus(AvailableStatus.ACTIVE);
 
             // Lưu người dùng vào database
             usersRepository.save(newUser);
-
             if (newUser.getId() > 0) {
                 UsersDTO usersDTO = Converter.convertUserToUserDTO(newUser);
                 response.setUsersDTO(usersDTO);
@@ -323,7 +320,6 @@ public class UsersService {
                 deleteStudent.setAvailableStatus(AvailableStatus.DELETED);
                 studentsRepository.save(deleteStudent);
             }
-
             user.setAvailableStatus(AvailableStatus.DELETED);
             usersRepository.save(user);
             response.setStatusCode(200);

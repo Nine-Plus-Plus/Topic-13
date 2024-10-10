@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 public class Converter {
     
@@ -15,12 +18,22 @@ public class Converter {
         classDTO.setId(convertClass.getId());
         classDTO.setClassName(convertClass.getClassName());
         classDTO.setDateCreated(convertClass.getDateCreated());
-        
-        if (convertClass.getSemester() != null) {
+        classDTO.setAvailableStatus(convertClass.getAvailableStatus());
+
+        if(convertClass.getSemester() != null){
             classDTO.setSemester(convertSemesterToSemesterDTO(convertClass.getSemester()));
         }
-        
-        classDTO.setAvailableStatus(convertClass.getAvailableStatus());
+        if(convertClass.getMentor() != null){
+            Mentors mentor = new Mentors();
+            mentor.setId(convertClass.getId());
+            mentor.setMentorCode(convertClass.getMentor().getMentorCode());
+            mentor.setDateCreated(convertClass.getMentor().getDateCreated());
+            mentor.setStar(convertClass.getMentor().getStar());
+            mentor.setTotalTimeRemain(convertClass.getMentor().getTotalTimeRemain());
+            mentor.setAvailableStatus(convertClass.getMentor().getAvailableStatus());
+            classDTO.setMentor(convertMentorToMentorDTO(mentor));
+        }
+
         return classDTO;
     }
     
@@ -41,16 +54,22 @@ public class Converter {
         mentorsDTO.setDateUpdated(convertMentor.getDateUpdated());
         mentorsDTO.setStar(convertMentor.getStar());
         mentorsDTO.setTotalTimeRemain(convertMentor.getTotalTimeRemain());
-        
-        if (convertMentor.getAssignedClass() != null) {
+
+        mentorsDTO.setAvailableStatus(convertMentor.getAvailableStatus());
+
+        if(convertMentor.getAssignedClass() != null){
             mentorsDTO.setAssignedClass(convertClassToClassDTO(convertMentor.getAssignedClass()));
         }
         
         if (convertMentor.getUser() != null) {
             mentorsDTO.setUser(convertUserToUserDTO(convertMentor.getUser()));
         }
-        
-        mentorsDTO.setAvailableStatus(convertMentor.getAvailableStatus());
+        if(convertMentor.getSkills() != null){
+            List<SkillsDTO> skillsDTOList = convertMentor.getSkills().stream()
+                    .map(Converter::convertSkillToSkillDTO)
+                    .collect(Collectors.toList());
+            mentorsDTO.setSkills(skillsDTOList);
+        }
         return mentorsDTO;
     }
     
@@ -62,7 +81,6 @@ public class Converter {
         studentsDTO.setDateUpdated(convertStudent.getDateUpdated());
         studentsDTO.setDateCreated(convertStudent.getDateCreated());
         studentsDTO.setPoint(convertStudent.getPoint());
-        
         if (convertStudent.getAClass() != null) {
             studentsDTO.setAClass(convertClassToClassDTO(convertStudent.getAClass()));
         }
@@ -87,7 +105,6 @@ public class Converter {
         userDTO.setGender(convertUsers.getGender());
         userDTO.setDateUpdated(convertUsers.getDateUpdated());
         userDTO.setDateCreated(convertUsers.getDateCreated());
-        
         RoleDTO roleDTO = new RoleDTO();
         roleDTO.setId(convertUsers.getRole().getId());
         roleDTO.setRoleName(convertUsers.getRole().getRoleName());
@@ -102,9 +119,17 @@ public class Converter {
         skillsDTO.setId(convertSkill.getId());
         skillsDTO.setSkillName(convertSkill.getSkillName());
         skillsDTO.setSkillDescription(convertSkill.getSkillDescription());
-        
         skillsDTO.setAvailableStatus(convertSkill.getAvailableStatus());
         return skillsDTO;
+    }
+
+    public static Skills convertSkillDTOToSkill(SkillsDTO skillsDTO) {
+        Skills skill = new Skills();
+        skill.setId(skillsDTO.getId()); // Nếu bạn có một ID, nếu không, có thể bỏ qua
+        skill.setSkillName(skillsDTO.getSkillName());
+        skill.setSkillDescription(skillsDTO.getSkillDescription());
+        skill.setAvailableStatus(skillsDTO.getAvailableStatus());
+        return skill;
     }
     
     public static TopicDTO convertTopicToTopicDTO(Topic convertTopic) {

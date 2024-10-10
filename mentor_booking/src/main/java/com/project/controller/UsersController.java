@@ -1,6 +1,7 @@
 
 package com.project.controller;
 
+import com.project.dto.CreateMentorRequest;
 import com.project.dto.CreateStudentRequest;
 import com.project.dto.Response;
 import com.project.dto.UsersDTO;
@@ -34,6 +35,12 @@ public class UsersController {
     @PostMapping("/admin/create-student")
     public ResponseEntity<Response> createStudentRequestResponseEntity(@RequestBody CreateStudentRequest createStudentRequest){
         Response response = userService.createStudents(createStudentRequest);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @PostMapping("/admin/create-mentor")
+    public ResponseEntity<Response> createMentorRequestResponseEntity(@RequestBody CreateMentorRequest createMentorRequest){
+        Response response = userService.createMentors(createMentorRequest);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
     

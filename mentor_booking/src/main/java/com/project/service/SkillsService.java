@@ -25,7 +25,7 @@ public class SkillsService {
         Response response = new Response();
         try {
 
-            if (skillsRepository.findBySkillName(skillsDTO.getSkillName()).isPresent()) {
+            if (skillsRepository.findBySkillName(skillsDTO.getSkillName(), AvailableStatus.ACTIVE) !=null) {
                 throw new OurException("Name already exists");
             }
 
@@ -35,6 +35,7 @@ public class SkillsService {
             newSkill.setAvailableStatus(AvailableStatus.ACTIVE);
 
             skillsRepository.save(newSkill);
+
             if(newSkill.getId()>0){
                 response.setSkillsDTO(Converter.convertSkillToSkillDTO(newSkill));
                 response.setStatusCode(200);
@@ -55,15 +56,20 @@ public class SkillsService {
     public Response getAllSkills() {
         Response response = new Response();
         try {
-            List<Skills> skillsList = skillsRepository.findAll();
+            List<Skills> skillsList = skillsRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
             List<SkillsDTO> skillsDTOList = skillsList
                     .stream()
                     .map(Converter::convertSkillToSkillDTO)
                     .collect(Collectors.toList());
-
-            response.setSkillsDTOList(skillsDTOList);
-            response.setStatusCode(200);
-            response.setMessage("Skills fetched successfully");
+            if(!skillsDTOList.isEmpty()){
+                response.setSkillsDTOList(skillsDTOList);
+                response.setStatusCode(200);
+                response.setMessage("Skills fetched successfully");
+            }else{
+                response.setSkillsDTOList(null);
+                response.setStatusCode(400);
+                response.setMessage("No data found");
+            }
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -79,13 +85,17 @@ public class SkillsService {
     public Response getSkillById(Long id) {
         Response response = new Response();
         try {
-            Skills skill = skillsRepository.findById(id)
-                    .orElseThrow(() -> new OurException("Skill not found"));
-            SkillsDTO skillsDTO = Converter.convertSkillToSkillDTO(skill);
-
-            response.setSkillsDTO(skillsDTO);
-            response.setStatusCode(200);
-            response.setMessage("Skill fetched successfully");
+            Skills skill = skillsRepository.findByIdAndAvailableStatus(id, AvailableStatus.ACTIVE);
+            if(skill!=null){
+                SkillsDTO skillsDTO = Converter.convertSkillToSkillDTO(skill);
+                response.setSkillsDTO(skillsDTO);
+                response.setStatusCode(200);
+                response.setMessage("Skill fetched successfully");
+            }else{
+                response.setSkillsDTO(null);
+                response.setStatusCode(400);
+                response.setMessage("No data found");
+            }
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -101,13 +111,18 @@ public class SkillsService {
     public Response findSkillByNName(String skillName) {
         Response response = new Response();
         try {
-            Skills skill = skillsRepository.findBySkillName(skillName)
-                    .orElseThrow(() -> new OurException("Skill not found"));
-            SkillsDTO skillsDTO = Converter.convertSkillToSkillDTO(skill);
+            Skills skill = skillsRepository.findBySkillName(skillName, AvailableStatus.ACTIVE);
 
-            response.setSkillsDTO(skillsDTO);
-            response.setStatusCode(200);
-            response.setMessage("Skill fetched successfully");
+            if(skill !=null){
+                SkillsDTO skillsDTO = Converter.convertSkillToSkillDTO(skill);
+                response.setSkillsDTO(skillsDTO);
+                response.setStatusCode(200);
+                response.setMessage("Skill fetched successfully");
+            }else{
+                response.setSkillsDTO(null);
+                response.setStatusCode(400);
+                response.setMessage("No data found");
+            }
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -124,13 +139,8 @@ public class SkillsService {
         Response response = new Response();
         try {
             Skills skill = skillsRepository.findById(id).orElseThrow(() -> new OurException("Skill not found"));
-
-            if (skillsRepository.findBySkillName(skillsDTO.getSkillName()).isPresent()) {
-                throw new OurException("Name already exists");
-            }
             skill.setSkillName(skillsDTO.getSkillName());
             skill.setSkillDescription(skillsDTO.getSkillDescription());
-
             skillsRepository.save(skill);
 
             response.setSkillsDTO(Converter.convertSkillToSkillDTO(skill));
@@ -152,7 +162,6 @@ public class SkillsService {
         Response response = new Response();
         try {
             Skills skill = skillsRepository.findById(id).orElseThrow(() -> new OurException("Skill not found"));
-
             skill.setAvailableStatus(AvailableStatus.DELETED);
             skillsRepository.save(skill);
 

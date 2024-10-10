@@ -19,4 +19,6 @@ public interface MentorsRepository extends JpaRepository<Mentors, Long>{
     List<Mentors> findByAvailableStatus(AvailableStatus availableStatus);
 
     Mentors findByIdAndAvailableStatus(Long id, AvailableStatus availableStatus);
+
+    Mentors findByMentorCodeAndAvailableStatus(String mentorCode, AvailableStatus availableStatus);
 }

@@ -29,6 +29,12 @@ public class ClassService {
     @Autowired
     private SemesterRepository semesterRepository;
 
+    @Autowired
+    private MentorsRepository mentorsRepository;
+
+    @Autowired
+    private StudentsRepository studentsRepository;
+
     public Response createClass(ClassDTO inputRequest) {
         Response response = new Response();
         try {

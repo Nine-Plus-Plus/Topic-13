@@ -191,17 +191,21 @@ public class ClassService {
                 response.setMessage("No class in the database");
                 return response;
             }
+
+            // Kiểm tra nếu mentor đã có lớp
             if (classRepository.findByMentorId(newClass.getMentor().getId()).isPresent()) {
                 throw new OurException("Mentor has already have a class");
             }
-            if (classRepository.findBySemesterId(newClass.getSemester().getId()).isPresent()) {
-                throw new OurException("Class have already existed in this semester");
-            }
 
+//            // Kiểm tra nếu lớp đã tồn tại trong học kỳ này
+//            if (classRepository.findBySemesterId(newClass.getSemester().getId()).isPresent()) {
+//                throw new OurException("Class has already existed in this semester");
+//            }
+
+            // Cập nhật các thông tin khác của class ngoại trừ students
             presentClass.setClassName(newClass.getClassName());
-            presentClass.setSemester(presentClass.getSemester());
+            presentClass.setSemester(newClass.getSemester());
             presentClass.setMentor(newClass.getMentor());
-            presentClass.setStudents(newClass.getStudents());
 
             classRepository.save(presentClass);
 
@@ -239,6 +243,7 @@ public class ClassService {
         }
         return response;
     }
+
 
     public Response getUnassignedMentors() {
         Response response = new Response();

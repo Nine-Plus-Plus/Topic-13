@@ -18,7 +18,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.commons.logging.impl.AvalonLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -130,16 +129,27 @@ public class GroupService {
         return response;
     }
     
-    public Response updateGroup(GroupDTO inputRequest){
+    public Response updateGroup(Long id, Group newGroup){
         Response response = new Response();
         try{
+            Group presentGroup = groupRepository.findById(id)
+                    .orElseThrow(() -> new OurException("Cannot find group with id: " + id));
+
+            presentGroup.setGroupName(newGroup.getGroupName());
+            presentGroup.setDateUpdated(LocalDate.now());
             
+            groupRepository.save(presentGroup);
+
+            GroupDTO dto = Converter.convertGroupToGroupDTO(presentGroup);
+            response.setGroupDTO(dto);
+            response.setStatusCode(200);
+            response.setMessage("Group updated successfully");
         }catch(OurException e){
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
         }catch(Exception e){
             response.setStatusCode(500);
-            response.setMessage(e.getMessage());
+            response.setMessage("Error occurred while updating class: " + e.getMessage());
         }
         return response;
     }

@@ -1,7 +1,9 @@
 package com.project.controller;
 
+import com.project.dto.CreateStudentRequest;
 import com.project.dto.Response;
 import com.project.dto.StudentsDTO;
+import com.project.model.Users;
 import com.project.service.StudentsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +38,12 @@ public class StudentsController {
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String expertise) {
         Response response = studentsService.findStudentByNameAndExpertise(name, expertise);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @PutMapping("/admin/update-student/{id}")
+    public ResponseEntity<Response> updateStudent(@PathVariable Long id, @RequestBody CreateStudentRequest updateStudent) {
+        Response response = studentsService.updateStudent(id, updateStudent);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }

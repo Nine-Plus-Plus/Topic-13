@@ -33,7 +33,8 @@ public class Class {
     @OneToMany(mappedBy = "aClass", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Group> groups;
 
-    @OneToOne(mappedBy = "assignedClass")
+    @OneToOne
+    @JoinColumn(name = "mentor_id")
     private Mentors mentor;
 
     @Enumerated(EnumType.STRING)

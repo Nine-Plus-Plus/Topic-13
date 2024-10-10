@@ -38,12 +38,4 @@ public class StudentsController {
         Response response = studentsService.findStudentByNameAndExpertise(name, expertise);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
-
-    @GetMapping("/student/get-student-profile")
-    public ResponseEntity<Response> getStudentProfile(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-        Response response = studentsService.getStudentProfile(username);
-        return ResponseEntity.status(response.getStatusCode()).body(response);
-    }
 }

@@ -62,4 +62,10 @@ public class ClassController {
         Response response = classService.deleteClass(id);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
+
+    @GetMapping("/admin/unassigned-mentors")
+    public ResponseEntity<Response> getUnassignedMentors() {
+        Response response = classService.getUnassignedMentors();
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
 }

@@ -46,10 +46,6 @@ public class ClassService {
     @Autowired
     private StudentsRepository studentsRepository;
 
-    @Autowired
-    @Lazy
-    private ModelMapper modelMapper;
-
     public Response createClass(ClassDTO inputRequest) {
         Response response = new Response();
         try {

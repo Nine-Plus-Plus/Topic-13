@@ -56,12 +56,6 @@ public class UsersController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
     
-    @PutMapping("/admin/update-user/{id}")
-    public ResponseEntity<Response> updateUser(@PathVariable Long id, @RequestBody Users user) {
-        Response response = userService.updateUser(id, user);
-        return ResponseEntity.status(response.getStatusCode()).body(response);
-    }
-    
     @DeleteMapping("/admin/delete-user/{id}")
     public ResponseEntity<Response> deleteUser(@PathVariable Long id) {
         Response response = userService.deleteUser(id);

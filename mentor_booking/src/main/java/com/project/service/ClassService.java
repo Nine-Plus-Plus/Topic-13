@@ -1,12 +1,15 @@
 package com.project.service;
 
 import com.project.dto.ClassDTO;
+import com.project.dto.MentorsDTO;
 import com.project.dto.Response;
 import com.project.enums.AvailableStatus;
 import com.project.model.Class;
 import com.project.exception.OurException;
+import com.project.model.Mentors;
 import com.project.model.Semester;
 import com.project.repository.ClassRepository;
+import com.project.repository.MentorsRepository;
 import com.project.repository.SemesterRepository;
 import com.project.repository.StudentsRepository;
 import java.time.LocalDateTime;

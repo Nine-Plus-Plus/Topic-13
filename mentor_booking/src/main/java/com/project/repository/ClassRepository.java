@@ -7,6 +7,7 @@ import com.project.model.Class;
 import java.util.List;
 import java.util.Optional;
 
+import com.project.model.Mentors;
 import com.project.model.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

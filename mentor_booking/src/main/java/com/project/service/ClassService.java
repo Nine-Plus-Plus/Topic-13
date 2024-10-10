@@ -8,6 +8,7 @@ import com.project.dto.StudentsDTO;
 import com.project.enums.AvailableStatus;
 import com.project.model.Class;
 import com.project.exception.OurException;
+import com.project.model.Mentors;
 import com.project.model.Semester;
 import com.project.model.Students;
 import com.project.repository.ClassRepository;

@@ -1,13 +1,10 @@
 package com.project.model;
 
-
 import com.project.enums.AvailableStatus;
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 import java.util.List;
-
-import com.project.enums.AvailableStatus;
-
 import lombok.Data;
 
 @Data
@@ -21,29 +18,17 @@ public class Projects {
     @Column(name = "project_name")
     private String projectName;
     
-    @Column(name = "percentage", nullable = false)
-    private float percentage = 0; // default value set = 0
+    @Column(name = "percentage")
+    private float percentage;
     
     @Column(name = "description")
     private String description;
     
-    @Column(name = "date_created", nullable = false, updatable = false)
+    @Column(name = "date_created")
     private LocalDateTime dateCreated;
     
     @Column(name = "date_updated")
     private LocalDateTime dateUpdated;
-
-    // Tạo thời gian khi tạo mới trước khi lưu vào database (PrePersist)
-    @PrePersist
-    protected void onCreate() {
-        dateCreated = LocalDateTime.now();
-        dateUpdated = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        dateUpdated = LocalDateTime.now();
-    }
     
     @OneToMany(mappedBy = "projects", cascade = CascadeType.ALL, fetch = FetchType.LAZY)  // Thiết lập mối quan hệ OneToMany
     private List<ProjectTasks> projectTasks;

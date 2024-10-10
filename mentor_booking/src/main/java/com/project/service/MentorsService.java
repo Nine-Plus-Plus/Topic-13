@@ -122,6 +122,8 @@ public class MentorsService {
             // Cập nhật thông tin mentor
             mentorUpdate.setMentorCode(updateRequest.getMentorCode());
             mentorUpdate.setDateUpdated(LocalDate.now());
+            mentorUpdate.setStar(updateRequest.getStar());
+            mentorUpdate.setTotalTimeRemain(updateRequest.getTotalTimeRemain());
 
             // Cập nhật danh sách kỹ năng (skills)
             List<SkillsDTO> skillsListDTO = updateRequest.getSkills();

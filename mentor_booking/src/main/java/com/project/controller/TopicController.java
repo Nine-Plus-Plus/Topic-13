@@ -1,6 +1,4 @@
-/*
 
- */
 package com.project.controller;
 
 import com.project.dto.Response;
@@ -35,7 +33,7 @@ public class TopicController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
     
-    @GetMapping("/admin/get-all-topics")
+    @GetMapping("/user/get-all-topics")
     public ResponseEntity<Response> getAllTopics(){
         Response response = topicService.getAllTopics();
         return ResponseEntity.status(response.getStatusCode()).body(response);
@@ -56,6 +54,12 @@ public class TopicController {
     @DeleteMapping("/admin/delete-topic/{id}")
     public ResponseEntity<Response> deleteTopic(@PathVariable Long id){
         Response response = topicService.deleteTopic(id);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+    
+    @GetMapping("/user/get-topic-by-semester-id/{id}")
+    public ResponseEntity<Response> getTopicsBySemesterId(@PathVariable Long semesterId){
+        Response response = topicService.getTopicBySemesterId(semesterId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }

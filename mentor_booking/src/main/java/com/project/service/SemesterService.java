@@ -21,9 +21,6 @@ public class SemesterService {
     @Autowired
     private SemesterRepository semesterRepository;
 
-    @Autowired
-    private ClassRepository classRepository;
-
     public Response createSemester(SemesterDTO createRequest) {
         Response response = new Response();
         try {
@@ -39,7 +36,7 @@ public class SemesterService {
                 SemesterDTO dto = Converter.convertSemesterToSemesterDTO(semester);
                 dto.setClasses(createRequest.getClasses());
                 response.setSemesterDTO(dto);
-                response.setStatusCode(201);
+                response.setStatusCode(200);
                 response.setMessage("Semester added successfully");
             }
 

@@ -20,4 +20,7 @@ public interface ClassRepository extends JpaRepository<Class, Long>{
     @Query("SELECT c FROM Class c WHERE c.semester.id = :semesterId")
     List<Class> findClassBySemesterId(@Param("semesterId") Long semesterId);
 
+//    @Query("SELECT c FROM Class c WHERE c.class_name LIKE %:className%")
+    List<Class> findByClassNameContainingIgnoreCase(String className);
+    
 }

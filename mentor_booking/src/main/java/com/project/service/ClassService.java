@@ -1,30 +1,19 @@
 package com.project.service;
 
 import com.project.dto.ClassDTO;
-import com.project.dto.MentorsDTO;
 import com.project.dto.Response;
-import com.project.dto.SemesterDTO;
-import com.project.dto.StudentsDTO;
 import com.project.enums.AvailableStatus;
 import com.project.model.Class;
 import com.project.exception.OurException;
 import com.project.model.Semester;
-import com.project.model.Students;
 import com.project.repository.ClassRepository;
-import com.project.repository.MentorsRepository;
 import com.project.repository.SemesterRepository;
-import com.project.repository.StudentsRepository;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.project.ultis.Converter;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 /**
@@ -39,16 +28,6 @@ public class ClassService {
 
     @Autowired
     private SemesterRepository semesterRepository;
-
-    @Autowired
-    private MentorsRepository mentorsRepository;
-
-    @Autowired
-    private StudentsRepository studentsRepository;
-
-    @Autowired
-    @Lazy
-    private ModelMapper modelMapper;
 
     public Response createClass(ClassDTO inputRequest) {
         Response response = new Response();
@@ -189,7 +168,7 @@ public class ClassService {
 
             classRepository.save(presentClass);
 
-            ClassDTO dto = convertClassToClassDto(presentClass);
+            ClassDTO dto = Converter.convertClassToClassDTO(presentClass);
             response.setClassDTO(dto);
             response.setStatusCode(200);
             response.setMessage("Class updated successfully");
@@ -202,32 +181,26 @@ public class ClassService {
         }
         return response;
     }
-
-    private List<Students> convertStudentsDtoListToStudents(List<StudentsDTO> lst) {
-        List<Students> result = new ArrayList<>();
-        for (StudentsDTO dto : lst) {
-            Students student = null;
-            student = studentsRepository.findByStudentCode(dto.getStudentCode())
-                    .orElseThrow(() -> new OurException("No student in the database: " + dto.getStudentCode()));
-            if (student != null) {
-                result.add(student);
-            }
+    
+    public Response getClassesByName(String className){
+        Response response = new Response();
+        try{
+            List<Class> topicList = classRepository.findByClassNameContainingIgnoreCase(className);
+            if (topicList != null){
+                List<ClassDTO> classListDTO = topicList.stream()
+                        .map(Converter::convertClassToClassDTO)
+                        .collect(Collectors.toList());
+                response.setClassDTOList(classListDTO);
+                response.setStatusCode(200);
+                response.setMessage("Classes fetched successfully");
+            }else throw new OurException("Cannot find claases with the input: "+className);
+        }catch(OurException e){
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        }catch(Exception e){
+            response.setStatusCode(500);
+            response.setMessage("Error occurred during get all classes " + e.getMessage());
         }
-        return result;
-    }
-
-    private ClassDTO convertClassToClassDto(Class insertClass) {
-        ClassDTO classDto = new ClassDTO();
-        classDto.setClassName(insertClass.getClassName());
-        classDto.setSemester(this.modelMapper.map(insertClass.getSemester(), SemesterDTO.class));
-        classDto.setDateCreated(insertClass.getDateCreated());
-        classDto.setStudents(Arrays.asList(modelMapper.map(insertClass.getStudents(), StudentsDTO[].class)));
-        classDto.setMentor(this.modelMapper.map(insertClass.getMentor(), MentorsDTO.class));
-        return classDto;
-    }
-
-    @Bean
-    public ModelMapper modelMapper() {
-        return new ModelMapper();
+        return response;
     }
 }

@@ -32,4 +32,7 @@ public interface ClassRepository extends JpaRepository<com.project.model.Class, 
 
     @Query("SELECT c FROM Class c WHERE c.id = :id AND c.availableStatus = :availableStatus")
     Class findByIdAndAvailableStatus(@Param("id") Long id, @Param("availableStatus") AvailableStatus status);
+
+    @Query("SELECT c.mentor FROM Class c WHERE c.availableStatus = :status")
+    List<Mentors> findMentorsAssignedToClasses(@Param("status") AvailableStatus status);
 }

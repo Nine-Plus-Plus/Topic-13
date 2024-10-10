@@ -41,6 +41,7 @@ public class StudentsService {
                 response.setStatusCode(200);
                 response.setMessage("Students fetched successfully");
             }else{
+                response.setStudentsDTOList(null);
                 response.setStatusCode(400);
                 response.setMessage("No data found");
             }
@@ -65,6 +66,7 @@ public class StudentsService {
                 response.setStatusCode(200);
                 response.setMessage("Student fetched successfully");
             }else{
+                response.setStudentsDTO(null);
                 response.setStatusCode(400);
                 response.setMessage("No data found");
             }
@@ -90,6 +92,7 @@ public class StudentsService {
             } else if (expertise != null && !expertise.isEmpty()) {
                 studentsList = studentsRepository.findByExpertise(expertise, AvailableStatus.ACTIVE);
             } else {
+                response.setUsersDTOList(null);
                 response.setStatusCode(400);
                 response.setMessage("Both name and expertise cannot be empty");
                 return response;
@@ -103,6 +106,7 @@ public class StudentsService {
                 response.setStatusCode(200);
                 response.setMessage("Students fetched successfully");
             } else {
+                response.setUsersDTOList(null);
                 response.setStatusCode(400);
                 response.setMessage("No data found");
             }

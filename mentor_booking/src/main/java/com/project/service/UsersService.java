@@ -264,6 +264,7 @@ public class UsersService {
                 response.setStatusCode(200);
                 response.setMessage("Users fetched successfully");
             }else{
+                response.setUsersDTOList(null);
                 response.setMessage("No data found");
                 response.setStatusCode(400);
             }
@@ -289,6 +290,7 @@ public class UsersService {
                 response.setStatusCode(200);
                 response.setMessage("Successfully");
             }else{
+                response.setUsersDTO(null);
                 response.setMessage("No data found");
                 response.setStatusCode(400);
             }
@@ -384,6 +386,7 @@ public class UsersService {
                 response.setStatusCode(200);
                 response.setMessage("Successfully");
             }else {
+                response.setUsersDTO(null);
                 response.setStatusCode(400);
                 response.setMessage("User not found");
             }

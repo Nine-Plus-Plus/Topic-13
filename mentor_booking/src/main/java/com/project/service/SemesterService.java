@@ -73,6 +73,7 @@ public class SemesterService {
                 response.setStatusCode(200);
                 response.setMessage("Semester fetched successfully");
             }else{
+                response.setSemesterDTOList(null);
                 response.setStatusCode(400);
                 response.setMessage("No data found");
             }
@@ -97,6 +98,7 @@ public class SemesterService {
                 response.setStatusCode(200);
                 response.setMessage("Successfully");
             }else{
+                response.setSemesterDTO(null);
                 response.setStatusCode(400);
                 response.setMessage("No data found");
             }

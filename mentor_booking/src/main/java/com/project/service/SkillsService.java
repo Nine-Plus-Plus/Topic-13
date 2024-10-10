@@ -65,6 +65,7 @@ public class SkillsService {
                 response.setStatusCode(200);
                 response.setMessage("Skills fetched successfully");
             }else{
+                response.setSkillsDTOList(null);
                 response.setStatusCode(400);
                 response.setMessage("No data found");
             }
@@ -90,6 +91,7 @@ public class SkillsService {
                 response.setStatusCode(200);
                 response.setMessage("Skill fetched successfully");
             }else{
+                response.setSkillsDTO(null);
                 response.setStatusCode(400);
                 response.setMessage("No data found");
             }
@@ -116,6 +118,7 @@ public class SkillsService {
                 response.setStatusCode(200);
                 response.setMessage("Skill fetched successfully");
             }else{
+                response.setSkillsDTO(null);
                 response.setStatusCode(400);
                 response.setMessage("No data found");
             }

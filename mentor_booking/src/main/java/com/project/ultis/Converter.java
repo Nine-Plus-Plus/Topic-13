@@ -21,6 +21,17 @@ public class Converter {
         if(convertClass.getSemester() != null){
             classDTO.setSemester(convertSemesterToSemesterDTO(convertClass.getSemester()));
         }
+
+        if(convertClass.getMentor() != null){
+            Mentors mentor = new Mentors();
+            mentor.setId(convertClass.getId());
+            mentor.setMentorCode(convertClass.getMentor().getMentorCode());
+            mentor.setDateCreated(convertClass.getMentor().getDateCreated());
+            mentor.setStar(convertClass.getMentor().getStar());
+            mentor.setTotalTimeRemain(convertClass.getMentor().getTotalTimeRemain());
+            mentor.setAvailableStatus(convertClass.getMentor().getAvailableStatus());
+            classDTO.setMentor(convertMentorToMentorDTO(mentor));
+        }
         return classDTO;
     }
 

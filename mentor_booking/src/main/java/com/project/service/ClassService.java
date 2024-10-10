@@ -14,6 +14,7 @@ import com.project.repository.ClassRepository;
 import com.project.repository.MentorsRepository;
 import com.project.repository.SemesterRepository;
 import com.project.repository.StudentsRepository;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +29,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 /**
- *
  * @author Thịnh Đạt
  */
 @Service
@@ -58,15 +58,29 @@ public class ClassService {
             if (classRepository.existsByClassNameAndSemesterId(inputRequest.getClassName(), inputRequest.getSemester().getId())) {
                 throw new OurException("Class already exists in this semester");
             }
-            Semester semester = semesterRepository.findById(inputRequest.getSemester().getId())
-                    .orElseThrow(() -> new OurException("No semester in the database: " + inputRequest.getSemester().getId()));
+            Semester semester = semesterRepository.findByIdAndAvailableStatus(inputRequest.getSemester().getId(), AvailableStatus.ACTIVE);
+            if (semester == null) {
+                response.setStatusCode(400);
+                response.setMessage("No semester in the database: " + inputRequest.getSemester().getId());
+                return response;
+            }
+
+            Mentors mentor = mentorsRepository.findByIdAndAvailableStatus(inputRequest.getMentor().getId(), AvailableStatus.ACTIVE);
+            if (mentor == null) {
+                response.setStatusCode(400);
+                response.setMessage("No mentor in the database: " + inputRequest.getMentor().getId());
+                return response;
+            }
+
             Class newClass = new Class();
             newClass.setClassName(inputRequest.getClassName());
             newClass.setDateCreated(LocalDateTime.now());
             newClass.setSemester(semester);
+            newClass.setMentor(mentor);
             newClass.setAvailableStatus(AvailableStatus.ACTIVE);
             classRepository.save(newClass);
             if (newClass.getId() > 0) {
+
                 ClassDTO classDto = Converter.convertClassToClassDTO(newClass);
                 response.setClassDTO(classDto);
                 response.setStatusCode(200);
@@ -85,7 +99,7 @@ public class ClassService {
     public Response getAllClasses() {
         Response response = new Response();
         try {
-            List<Class> classList = classRepository.findAll();
+            List<Class> classList = classRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
             if (!classList.isEmpty()) {
                 List<ClassDTO> classListDTO = classList.stream()
                         .map(Converter::convertClassToClassDTO)
@@ -94,7 +108,11 @@ public class ClassService {
                 response.setClassDTOList(classListDTO);
                 response.setStatusCode(200);
                 response.setMessage("Classes fetched successfully");
-            } else throw new OurException("Cannot find any classes in the database");
+            } else {
+                response.setClassDTOList(null);
+                response.setStatusCode(400);
+                response.setMessage("Class not found");
+            }
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -108,7 +126,7 @@ public class ClassService {
     public Response getClassesSemesterId(Long semesterId) {
         Response response = new Response();
         try {
-            List<Class> classList = classRepository.findClassBySemesterId(semesterId);
+            List<Class> classList = classRepository.findClassBySemesterId(semesterId, AvailableStatus.ACTIVE);
             if (!classList.isEmpty()) {
                 List<ClassDTO> classListDTO = classList.stream()
                         .map(Converter::convertClassToClassDTO)
@@ -117,7 +135,11 @@ public class ClassService {
                 response.setClassDTOList(classListDTO);
                 response.setStatusCode(200);
                 response.setMessage("Classes fetched successfully");
-            } else throw new OurException("Cannot find class with semester id: "+semesterId);
+            } else {
+                response.setClassDTOList(null);
+                response.setStatusCode(400);
+                response.setMessage("Class not found");
+            }
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -131,14 +153,16 @@ public class ClassService {
     public Response getClassById(Long id) {
         Response response = new Response();
         try {
-            Class findClass = classRepository.findById(id).orElse(null);
+            Class findClass = classRepository.findByIdAndAvailableStatus(id, AvailableStatus.ACTIVE);
             if (findClass != null) {
                 ClassDTO dto = Converter.convertClassToClassDTO(findClass);
                 response.setClassDTO(dto);
                 response.setStatusCode(200);
                 response.setMessage("Successfully");
             } else {
-                throw new OurException("Cannot find class");
+                response.setClassDTO(null);
+                response.setStatusCode(400);
+                response.setMessage("Class not found");
             }
         } catch (OurException e) {
             response.setStatusCode(400);
@@ -156,6 +180,7 @@ public class ClassService {
             Class deletedClass = classRepository.findById(id)
                     .orElseThrow(() -> new OurException("Cannot find class with id: " + id));
             deletedClass.setAvailableStatus(AvailableStatus.DELETED);
+            deletedClass.setMentor(null);
             classRepository.save(deletedClass);
             response.setStatusCode(200);
             response.setMessage("Class deleted successfully");
@@ -172,9 +197,12 @@ public class ClassService {
     public Response updateClass(Long id, Class newClass) {
         Response response = new Response();
         try {
-            Class presentClass = classRepository.findById(id)
-                    .orElseThrow(() -> new OurException("Cannot find class with id: " + id));
-
+            Class presentClass = classRepository.findByIdAndAvailableStatus(id, AvailableStatus.ACTIVE);
+            if (presentClass == null) {
+                response.setStatusCode(400);
+                response.setMessage("No class in the database");
+                return response;
+            }
             if (classRepository.findByMentorId(newClass.getMentor().getId()).isPresent()) {
                 throw new OurException("Mentor has already have a class");
             }
@@ -189,7 +217,7 @@ public class ClassService {
 
             classRepository.save(presentClass);
 
-            ClassDTO dto = convertClassToClassDto(presentClass);
+            ClassDTO dto = Converter.convertClassToClassDTO(presentClass);
             response.setClassDTO(dto);
             response.setStatusCode(200);
             response.setMessage("Class updated successfully");
@@ -203,31 +231,41 @@ public class ClassService {
         return response;
     }
 
-    private List<Students> convertStudentsDtoListToStudents(List<StudentsDTO> lst) {
-        List<Students> result = new ArrayList<>();
-        for (StudentsDTO dto : lst) {
-            Students student = null;
-            student = studentsRepository.findByStudentCode(dto.getStudentCode())
-                    .orElseThrow(() -> new OurException("No student in the database: " + dto.getStudentCode()));
-            if (student != null) {
-                result.add(student);
+    public Response getUnassignedMentors() {
+        Response response = new Response();
+        try {
+            // Lấy tất cả mentor đang hoạt động
+            List<Mentors> allMentors = mentorsRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
+
+            // Lấy danh sách mentor đã được gán vào lớp
+            List<Mentors> assignedMentors = classRepository.findMentorsAssignedToClasses(AvailableStatus.ACTIVE);
+
+            // Tìm các mentor chưa được gán vào lớp
+            List<Mentors> unassignedMentors = allMentors.stream()
+                    .filter(mentor -> !assignedMentors.contains(mentor))
+                    .collect(Collectors.toList());
+
+            // Chuyển đổi sang DTO nếu cần thiết
+            List<MentorsDTO> unassignedMentorsDTOs = unassignedMentors.stream()
+                    .map(Converter::convertMentorToMentorDTO)
+                    .collect(Collectors.toList());
+
+            if(!unassignedMentorsDTOs.isEmpty()){
+                response.setMentorsDTOList(unassignedMentorsDTOs);
+                response.setStatusCode(200);
+                response.setMessage("Unassigned mentors fetched successfully");
+            }else{
+                response.setMentorsDTOList(null);
+                response.setStatusCode(400);
+                response.setMessage("Class not found");
             }
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred while updating class: " + e.getMessage());
         }
-        return result;
-    }
-
-    private ClassDTO convertClassToClassDto(Class insertClass) {
-        ClassDTO classDto = new ClassDTO();
-        classDto.setClassName(insertClass.getClassName());
-        classDto.setSemester(this.modelMapper.map(insertClass.getSemester(), SemesterDTO.class));
-        classDto.setDateCreated(insertClass.getDateCreated());
-        classDto.setStudents(Arrays.asList(modelMapper.map(insertClass.getStudents(), StudentsDTO[].class)));
-        classDto.setMentor(this.modelMapper.map(insertClass.getMentor(), MentorsDTO.class));
-        return classDto;
-    }
-
-    @Bean
-    public ModelMapper modelMapper() {
-        return new ModelMapper();
+        return response;
     }
 }

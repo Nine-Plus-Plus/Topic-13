@@ -34,26 +34,26 @@ public class GroupController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
     
-    @GetMapping("/user/get-all-topics")
-    public ResponseEntity<Response> getAllClass(){
+    @GetMapping("/user/get-all-groups")
+    public ResponseEntity<Response> getAllGroups(){
         Response response = groupService.getAllGroups();
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
     
     @GetMapping("/user/get-group-by-id/{id}")
-    public ResponseEntity<Response> getClassById(@PathVariable Long id){
+    public ResponseEntity<Response> getGroupById(@PathVariable Long id){
         Response response = groupService.getGroupById(id);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
     
     @PutMapping("/student/update-group/{id}")
-    public ResponseEntity<Response> updateClass(@PathVariable Long id, @RequestBody Group newGroup){
+    public ResponseEntity<Response> updateGroup(@PathVariable Long id, @RequestBody Group newGroup){
         Response response = groupService.updateGroup(id, newGroup);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
     
     @DeleteMapping("/student/delete-group/{id}")
-    public ResponseEntity<Response> deleteClass(@PathVariable Long id){
+    public ResponseEntity<Response> deleteGroup(@PathVariable Long id){
         Response response = groupService.deleteGroup(id);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }

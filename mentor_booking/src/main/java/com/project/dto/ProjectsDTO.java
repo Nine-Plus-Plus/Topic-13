@@ -19,4 +19,5 @@ public class ProjectsDTO {
     private List<ProjectTasksDTO> projectTasks; //one to many relationship with project tasks, foreign key
     private TopicDTO topic; //foreign key, many to one relationship with topic, user chooses from a list of topics
     private GroupDTO group; //foreign key, 
+    private String status; //soft delete purpose, default value is ACTIVE
 }

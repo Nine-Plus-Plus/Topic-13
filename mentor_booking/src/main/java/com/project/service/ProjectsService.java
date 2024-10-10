@@ -2,6 +2,7 @@ package com.project.service;
 
 import com.project.dto.ProjectsDTO;
 import com.project.dto.Response;
+import com.project.enums.AvailableStatus;
 import com.project.exception.OurException;
 import com.project.model.Projects;
 import com.project.model.Topic;
@@ -54,6 +55,7 @@ public class ProjectsService {
             project.setPercentage(0); // Set percentage to 0 when creating a new project
             project.setDateCreated(LocalDateTime.now()); // Set dateCreated to current time
             project.setDateUpdated(LocalDateTime.now()); // Set dateUpdated to current time
+            project.setStatus(AvailableStatus.ACTIVE); // Set status to ACTIVE when creating a new project
 
             // Fetch and set the topic
             Topic topic = topicRepository.findById(createRequest.getTopic().getId())
@@ -122,7 +124,6 @@ public class ProjectsService {
         try {
             Projects project = projectsRepository.findById(id)
                     .orElseThrow(() -> new OurException("Project not found"));
-
             if (updateRequest.getProjectName() != null) {
                 project.setProjectName(updateRequest.getProjectName());
             }
@@ -134,7 +135,6 @@ public class ProjectsService {
             }
             project.setDateUpdated(LocalDateTime.now()); // Set dateUpdated to current time
             projectsRepository.save(project);
-
             ProjectsDTO dto = modelMapper.map(project, ProjectsDTO.class);
             response.setProjectsDTO(dto); // Set single ProjectsDTO object
             response.setStatusCode(200);
@@ -154,9 +154,10 @@ public class ProjectsService {
         try {
             Projects project = projectsRepository.findById(id)
                     .orElseThrow(() -> new OurException("Project not found"));
-            projectsRepository.delete(project);
+            project.setStatus(AvailableStatus.DELETED); // Set status to DELETED
+            projectsRepository.save(project);
             response.setStatusCode(200);
-            response.setMessage("Project deleted successfully");
+            response.setMessage("Project marked as deleted successfully");
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());

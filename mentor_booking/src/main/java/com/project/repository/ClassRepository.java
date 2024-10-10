@@ -30,4 +30,8 @@ public interface ClassRepository extends JpaRepository<Class, Long>{
 
     @Query("SELECT c.mentor FROM Class c WHERE c.availableStatus = :status")
     List<Mentors> findMentorsAssignedToClasses(@Param("status") AvailableStatus status);
+
+//    @Query("SELECT c FROM Class c WHERE c.class_name LIKE %:className%")
+    List<Class> findByClassNameContainingIgnoreCase(String className);
+
 }

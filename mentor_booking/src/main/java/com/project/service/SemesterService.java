@@ -24,9 +24,6 @@ public class SemesterService {
     @Autowired
     private SemesterRepository semesterRepository;
 
-    @Autowired
-    private ClassRepository classRepository;
-
     public Response createSemester(SemesterDTO createRequest) {
         Response response = new Response();
         try {

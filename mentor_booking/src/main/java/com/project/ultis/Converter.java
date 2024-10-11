@@ -24,7 +24,7 @@ public class Converter {
         }
         if(convertClass.getMentor() != null){
             Mentors mentor = new Mentors();
-            mentor.setId(convertClass.getId());
+            mentor.setId(convertClass.getMentor().getId());
             mentor.setMentorCode(convertClass.getMentor().getMentorCode());
             mentor.setDateCreated(convertClass.getMentor().getDateCreated());
             mentor.setStar(convertClass.getMentor().getStar());

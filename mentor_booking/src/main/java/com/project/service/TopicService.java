@@ -162,8 +162,8 @@ public class TopicService {
             presentTopic.setRequirement(newTopic.getRequirement());
             presentTopic.setNonFunctionRequirement(newTopic.getNonFunctionRequirement());
             presentTopic.setDateUpdated(LocalDateTime.now());
-            presentTopic.setMentor(newTopic.getMentor());
-            presentTopic.setSemester(newTopic.getSemester());
+            presentTopic.setMentor(mentor);
+            presentTopic.setSemester(semester);
 
             topicRepository.save(presentTopic);
 

@@ -14,8 +14,10 @@ import com.project.repository.UsersRepository;
 import com.project.ultis.Converter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,8 +39,9 @@ public class StudentsService {
         Response response = new Response();
         try {
             List<Students> list = studentsRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
+            List<StudentsDTO> listDTO = new ArrayList<>();
             if (!list.isEmpty()) {
-                List<StudentsDTO> listDTO = list.stream()
+                listDTO = list.stream()
                         .map(Converter::convertStudentToStudentDTO)
                         .collect(Collectors.toList());
 
@@ -46,7 +49,7 @@ public class StudentsService {
                 response.setStatusCode(200);
                 response.setMessage("Students fetched successfully");
             } else {
-                response.setStudentsDTOList(null);
+                response.setStudentsDTOList(listDTO);
                 response.setStatusCode(400);
                 response.setMessage("No data found");
             }
@@ -65,13 +68,14 @@ public class StudentsService {
         Response response = new Response();
         try {
             Students student = studentsRepository.findByIdAndAvailableStatus(id, AvailableStatus.ACTIVE);
+            StudentsDTO studentsDTO = new StudentsDTO();
             if (student != null) {
-                StudentsDTO studentsDTO = Converter.convertStudentToStudentDTO(student);
+                studentsDTO = Converter.convertStudentToStudentDTO(student);
                 response.setStudentsDTO(studentsDTO);
                 response.setStatusCode(200);
                 response.setMessage("Student fetched successfully");
             } else {
-                response.setStudentsDTO(null);
+                response.setStudentsDTO(studentsDTO);
                 response.setStatusCode(400);
                 response.setMessage("No data found");
             }
@@ -89,21 +93,30 @@ public class StudentsService {
         Response response = new Response();
         try {
             List<Students> studentsList;
+            List<StudentsDTO> listDTO = new ArrayList<>();
+//            // Kiểm tra classId và truy vấn theo name và expertise trong class
+//            if (classId == null) {
+//                response.setStudentsDTOList(null);
+//                response.setStatusCode(400);
+//                response.setMessage("Class ID cannot be null");
+//                return response;
+//            }
 
             if (name != null && !name.isEmpty() && expertise != null && !expertise.isEmpty()) {
                 studentsList = studentsRepository.findStudentByUserFullNameAndExpertise(name, expertise, AvailableStatus.ACTIVE);
             } else if (name != null && !name.isEmpty()) {
-                studentsList = studentsRepository.findStudentByUserFullName(name, AvailableStatus.ACTIVE);
+                studentsList = studentsRepository.findStudentByUserFullName( name, AvailableStatus.ACTIVE);
             } else if (expertise != null && !expertise.isEmpty()) {
                 studentsList = studentsRepository.findByExpertise(expertise, AvailableStatus.ACTIVE);
             } else {
-                response.setUsersDTOList(null);
+                response.setStudentsDTOList(null);
                 response.setStatusCode(400);
                 response.setMessage("Both name and expertise cannot be empty");
                 return response;
             }
+
             if (!studentsList.isEmpty()) {
-                List<StudentsDTO> listDTO = studentsList.stream()
+                listDTO = studentsList.stream()
                         .map(Converter::convertStudentToStudentDTO)
                         .collect(Collectors.toList());
 
@@ -111,7 +124,7 @@ public class StudentsService {
                 response.setStatusCode(200);
                 response.setMessage("Students fetched successfully");
             } else {
-                response.setUsersDTOList(null);
+                response.setStudentsDTOList(listDTO);
                 response.setStatusCode(400);
                 response.setMessage("No data found");
             }
@@ -152,7 +165,7 @@ public class StudentsService {
             updateUser.setDateUpdated(LocalDateTime.now());
             updateUser.setAvailableStatus(AvailableStatus.ACTIVE);
             usersRepository.save(updateUser);
-                // Tạo đối tượng Student mới
+            // Tạo đối tượng Student mới
             // Tìm kiếm và cập nhật Students
             Students updateStudent = studentsRepository.findByUser_Id(updateUser.getId());
             if (updateStudent == null) {

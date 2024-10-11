@@ -1,6 +1,7 @@
 
 package com.project.repository;
 
+import com.project.enums.AvailableStatus;
 import com.project.model.Topic;
 import java.util.List;
 import java.util.Optional;
@@ -13,11 +14,14 @@ import org.springframework.stereotype.Repository;
 public interface TopicRepository extends JpaRepository<Topic, Long>{
     Optional<Topic> findByTopicName(String topicName);
     
-    @Query("SELECT c FROM Topic c WHERE c.semester.id = :semesterId")
-    List<Topic> findTopicsBySemesterId(@Param("semesterId") Long semesterId);
+    @Query("SELECT t FROM Topic t WHERE t.semester.id = :semesterId and t.availableStatus = :availableStatus")
+    List<Topic> findTopicsBySemesterIdAndAvailableStatus(@Param("semesterId") Long semesterId, 
+            @Param("availableStatus") AvailableStatus availableStatus);
     
 //    @Query("SELECT t FROM Topic t WHERE t.topic_name LIKE %:topicName%")
-    List<Topic> findByTopicNameContainingIgnoreCase(String topicName);
+    List<Topic> findByTopicNameContainingIgnoreCaseAndAvailableStatus(String topicName, AvailableStatus availableStatus);
     
+    List<Topic> findByAvailableStatus(AvailableStatus availableStatus);
     
+    Topic findByIdAndAvailableStatus(Long id, AvailableStatus availableStatus);
 }

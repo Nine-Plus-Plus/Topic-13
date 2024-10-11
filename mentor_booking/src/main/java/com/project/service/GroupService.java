@@ -84,7 +84,7 @@ public class GroupService {
     public Response getAllGroups(){
         Response response = new Response();
         try{
-            List<Group> groupList = groupRepository.findAll();
+            List<Group> groupList = groupRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
             List<GroupDTO> groupListDTO = null;
             if (groupList != null) {
                 groupListDTO = groupList.stream()
@@ -110,7 +110,7 @@ public class GroupService {
     public Response getGroupById(Long id){
         Response response = new Response();
         try{
-            Group findGroup = groupRepository.findById(id).orElse(null);
+            Group findGroup = groupRepository.findByIdAndAvailableStatus(id, AvailableStatus.ACTIVE);
             GroupDTO dto = Converter.convertGroupToGroupDTO(findGroup);
             response.setGroupDTO(dto);
             if (findGroup != null) {

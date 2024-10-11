@@ -70,9 +70,6 @@ public class TopicService {
 
             if (topic.getId() > 0) {
                 TopicDTO dto = Converter.convertTopicToTopicDTO(topic);
-                dto.setProjectDTO(createRequest.getProjectDTO());
-                dto.setMentorsDTO(createRequest.getMentorsDTO());
-                dto.setSemesterDTO(createRequest.getSemesterDTO());
                 response.setTopicDTO(dto);
                 response.setStatusCode(200);
                 response.setMessage("Topic added successfully");
@@ -92,7 +89,7 @@ public class TopicService {
     public Response getAllTopics() {
         Response response = new Response();
         try {
-            List<Topic> topicLists = topicRepository.findAll();
+            List<Topic> topicLists = topicRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
             List<TopicDTO> topicListDTO = null;
             if (topicLists != null) {
                 topicListDTO = topicLists.stream()
@@ -118,14 +115,15 @@ public class TopicService {
     public Response getTopicById(Long id) {
         Response response = new Response();
         try {
-            Topic findTopic = topicRepository.findById(id).orElse(null);
+            Topic findTopic = topicRepository.findByIdAndAvailableStatus(id, AvailableStatus.ACTIVE);
             TopicDTO dto = Converter.convertTopicToTopicDTO(findTopic);
             response.setTopicDTO(dto);
             if (findTopic != null) {
                 response.setStatusCode(200);
                 response.setMessage("Successfully");
             } else {
-                throw new OurException("Cannot find topic");
+                response.setStatusCode(400);
+                response.setMessage("No data found");
             }
         } catch (OurException e) {
             response.setStatusCode(400);
@@ -196,7 +194,7 @@ public class TopicService {
     public Response getTopicBySemesterId(Long semesterId) {
         Response response = new Response();
         try {
-            List<Topic> topicList = topicRepository.findTopicsBySemesterId(semesterId);
+            List<Topic> topicList = topicRepository.findTopicsBySemesterIdAndAvailableStatus(semesterId, AvailableStatus.ACTIVE);
             if (topicList != null) {
                 List<TopicDTO> topicListDTO = topicList.stream()
                         .map(Converter::convertTopicToTopicDTO)
@@ -220,7 +218,8 @@ public class TopicService {
     public Response getTopicByName(String topicName) {
         Response response = new Response();
         try {
-            List<Topic> topicList = topicRepository.findByTopicNameContainingIgnoreCase(topicName);
+            List<Topic> topicList = topicRepository.findByTopicNameContainingIgnoreCaseAndAvailableStatus
+                                    (topicName, AvailableStatus.ACTIVE);
             if (topicList != null) {
                 List<TopicDTO> topicListDTO = topicList.stream()
                         .map(Converter::convertTopicToTopicDTO)

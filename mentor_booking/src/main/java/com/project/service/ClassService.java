@@ -11,7 +11,6 @@ import com.project.model.Semester;
 import com.project.repository.ClassRepository;
 import com.project.repository.MentorsRepository;
 import com.project.repository.SemesterRepository;
-import com.project.repository.StudentsRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,6 +30,9 @@ public class ClassService {
 
     @Autowired
     private SemesterRepository semesterRepository;
+    
+    @Autowired
+    private MentorsRepository mentorsRepository;
 
     @Autowired
     private MentorsRepository mentorsRepository;

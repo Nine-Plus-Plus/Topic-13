@@ -3,6 +3,7 @@ package com.project.ultis;
 import com.project.model.*;
 import com.project.model.Class;
 import com.project.dto.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -12,7 +13,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class Converter {
-    
+
     public static ClassDTO convertClassToClassDTO(Class convertClass) {
         ClassDTO classDTO = new ClassDTO();
         classDTO.setId(convertClass.getId());
@@ -20,10 +21,10 @@ public class Converter {
         classDTO.setDateCreated(convertClass.getDateCreated());
         classDTO.setAvailableStatus(convertClass.getAvailableStatus());
 
-        if(convertClass.getSemester() != null){
+        if (convertClass.getSemester() != null) {
             classDTO.setSemester(convertSemesterToSemesterDTO(convertClass.getSemester()));
         }
-        if(convertClass.getMentor() != null){
+        if (convertClass.getMentor() != null) {
             Mentors mentor = new Mentors();
             mentor.setId(convertClass.getId());
             mentor.setMentorCode(convertClass.getMentor().getMentorCode());
@@ -36,7 +37,7 @@ public class Converter {
 
         return classDTO;
     }
-    
+
     public static SemesterDTO convertSemesterToSemesterDTO(Semester convertSemester) {
         SemesterDTO semesterDTO = new SemesterDTO();
         semesterDTO.setId(convertSemester.getId());
@@ -45,7 +46,7 @@ public class Converter {
         semesterDTO.setAvailableStatus(convertSemester.getAvailableStatus());
         return semesterDTO;
     }
-    
+
     public static MentorsDTO convertMentorToMentorDTO(Mentors convertMentor) {
         MentorsDTO mentorsDTO = new MentorsDTO();
         mentorsDTO.setId(convertMentor.getId());
@@ -57,14 +58,14 @@ public class Converter {
 
         mentorsDTO.setAvailableStatus(convertMentor.getAvailableStatus());
 
-        if(convertMentor.getAssignedClass() != null){
+        if (convertMentor.getAssignedClass() != null) {
             mentorsDTO.setAssignedClass(convertClassToClassDTO(convertMentor.getAssignedClass()));
         }
-        
+
         if (convertMentor.getUser() != null) {
             mentorsDTO.setUser(convertUserToUserDTO(convertMentor.getUser()));
         }
-        if(convertMentor.getSkills() != null){
+        if (convertMentor.getSkills() != null) {
             List<SkillsDTO> skillsDTOList = convertMentor.getSkills().stream()
                     .map(Converter::convertSkillToSkillDTO)
                     .collect(Collectors.toList());
@@ -72,7 +73,7 @@ public class Converter {
         }
         return mentorsDTO;
     }
-    
+
     public static StudentsDTO convertStudentToStudentDTO(Students convertStudent) {
         StudentsDTO studentsDTO = new StudentsDTO();
         studentsDTO.setId(convertStudent.getId());
@@ -84,14 +85,14 @@ public class Converter {
         if (convertStudent.getAClass() != null) {
             studentsDTO.setAClass(convertClassToClassDTO(convertStudent.getAClass()));
         }
-        
+
         if (convertStudent.getUser() != null) {
             studentsDTO.setUser(convertUserToUserDTO(convertStudent.getUser()));
         }
         studentsDTO.setAvailableStatus(convertStudent.getAvailableStatus());
         return studentsDTO;
     }
-    
+
     public static UsersDTO convertUserToUserDTO(Users convertUsers) {
         UsersDTO userDTO = new UsersDTO();
         userDTO.setId(convertUsers.getId());
@@ -109,11 +110,11 @@ public class Converter {
         roleDTO.setId(convertUsers.getRole().getId());
         roleDTO.setRoleName(convertUsers.getRole().getRoleName());
         userDTO.setRole(roleDTO);
-        
+
         userDTO.setAvailableStatus(convertUsers.getAvailableStatus());
         return userDTO;
     }
-    
+
     public static SkillsDTO convertSkillToSkillDTO(Skills convertSkill) {
         SkillsDTO skillsDTO = new SkillsDTO();
         skillsDTO.setId(convertSkill.getId());
@@ -131,7 +132,7 @@ public class Converter {
         skill.setAvailableStatus(skillsDTO.getAvailableStatus());
         return skill;
     }
-    
+
     public static TopicDTO convertTopicToTopicDTO(Topic convertTopic) {
         TopicDTO topicDTO = new TopicDTO();
         topicDTO.setId(convertTopic.getId());
@@ -142,14 +143,14 @@ public class Converter {
         topicDTO.setActor(convertTopic.getActor());
         topicDTO.setNonFunctionRequirement(convertTopic.getNonFunctionRequirement());
         topicDTO.setRequirement(convertTopic.getRequirement());
-        
+
         topicDTO.setSemesterDTO(convertSemesterToSemesterDTO(convertTopic.getSemester()));
         topicDTO.setMentorsDTO(convertMentorToMentorDTO(convertTopic.getMentor()));
-        
+
         topicDTO.setAvailableStatus(convertTopic.getAvailableStatus());
         return topicDTO;
     }
-    
+
     public static GroupDTO convertGroupToGroupDTO(Group convertGroup) {
         GroupDTO groupDTO = new GroupDTO();
         StudentsDTO studentsDTO = new StudentsDTO();
@@ -158,7 +159,7 @@ public class Converter {
         groupDTO.setGroupName(convertGroup.getGroupName());
         groupDTO.setTotalPoint(convertGroup.getTotalPoint());
         groupDTO.setDateCreated(convertGroup.getDateCreated());
-        
+
         for (Students student : convertGroup.getStudents()) {
             studentsDTO = convertStudentToStudentDTO(student);
             studentsDTO.setAClass(null);
@@ -168,7 +169,7 @@ public class Converter {
         }
         groupDTO.setStudents(studentsListDTO);
         groupDTO.setClassDTO(convertClassToClassDTO(convertGroup.getAClass()));
-        
+
         groupDTO.setAvailableStatus(convertGroup.getAvailableStatus());
         return groupDTO;
     }

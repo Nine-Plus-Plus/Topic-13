@@ -4,6 +4,7 @@ package com.project.repository;
 
 import com.project.enums.AvailableStatus;
 import com.project.model.Class;
+import com.project.model.Mentors;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,7 +13,6 @@ import com.project.model.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
 public interface ClassRepository extends JpaRepository<Class, Long>{
     Optional<Class> findByMentorId(Long mentorId);

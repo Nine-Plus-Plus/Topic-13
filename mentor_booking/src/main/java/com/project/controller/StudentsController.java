@@ -36,8 +36,9 @@ public class StudentsController {
     @GetMapping("/admin/get-student-by-name-or-expertise")
     public ResponseEntity<Response> getStudentByNameAndExpertise(
             @RequestParam(required = false) String name,
-            @RequestParam(required = false) String expertise) {
-        Response response = studentsService.findStudentByNameAndExpertise(name, expertise);
+            @RequestParam(required = false) String expertise,
+            @RequestParam(required = false) Long classId) {
+        Response response = studentsService.findStudentByNameAndExpertise(classId, name, expertise);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 

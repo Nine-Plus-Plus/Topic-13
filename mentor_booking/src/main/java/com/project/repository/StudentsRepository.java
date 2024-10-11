@@ -18,17 +18,29 @@ public interface StudentsRepository extends JpaRepository<Students, Long>{
     Optional<Students> findByStudentCode(String studentCode);
     Students findByUser_Id(Long userId);
 
-    @Query("SELECT s FROM Students s WHERE s.user.fullName LIKE %:name% AND s.expertise LIKE :expertise AND s.availableStatus = :availableStatus")
-    List<Students> findStudentByUserFullNameAndExpertise(
+    @Query("SELECT s FROM Students s WHERE s.user.fullName LIKE %:name% AND s.expertise LIKE :expertise AND s.availableStatus = :availableStatus AND s.aClass.id = :classId")
+    List<Students> findStudentByUserFullNameAndExpertiseAndClassId(
             @Param("name") String name,
             @Param("expertise") String expertise,
+            @Param("availableStatus") AvailableStatus status,
+            @Param("classId") Long classId);
+
+    @Query("SELECT s FROM Students s WHERE s.user.fullName LIKE %:name% AND s.availableStatus = :availableStatus AND s.aClass.id = :classId")
+    List<Students> findStudentByUserFullNameAndClassId(
+            @Param("name") String name,
+            @Param("availableStatus") AvailableStatus status,
+            @Param("classId") Long classId);
+
+    @Query("SELECT s FROM Students s WHERE s.expertise LIKE :expertise AND s.availableStatus = :availableStatus AND s.aClass.id = :classId")
+    List<Students> findByExpertiseAndClassId(
+            @Param("expertise") String expertise,
+            @Param("availableStatus") AvailableStatus status,
+            @Param("classId") Long classId);
+
+    @Query("SELECT s FROM Students s WHERE s.aClass.id = :classId AND s.availableStatus = :availableStatus")
+    List<Students> findStudentByClassId(
+            @Param("classId") Long classId,
             @Param("availableStatus") AvailableStatus status);
-
-    @Query("SELECT s FROM Students s WHERE s.user.fullName LIKE %:name% AND s.availableStatus = :availableStatus")
-    List<Students> findStudentByUserFullName(@Param("name") String name, @Param("availableStatus") AvailableStatus status);
-
-    @Query("SELECT s FROM Students s WHERE s.expertise LIKE :expertise AND s.availableStatus = :availableStatus")
-    List<Students> findByExpertise(@Param("expertise") String expertise, @Param("availableStatus") AvailableStatus status);
 
     List<Students> findByAvailableStatus(AvailableStatus status);
 

@@ -89,31 +89,40 @@ public class StudentsService {
         return response;
     }
 
-    public Response findStudentByNameAndExpertise(String name, String expertise) {
+    public Response findStudentByNameAndExpertise(Long classId, String name, String expertise) {
         Response response = new Response();
         try {
             List<Students> studentsList;
             List<StudentsDTO> listDTO = new ArrayList<>();
-//            // Kiểm tra classId và truy vấn theo name và expertise trong class
-//            if (classId == null) {
-//                response.setStudentsDTOList(null);
-//                response.setStatusCode(400);
-//                response.setMessage("Class ID cannot be null");
-//                return response;
-//            }
-
-            if (name != null && !name.isEmpty() && expertise != null && !expertise.isEmpty()) {
-                studentsList = studentsRepository.findStudentByUserFullNameAndExpertise(name, expertise, AvailableStatus.ACTIVE);
-            } else if (name != null && !name.isEmpty()) {
-                studentsList = studentsRepository.findStudentByUserFullName( name, AvailableStatus.ACTIVE);
-            } else if (expertise != null && !expertise.isEmpty()) {
-                studentsList = studentsRepository.findByExpertise(expertise, AvailableStatus.ACTIVE);
-            } else {
+            // Kiểm tra classId và truy vấn theo name và expertise trong class
+            if (classId == null) {
                 response.setStudentsDTOList(null);
+                response.setStatusCode(400);
+                response.setMessage("Class ID cannot be null");
+                return response;
+            }
+
+            if (name == null && expertise == null) {
+                studentsList = studentsRepository.findStudentByClassId(classId, AvailableStatus.ACTIVE);
+            }
+            // Truy vấn theo cả name và expertise trong class
+            else if (name != null && !name.isEmpty() && expertise != null && !expertise.isEmpty()) {
+                studentsList = studentsRepository.findStudentByUserFullNameAndExpertiseAndClassId(name, expertise, AvailableStatus.ACTIVE, classId);
+            }
+            // Truy vấn theo name trong class
+            else if (name != null && !name.isEmpty()) {
+                studentsList = studentsRepository.findStudentByUserFullNameAndClassId(name, AvailableStatus.ACTIVE, classId);
+            }
+            // Truy vấn theo expertise trong class
+            else if (expertise != null && !expertise.isEmpty()) {
+                studentsList = studentsRepository.findByExpertiseAndClassId(expertise, AvailableStatus.ACTIVE, classId);
+            } else {
+                response.setStudentsDTOList(listDTO);
                 response.setStatusCode(400);
                 response.setMessage("Both name and expertise cannot be empty");
                 return response;
             }
+
 
             if (!studentsList.isEmpty()) {
                 listDTO = studentsList.stream()

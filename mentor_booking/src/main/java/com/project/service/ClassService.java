@@ -194,15 +194,19 @@ public class ClassService {
                 return response;
             }
 
+            // Kiểm tra mentor có tồn tại không
+            Mentors mentor = mentorsRepository.findByIdAndAvailableStatus(newClass.getMentor().getId(), AvailableStatus.ACTIVE);
+            if (mentor == null) {
+                response.setStatusCode(400);
+                response.setMessage("Mentor not found");
+                return response;
+            }
+
             // Kiểm tra nếu mentor đã có lớp
             if (classRepository.findByMentorId(newClass.getMentor().getId()).isPresent()) {
                 throw new OurException("Mentor has already have a class");
             }
 
-//            // Kiểm tra nếu lớp đã tồn tại trong học kỳ này
-//            if (classRepository.findBySemesterId(newClass.getSemester().getId()).isPresent()) {
-//                throw new OurException("Class has already existed in this semester");
-//            }
 
             // Cập nhật các thông tin khác của class ngoại trừ students
             presentClass.setClassName(newClass.getClassName());

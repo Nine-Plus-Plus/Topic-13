@@ -90,8 +90,9 @@ public class ClassService {
         Response response = new Response();
         try {
             List<Class> classList = classRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
+            List<ClassDTO> classListDTO = new ArrayList<>();
             if (!classList.isEmpty()) {
-                List<ClassDTO> classListDTO = classList.stream()
+                classListDTO = classList.stream()
                         .map(Converter::convertClassToClassDTO)
                         .collect(Collectors.toList());
 
@@ -99,7 +100,7 @@ public class ClassService {
                 response.setStatusCode(200);
                 response.setMessage("Classes fetched successfully");
             } else {
-                response.setClassDTOList(null);
+                response.setClassDTOList(classListDTO);
                 response.setStatusCode(400);
                 response.setMessage("Class not found");
             }
@@ -117,8 +118,10 @@ public class ClassService {
         Response response = new Response();
         try {
             List<Class> classList = classRepository.findClassBySemesterId(semesterId, AvailableStatus.ACTIVE);
+            List<ClassDTO> classListDTO = new ArrayList<>();
+
             if (!classList.isEmpty()) {
-                List<ClassDTO> classListDTO = classList.stream()
+                classListDTO = classList.stream()
                         .map(Converter::convertClassToClassDTO)
                         .collect(Collectors.toList());
 
@@ -126,7 +129,7 @@ public class ClassService {
                 response.setStatusCode(200);
                 response.setMessage("Classes fetched successfully");
             } else {
-                response.setClassDTOList(null);
+                response.setClassDTOList(classListDTO);
                 response.setStatusCode(400);
                 response.setMessage("Class not found");
             }
@@ -142,15 +145,16 @@ public class ClassService {
 
     public Response getClassById(Long id) {
         Response response = new Response();
+        ClassDTO classDTO = new ClassDTO();
         try {
             Class findClass = classRepository.findByIdAndAvailableStatus(id, AvailableStatus.ACTIVE);
             if (findClass != null) {
-                ClassDTO dto = Converter.convertClassToClassDTO(findClass);
-                response.setClassDTO(dto);
+                classDTO = Converter.convertClassToClassDTO(findClass);
+                response.setClassDTO(classDTO);
                 response.setStatusCode(200);
                 response.setMessage("Successfully");
             } else {
-                response.setClassDTO(null);
+                response.setClassDTO(classDTO);
                 response.setStatusCode(400);
                 response.setMessage("Class not found");
             }
@@ -254,6 +258,8 @@ public class ClassService {
     public Response getUnassignedMentors() {
         Response response = new Response();
         try {
+
+            List<MentorsDTO> unassignedMentorsDTOs = new ArrayList<>();
             // Lấy tất cả mentor đang hoạt động
             List<Mentors> allMentors = mentorsRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
 
@@ -266,7 +272,7 @@ public class ClassService {
                     .collect(Collectors.toList());
 
             // Chuyển đổi sang DTO nếu cần thiết
-            List<MentorsDTO> unassignedMentorsDTOs = unassignedMentors.stream()
+            unassignedMentorsDTOs = unassignedMentors.stream()
                     .map(Converter::convertMentorToMentorDTO)
                     .collect(Collectors.toList());
 
@@ -275,7 +281,7 @@ public class ClassService {
                 response.setStatusCode(200);
                 response.setMessage("Unassigned mentors fetched successfully");
             }else{
-                response.setMentorsDTOList(null);
+                response.setMentorsDTOList(unassignedMentorsDTOs);
                 response.setStatusCode(400);
                 response.setMessage("Class not found");
             }

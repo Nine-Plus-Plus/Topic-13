@@ -10,6 +10,7 @@ import com.project.ultis.Converter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -57,7 +58,9 @@ public class SkillsService {
         Response response = new Response();
         try {
             List<Skills> skillsList = skillsRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
-            List<SkillsDTO> skillsDTOList = skillsList
+            List<SkillsDTO> skillsDTOList = new ArrayList<>();
+
+            skillsDTOList = skillsList
                     .stream()
                     .map(Converter::convertSkillToSkillDTO)
                     .collect(Collectors.toList());
@@ -66,7 +69,7 @@ public class SkillsService {
                 response.setStatusCode(200);
                 response.setMessage("Skills fetched successfully");
             }else{
-                response.setSkillsDTOList(null);
+                response.setSkillsDTOList(skillsDTOList);
                 response.setStatusCode(400);
                 response.setMessage("No data found");
             }
@@ -86,13 +89,14 @@ public class SkillsService {
         Response response = new Response();
         try {
             Skills skill = skillsRepository.findByIdAndAvailableStatus(id, AvailableStatus.ACTIVE);
+            SkillsDTO skillsDTO = new SkillsDTO();
             if(skill!=null){
-                SkillsDTO skillsDTO = Converter.convertSkillToSkillDTO(skill);
+                skillsDTO = Converter.convertSkillToSkillDTO(skill);
                 response.setSkillsDTO(skillsDTO);
                 response.setStatusCode(200);
                 response.setMessage("Skill fetched successfully");
             }else{
-                response.setSkillsDTO(null);
+                response.setSkillsDTO(skillsDTO);
                 response.setStatusCode(400);
                 response.setMessage("No data found");
             }
@@ -112,14 +116,15 @@ public class SkillsService {
         Response response = new Response();
         try {
             Skills skill = skillsRepository.findBySkillName(skillName, AvailableStatus.ACTIVE);
+            SkillsDTO skillsDTO = new SkillsDTO();
 
             if(skill !=null){
-                SkillsDTO skillsDTO = Converter.convertSkillToSkillDTO(skill);
+                skillsDTO = Converter.convertSkillToSkillDTO(skill);
                 response.setSkillsDTO(skillsDTO);
                 response.setStatusCode(200);
                 response.setMessage("Skill fetched successfully");
             }else{
-                response.setSkillsDTO(null);
+                response.setSkillsDTO(skillsDTO);
                 response.setStatusCode(400);
                 response.setMessage("No data found");
             }

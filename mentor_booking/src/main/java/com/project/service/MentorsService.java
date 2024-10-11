@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,9 +37,10 @@ public class MentorsService {
     // Phương thức lấy tất cả mentors
     public Response getAllMentors() {
         Response response = new Response();
+        List<MentorsDTO> mentorsDTOList = new ArrayList<>();
         try {
             List<Mentors> mentorsList = mentorsRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
-            List<MentorsDTO> mentorsDTOList = mentorsList
+            mentorsDTOList = mentorsList
                     .stream()
                     .map(Converter::convertMentorToMentorDTO)
                     .collect(Collectors.toList());
@@ -47,7 +49,7 @@ public class MentorsService {
                 response.setStatusCode(200);
                 response.setMessage("Mentors fetched successfully");
             }else{
-                response.setMentorsDTOList(null);
+                response.setMentorsDTOList(mentorsDTOList);
                 response.setMessage("No data found");
                 response.setStatusCode(400);
             }
@@ -64,15 +66,16 @@ public class MentorsService {
     // Phương thức lấy mentor theo ID
     public Response getMentorById(Long id) {
         Response response = new Response();
+        MentorsDTO mentorsDTO = new MentorsDTO();
         try {
             Mentors mentor = mentorsRepository.findByIdAndAvailableStatus(id, AvailableStatus.ACTIVE);
             if(mentor != null){
-                MentorsDTO mentorsDTO = Converter.convertMentorToMentorDTO(mentor);
+                mentorsDTO = Converter.convertMentorToMentorDTO(mentor);
                 response.setMentorsDTO(mentorsDTO);
                 response.setStatusCode(200);
                 response.setMessage("Mentor fetched successfully");
             }else{
-                response.setMentorsDTO(null);
+                response.setMentorsDTO(mentorsDTO);
                 response.setStatusCode(400);
                 response.setMessage("data not found");
             }

@@ -11,6 +11,7 @@ import com.project.model.Semester;
 import com.project.repository.ClassRepository;
 import com.project.repository.SemesterRepository;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -57,8 +58,9 @@ public class SemesterService {
         Response response = new Response();
         try {
             List<Semester> semesterList = semesterRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
+            List<SemesterDTO> semesterListDTO = new ArrayList<>();
             if (!semesterList.isEmpty()) {
-                List<SemesterDTO> semesterListDTO = semesterList
+                semesterListDTO = semesterList
                         .stream()
                         .map(Converter::convertSemesterToSemesterDTO)
                         .collect(Collectors.toList());
@@ -66,7 +68,7 @@ public class SemesterService {
                 response.setStatusCode(200);
                 response.setMessage("Semester fetched successfully");
             }else{
-                response.setSemesterDTOList(null);
+                response.setSemesterDTOList(semesterListDTO);
                 response.setStatusCode(400);
                 response.setMessage("No data found");
             }
@@ -85,13 +87,14 @@ public class SemesterService {
         Response response = new Response();
         try {
             Semester findSemester = semesterRepository.findByIdAndAvailableStatus(id,AvailableStatus.ACTIVE);
+            SemesterDTO semesterDTO = new SemesterDTO();
             if (findSemester != null) {
-                SemesterDTO dto = Converter.convertSemesterToSemesterDTO(findSemester);
-                response.setSemesterDTO(dto);
+                semesterDTO = Converter.convertSemesterToSemesterDTO(findSemester);
+                response.setSemesterDTO(semesterDTO);
                 response.setStatusCode(200);
                 response.setMessage("Successfully");
             }else{
-                response.setSemesterDTO(null);
+                response.setSemesterDTO(semesterDTO);
                 response.setStatusCode(400);
                 response.setMessage("No data found");
             }

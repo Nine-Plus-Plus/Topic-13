@@ -7,6 +7,7 @@ import com.project.model.*;
 import com.project.model.Class;
 import com.project.repository.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -252,8 +253,9 @@ public class UsersService {
         Response response = new Response();
         try {
             List<Users> list = usersRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
+            List<UsersDTO> listDTO = new ArrayList<>();
             if (!list.isEmpty()) {
-                List<UsersDTO> listDTO = list.stream()
+                 listDTO = list.stream()
                         .map(Converter::convertUserToUserDTO)
                         .collect(Collectors.toList());
                 
@@ -261,7 +263,7 @@ public class UsersService {
                 response.setStatusCode(200);
                 response.setMessage("Users fetched successfully");
             }else{
-                response.setUsersDTOList(null);
+                response.setUsersDTOList(listDTO);
                 response.setMessage("No data found");
                 response.setStatusCode(400);
             }
@@ -281,13 +283,14 @@ public class UsersService {
         Response response = new Response();
         try {
             Users user = usersRepository.findByIdAndAvailableStatus(id, AvailableStatus.ACTIVE);
+            UsersDTO userDTO = new UsersDTO();
             if (user != null) {
-                UsersDTO userDTO = Converter.convertUserToUserDTO(user);
+                userDTO = Converter.convertUserToUserDTO(user);
                 response.setUsersDTO(userDTO);
                 response.setStatusCode(200);
                 response.setMessage("Successfully");
             }else{
-                response.setUsersDTO(null);
+                response.setUsersDTO(userDTO);
                 response.setMessage("No data found");
                 response.setStatusCode(400);
             }
@@ -382,7 +385,6 @@ public class UsersService {
                 response.setStatusCode(200);
                 response.setMessage("Successfully");
             }else {
-                response.setUsersDTO(null);
                 response.setStatusCode(400);
                 response.setMessage("User not found");
             }
@@ -391,7 +393,7 @@ public class UsersService {
             response.setMessage(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
-            response.setMessage("Error occurred while geting user profile: " + e.getMessage());
+            response.setMessage("Error occurred while getting user profile: " + e.getMessage());
         }
         return response;
     }

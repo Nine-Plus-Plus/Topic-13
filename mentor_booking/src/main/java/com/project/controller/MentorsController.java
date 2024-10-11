@@ -1,7 +1,9 @@
 package com.project.controller;
 
+import com.project.dto.CreateMentorRequest;
 import com.project.dto.MentorsDTO;
 import com.project.dto.Response;
+import com.project.model.Users;
 import com.project.service.MentorsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +27,12 @@ public class MentorsController {
     @GetMapping("/admin/get-mentor-by-id/{id}")
     public ResponseEntity<Response> getMentorById(@PathVariable Long id) {
         Response response = mentorsService.getMentorById(id);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @PutMapping("/admin/update-mentor/{id}")
+    public ResponseEntity<Response> updateMentor(@PathVariable Long id, @RequestBody CreateMentorRequest updateMentor) {
+        Response response = mentorsService.updateMentor(id, updateMentor);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }

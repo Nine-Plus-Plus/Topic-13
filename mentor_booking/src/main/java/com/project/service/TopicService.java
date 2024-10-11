@@ -144,6 +144,16 @@ public class TopicService {
                     && newTopic.getTopicName().equals(presentTopic.getTopicName()) == false) {
                 throw new OurException("Semester has already existed");
             }
+            Mentors mentor = new Mentors();
+            Semester semester = new Semester();
+            if (newTopic.getMentor() != null) {
+                mentor = mentorsRepository.findById(newTopic.getMentor().getId())
+                        .orElseThrow(() -> new OurException("Cannot find mentor id"));
+            }
+            if (newTopic.getSemester() != null) {
+                semester = semesterRepository.findById(newTopic.getSemester().getId())
+                        .orElseThrow(() -> new OurException("Cannot find semester id"));
+            }
 
             presentTopic.setTopicName(newTopic.getTopicName());
             presentTopic.setContext(newTopic.getContext());
@@ -218,8 +228,7 @@ public class TopicService {
     public Response getTopicByName(String topicName) {
         Response response = new Response();
         try {
-            List<Topic> topicList = topicRepository.findByTopicNameContainingIgnoreCaseAndAvailableStatus
-                                    (topicName, AvailableStatus.ACTIVE);
+            List<Topic> topicList = topicRepository.findByTopicNameContainingIgnoreCaseAndAvailableStatus(topicName, AvailableStatus.ACTIVE);
             if (topicList != null) {
                 List<TopicDTO> topicListDTO = topicList.stream()
                         .map(Converter::convertTopicToTopicDTO)

@@ -216,13 +216,6 @@ public class ClassService {
                 return response;
             }
 
-            // Kiểm tra nếu mentor đã có lớp khác, ngoại trừ lớp hiện tại
-            Optional<Class> existingClass = classRepository.findByMentorId(newClass.getMentor().getId());
-            if (existingClass.isPresent()) {
-                throw new OurException("Mentor has already have a class");
-            }
-
-
             // Cập nhật các thông tin khác của class ngoại trừ students
             if(newClass.getClassName() != null) presentClass.setClassName(newClass.getClassName());
             if(newClass.getSemester() != null) presentClass.setSemester(semester);

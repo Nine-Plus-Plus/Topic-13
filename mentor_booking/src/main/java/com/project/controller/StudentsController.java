@@ -33,7 +33,7 @@ public class StudentsController {
     }
 
     // Lấy sinh viên theo name hoặc expertise
-    @GetMapping("/admin/get-student-by-name-or-expertise")
+    @GetMapping("/admin/get-student-by-name-or-expertise/")
     public ResponseEntity<Response> getStudentByNameAndExpertise(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String expertise,

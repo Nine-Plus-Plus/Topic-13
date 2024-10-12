@@ -102,19 +102,20 @@ public class StudentsService {
                 return response;
             }
 
-            if (name == null && expertise == null) {
+            // Nếu chỉ có classId (name và expertise đều là chuỗi rỗng)
+            if ((name == null || name.isEmpty()) && (expertise == null || expertise.isEmpty())) {
                 studentsList = studentsRepository.findStudentByClassId(classId, AvailableStatus.ACTIVE);
             }
-            // Truy vấn theo cả name và expertise trong class
-            else if (name != null && !name.isEmpty() && expertise != null && !expertise.isEmpty()) {
+            // Nếu có cả name và expertise
+            else if (!isNullOrEmpty(name) && !isNullOrEmpty(expertise)) {
                 studentsList = studentsRepository.findStudentByUserFullNameAndExpertiseAndClassId(name, expertise, AvailableStatus.ACTIVE, classId);
             }
-            // Truy vấn theo name trong class
-            else if (name != null && !name.isEmpty()) {
+            // Nếu chỉ có name
+            else if (!isNullOrEmpty(name)) {
                 studentsList = studentsRepository.findStudentByUserFullNameAndClassId(name, AvailableStatus.ACTIVE, classId);
             }
-            // Truy vấn theo expertise trong class
-            else if (expertise != null && !expertise.isEmpty()) {
+            // Nếu chỉ có expertise
+            else if (!isNullOrEmpty(expertise)) {
                 studentsList = studentsRepository.findByExpertiseAndClassId(expertise, AvailableStatus.ACTIVE, classId);
             } else {
                 response.setStudentsDTOList(listDTO);
@@ -145,6 +146,11 @@ public class StudentsService {
             response.setMessage("Error occurred while fetching student: " + e.getMessage());
         }
         return response;
+    }
+
+    // Hàm kiểm tra chuỗi rỗng
+    private boolean isNullOrEmpty(String str) {
+        return str == null || str.trim().isEmpty();
     }
 
     public Response updateStudent(Long userId, CreateStudentRequest updateRequest) {

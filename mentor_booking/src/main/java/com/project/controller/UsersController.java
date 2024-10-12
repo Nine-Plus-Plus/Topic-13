@@ -71,7 +71,7 @@ public class UsersController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @GetMapping("/admin/view-user-detail-by-id/{id}")
+    @GetMapping("/user/view-user-detail-by-id/{id}")
     public ResponseEntity<Response> getUserDetail(@PathVariable Long id){
         Response response = userService.viewDetailUser(id);
         return ResponseEntity.status(response.getStatusCode()).body(response);

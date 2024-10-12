@@ -173,4 +173,27 @@ public class Converter {
         groupDTO.setAvailableStatus(convertGroup.getAvailableStatus());
         return groupDTO;
     }
+
+    public static MentorScheduleDTO convertMentorScheduleToMentorScheduleDTO(MentorSchedule mentorSchedule){
+        MentorScheduleDTO mentorScheduleDTO = new MentorScheduleDTO();
+
+        mentorScheduleDTO.setId(mentorSchedule.getId());
+        mentorScheduleDTO.setAvailableFrom(mentorSchedule.getAvailableFrom());
+        mentorScheduleDTO.setAvailableTo(mentorSchedule.getAvailableTo());
+        mentorScheduleDTO.setStatus(mentorSchedule.getStatus());
+        mentorScheduleDTO.setAvailableStatus(mentorSchedule.getAvailableStatus());
+
+        if (mentorSchedule.getMentor() != null) {
+            Mentors mentor = new Mentors();
+            mentor.setId(mentorSchedule.getMentor().getId());
+            mentor.setMentorCode(mentorSchedule.getMentor().getMentorCode());
+            mentor.setDateCreated(mentorSchedule.getMentor().getDateCreated());
+            mentor.setStar(mentorSchedule.getMentor().getStar());
+            mentor.setTotalTimeRemain(mentorSchedule.getMentor().getTotalTimeRemain());
+            mentor.setAvailableStatus(mentorSchedule.getMentor().getAvailableStatus());
+            mentorScheduleDTO.setMentor(convertMentorToMentorDTO(mentor));
+        }
+
+        return mentorScheduleDTO;
+    }
 }

@@ -397,4 +397,47 @@ public class UsersService {
         }
         return response;
     }
+
+    // Phương thức lấy thông tin detail của người dùng dựa trên id
+    public Response viewDetailUser(Long id) {
+        Response response = new Response();
+        try {
+            UsersDTO usersDTO = new UsersDTO();
+            StudentsDTO studentsDTO = new StudentsDTO();
+            MentorsDTO mentorsDTO = new MentorsDTO();
+
+            Users userProfile = usersRepository.findByIdAndAvailableStatus(id, AvailableStatus.ACTIVE);
+            if(userProfile == null){
+                response.setUsersDTO(usersDTO);
+                response.setStatusCode(400);
+                response.setMessage("User not found");
+                return  response;
+            }
+
+            if(userProfile.getRole().getRoleName().equalsIgnoreCase("STUDENT")){
+                Students student = studentsRepository.findByUser_Id(userProfile.getId());
+                studentsDTO = Converter.convertStudentToStudentDTO(student);
+                response.setStudentsDTO(studentsDTO);
+                response.setStatusCode(200);
+                response.setMessage("Successfully");
+            } else if (userProfile.getRole().getRoleName().equalsIgnoreCase("MENTOR")) {
+                Mentors mentor = mentorsRepository.findByUser_Id(userProfile.getId());
+                mentorsDTO = Converter.convertMentorToMentorDTO(mentor);
+                response.setMentorsDTO(mentorsDTO);
+                response.setStatusCode(200);
+                response.setMessage("Successfully");
+            }else {
+                response.setUsersDTO(usersDTO);
+                response.setStatusCode(400);
+                response.setMessage("User not found");
+            }
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred while getting user profile: " + e.getMessage());
+        }
+        return response;
+    }
 }

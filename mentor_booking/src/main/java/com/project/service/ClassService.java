@@ -13,7 +13,9 @@ import com.project.repository.MentorsRepository;
 import com.project.repository.SemesterRepository;
 import com.project.repository.StudentsRepository;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.project.ultis.Converter;
@@ -115,6 +117,9 @@ public class ClassService {
     public Response getClassesSemesterId(Long semesterId) {
         Response response = new Response();
         try {
+            if(semesterId == null){
+                throw new OurException("Null semesterId");
+            }
             List<Class> classList = classRepository.findClassBySemesterId(semesterId, AvailableStatus.ACTIVE);
             List<ClassDTO> classListDTO = new ArrayList<>();
 
@@ -204,16 +209,24 @@ public class ClassService {
                 return response;
             }
 
-            // Kiểm tra nếu mentor đã có lớp
-            if (classRepository.findByMentorId(newClass.getMentor().getId()).isPresent()) {
+            Semester semester = semesterRepository.findByIdAndAvailableStatus(newClass.getSemester().getId(), AvailableStatus.ACTIVE);
+            if (semester == null) {
+                response.setStatusCode(400);
+                response.setMessage("semester not found");
+                return response;
+            }
+
+            // Kiểm tra nếu mentor đã có lớp khác, ngoại trừ lớp hiện tại
+            Optional<Class> existingClass = classRepository.findByMentorId(newClass.getMentor().getId());
+            if (existingClass.isPresent()) {
                 throw new OurException("Mentor has already have a class");
             }
 
 
             // Cập nhật các thông tin khác của class ngoại trừ students
-            presentClass.setClassName(newClass.getClassName());
-            presentClass.setSemester(newClass.getSemester());
-            presentClass.setMentor(newClass.getMentor());
+            if(newClass.getClassName() != null) presentClass.setClassName(newClass.getClassName());
+            if(newClass.getSemester() != null) presentClass.setSemester(semester);
+            if(newClass.getMentor() != null) presentClass.setMentor(mentor);
 
             classRepository.save(presentClass);
 
@@ -241,7 +254,7 @@ public class ClassService {
                 response.setClassDTOList(classListDTO);
                 response.setStatusCode(200);
                 response.setMessage("Classes fetched successfully");
-            }else throw new OurException("Cannot find claases with the input: "+className);
+            }else throw new OurException("Cannot find classes with the input: "+className);
         }catch(OurException e){
             response.setStatusCode(400);
             response.setMessage(e.getMessage());

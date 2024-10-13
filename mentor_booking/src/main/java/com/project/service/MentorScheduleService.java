@@ -224,4 +224,32 @@ public class MentorScheduleService {
         }
         return response;
     }
+
+    public Response getAllMentorScheduleByMentor(Long mentorId){
+        Response response = new Response();
+        try{
+            List<MentorScheduleDTO> mentorScheduleDTOList = new ArrayList<>();
+            List<MentorSchedule> mentorScheduleList = mentorScheduleRepository.findByMentorIdAndAvailableStatusAndStatus(mentorId, AvailableStatus.ACTIVE, MentorScheduleStatus.AVAILABLE);
+            if(!mentorScheduleList.isEmpty()){
+                mentorScheduleDTOList = mentorScheduleList.stream()
+                        .map(Converter::convertMentorScheduleToMentorScheduleDTO)
+                        .collect(Collectors.toList());
+
+                response.setMentorScheduleDTOList(mentorScheduleDTOList);
+                response.setStatusCode(200);
+                response.setMessage("Mentor Schedule fetched successfully");
+            }else{
+                response.setMentorScheduleDTOList(mentorScheduleDTOList);
+                response.setStatusCode(400);
+                response.setMessage("No data found");
+            }
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred while fetch mentor schedule: " + e.getMessage());
+        }
+        return response;
+    }
 }

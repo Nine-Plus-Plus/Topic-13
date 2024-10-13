@@ -380,7 +380,9 @@ public class UsersService {
             if(userProfile.getRole().getRoleName().equalsIgnoreCase("STUDENT")){
                 Students student = studentsRepository.findByUser_Id(userProfile.getId());
                 UsersDTO metorUserDTO = mentorsService.getMentorInformation(student.getAClass().getMentor().getId());
+                List<SkillsDTO> skillsDTOList = mentorsService.getSkillsByMentor(student.getAClass().getMentor().getId());
                 response.setUsersDTO(metorUserDTO);
+                response.setSkillsDTOList(skillsDTOList);
                 response.setStudentsDTO(Converter.convertStudentToStudentDTO(student));
                 response.setStatusCode(200);
                 response.setMessage("Successfully");

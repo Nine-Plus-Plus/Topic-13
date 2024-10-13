@@ -45,6 +45,12 @@ public class ClassController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
+    @GetMapping("/user/get-class-by-mentor/{mentorId}")
+    public ResponseEntity<Response> getClassByMentor(@PathVariable Long mentorId) {
+        Response response = classService.getClassByMentorId(mentorId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
     @GetMapping("/admin/get-classes-by-semester/{semesterId}")
     public ResponseEntity<Response> getClassesBySemester(@PathVariable Long semesterId) {
         Response response = classService.getClassesSemesterId(semesterId);

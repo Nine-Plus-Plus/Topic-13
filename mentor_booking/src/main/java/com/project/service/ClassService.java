@@ -298,4 +298,43 @@ public class ClassService {
         }
         return response;
     }
+
+    public Response getClassByMentorId(Long mentorId) {
+        Response response = new Response();
+        try {
+            // Kiểm tra nếu mentorId null
+            if (mentorId == null) {
+                throw new OurException("Null mentorId");
+            }
+
+            // Tìm mentor theo id
+            Mentors mentor = mentorsRepository.findByIdAndAvailableStatus(mentorId, AvailableStatus.ACTIVE);
+            if (mentor == null) {
+                response.setStatusCode(400);
+                response.setMessage("Mentor not found");
+                return response;
+            }
+
+            // Lấy lớp học theo mentor
+            Class classEntity = classRepository.findByMentorAndAvailableStatus(mentor, AvailableStatus.ACTIVE);
+
+            if (classEntity != null) {
+                ClassDTO classDTO = Converter.convertClassToClassDTO(classEntity);
+                response.setClassDTO(classDTO);
+                response.setStatusCode(200);
+                response.setMessage("Class fetched successfully");
+            } else {
+                response.setStatusCode(400);
+                response.setMessage("No class found for the specified mentor");
+            }
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred during fetching class by mentor: " + e.getMessage());
+        }
+        return response;
+    }
+
 }

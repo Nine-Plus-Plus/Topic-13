@@ -196,4 +196,30 @@ public class Converter {
 
         return mentorScheduleDTO;
     }
+    
+    public static ProjectsDTO convertProjectToProjectDTO(Projects convertProject){
+        ProjectsDTO projectsDTO = new ProjectsDTO();
+        
+        projectsDTO.setId(convertProject.getId());
+        projectsDTO.setDateCreated(convertProject.getDateCreated());
+        projectsDTO.setDateUpdated(convertProject.getDateUpdated());
+        projectsDTO.setDescription(convertProject.getDescription());
+        projectsDTO.setProjectName(convertProject.getProjectName());
+        projectsDTO.setPercentage(convertProject.getPercentage());
+        if (convertProject.getProjectTasks() != null){
+            List<ProjectTasksDTO> projectTasksDTOList = new ArrayList<>();
+            ProjectTasksDTO tasksDTO = new ProjectTasksDTO();
+            for (ProjectTasks task: convertProject.getProjectTasks()){
+                tasksDTO.setId(task.getId());
+                tasksDTO.setTaskName(task.getTaskName());
+                tasksDTO.setStatus(task.getStatus());
+                tasksDTO.setDescription(task.getDescription());
+                tasksDTO.setPercentage(task.getPercentage());
+                projectTasksDTOList.add(tasksDTO);
+            }
+            projectsDTO.setProjectTasks(projectTasksDTOList);
+        }
+        projectsDTO.setTopic(convertTopicToTopicDTO(convertProject.getTopic()));
+        return projectsDTO;
+    }
 }

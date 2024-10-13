@@ -135,7 +135,7 @@ public class GroupService {
             Group presentGroup = groupRepository.findById(id)
                     .orElseThrow(() -> new OurException("Cannot find group with id: " + id));
 
-            presentGroup.setGroupName(newGroup.getGroupName());
+            if (newGroup.getGroupName() != null) presentGroup.setGroupName(newGroup.getGroupName());
             presentGroup.setDateUpdated(LocalDate.now());
             
             groupRepository.save(presentGroup);

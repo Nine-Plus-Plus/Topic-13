@@ -1,4 +1,5 @@
 package com.project.service;
+
 import com.project.dto.ProjectsDTO;
 import com.project.dto.Response;
 import com.project.enums.AvailableStatus;
@@ -9,22 +10,24 @@ import com.project.model.Group;
 import com.project.repository.ProjectsRepository;
 import com.project.repository.TopicRepository;
 import com.project.repository.GroupRepository;
+import com.project.ultis.Converter;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class ProjectsService {
+
     @Autowired
     private ProjectsRepository projectsRepository;
     @Autowired
     private TopicRepository topicRepository;
-    @Autowired
-    private GroupRepository groupsRepository;
-    @Autowired
-    private ModelMapper modelMapper;
+
     public Response createProject(ProjectsDTO createRequest) {
         Response response = new Response();
         try {
@@ -35,33 +38,32 @@ public class ProjectsService {
             if (createRequest.getProjectName() == null || createRequest.getProjectName().isEmpty()) {
                 throw new OurException("Project name cannot be null or empty");
             }
-            if (createRequest.getTopic() == null || createRequest.getTopic().getId() == null) {
-                throw new OurException("Topic ID cannot be null");
-            }
-            if (createRequest.getGroup() == null || createRequest.getGroup().getId() == null) {
-                throw new OurException("Group ID cannot be null");
-            }
             // Convert ProjectsDTO Object to Projects Entity Object
-            Projects project = modelMapper.map(createRequest, Projects.class);
+            Projects project = new Projects();
             project.setPercentage(0); // Set percentage to 0 when creating a new project
             project.setDateCreated(LocalDateTime.now()); // Set dateCreated to current time
             project.setDateUpdated(LocalDateTime.now()); // Set dateUpdated to current time
             project.setAvailableStatus(AvailableStatus.ACTIVE); // Set status to ACTIVE when creating a new project
-            // Fetch and set the topic
-            Topic topic = topicRepository.findById(createRequest.getTopic().getId())
-                    .orElseThrow(() -> new OurException("Topic not found"));
-            project.setTopic(topic);
-            // Fetch and set the group
-            Group group = groupsRepository.findById(createRequest.getGroup().getId())
-                    .orElseThrow(() -> new OurException("Group not found"));
-            project.setGroup(group);
+            project.setDescription(createRequest.getDescription());
+            project.setProjectName(createRequest.getProjectName());
+            project.setGroup(null);
+            if (createRequest.getTopic() != null) {
+                Topic topic = topicRepository.findByIdAndAvailableStatus(createRequest.getTopic().getId(), AvailableStatus.ACTIVE);
+                if (topic == null) {
+                    throw new OurException("Cannot find topic with id: " + createRequest.getTopic().getId());
+                }
+                project.setTopic(topic);
+            }
+
             // Save the project
             projectsRepository.save(project);
             // Convert Projects Entity Object to ProjectsDTO Object
-            ProjectsDTO dto = modelMapper.map(project, ProjectsDTO.class);
-            response.setProjectsDTO(dto); // Set single ProjectsDTO object
-            response.setStatusCode(201);
-            response.setMessage("Project created successfully");
+            if (project.getId() > 0) {
+                ProjectsDTO dto = Converter.convertProjectToProjectDTO(project);
+                response.setProjectsDTO(dto); // Set single ProjectsDTO object
+                response.setStatusCode(200);
+                response.setMessage("Project created successfully");
+            }
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -71,29 +73,45 @@ public class ProjectsService {
         }
         return response;
     }
+
     public Response getAllProjects() {
         Response response = new Response();
         try {
-            List<Projects> projectsList = projectsRepository.findAll();
-            List<ProjectsDTO> projectsDTOList = Arrays.asList(modelMapper.map(projectsList, ProjectsDTO[].class));
-            response.setProjectsDTOList(projectsDTOList);
-            response.setStatusCode(200);
-            response.setMessage("Projects retrieved successfully");
+            List<Projects> projectsList = projectsRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
+            List<ProjectsDTO> projectsDTOList = new ArrayList<>();
+            if (projectsList != null) {
+                projectsDTOList = projectsList.stream()
+                        .map(Converter::convertProjectToProjectDTO)
+                        .collect(Collectors.toList());
+                response.setProjectsDTOList(projectsDTOList);
+                response.setStatusCode(200);
+                response.setMessage("Projects fetched successfully");
+            } else {
+                response.setProjectsDTOList(projectsDTOList);
+                throw new OurException("Cannot find any project");
+            }
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
             response.setMessage("Error occurred during retrieving projects: " + e.getMessage());
         }
         return response;
     }
+
     public Response getProjectById(Long id) {
         Response response = new Response();
         try {
-            Projects project = projectsRepository.findById(id)
-                    .orElseThrow(() -> new OurException("Project not found"));
-            ProjectsDTO dto = modelMapper.map(project, ProjectsDTO.class);
-            response.setProjectsDTO(dto); // Set single ProjectsDTO object
-            response.setStatusCode(200);
-            response.setMessage("Project retrieved successfully");
+            Projects project = projectsRepository.findByIdAndAvailableStatus(id, AvailableStatus.ACTIVE);
+            ProjectsDTO dto = Converter.convertProjectToProjectDTO(project);
+            response.setProjectsDTO(dto);
+            if (project != null) {
+                response.setStatusCode(200);
+                response.setMessage("Successfully");
+            } else {
+                throw new OurException("No data found");
+            }
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -103,11 +121,11 @@ public class ProjectsService {
         }
         return response;
     }
+
     public Response updateProject(Long id, ProjectsDTO updateRequest) {
         Response response = new Response();
         try {
-            Projects project = projectsRepository.findById(id)
-                    .orElseThrow(() -> new OurException("Project not found"));
+            Projects project = projectsRepository.findByIdAndAvailableStatus(id, AvailableStatus.ACTIVE);
             if (updateRequest.getProjectName() != null) {
                 project.setProjectName(updateRequest.getProjectName());
             }
@@ -117,9 +135,16 @@ public class ProjectsService {
             if (updateRequest.getPercentage() != 0) {
                 project.setPercentage(updateRequest.getPercentage());
             }
+            if (updateRequest.getTopic() != null) {
+                Topic topic = topicRepository.findByIdAndAvailableStatus(updateRequest.getTopic().getId(), AvailableStatus.ACTIVE);
+                if (topic == null) {
+                    throw new OurException("Cannot find topic with id: " + updateRequest.getTopic().getId());
+                }
+                project.setTopic(topic);
+            }
             project.setDateUpdated(LocalDateTime.now()); // Set dateUpdated to current time
             projectsRepository.save(project);
-            ProjectsDTO dto = modelMapper.map(project, ProjectsDTO.class);
+            ProjectsDTO dto = Converter.convertProjectToProjectDTO(project);
             response.setProjectsDTO(dto); // Set single ProjectsDTO object
             response.setStatusCode(200);
             response.setMessage("Project updated successfully");
@@ -132,6 +157,7 @@ public class ProjectsService {
         }
         return response;
     }
+
     public Response deleteProject(Long id) {
         Response response = new Response();
         try {

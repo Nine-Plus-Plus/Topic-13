@@ -237,4 +237,14 @@ public class MentorsService {
         response.setUsersDTO(usersDTO);
         return usersDTO;
     }
+
+    public List<SkillsDTO> getSkillsByMentor(Long mentorId){
+        List<SkillsDTO> skillsDTOList = new ArrayList<>();
+        List<Skills> skillsList = mentorsRepository.findByIdAndAvailableStatus(mentorId,AvailableStatus.ACTIVE).getSkills();
+        skillsDTOList = skillsList
+                .stream()
+                .map(Converter::convertSkillToSkillDTO)
+                .collect(Collectors.toList());
+        return skillsDTOList;
+    }
 }

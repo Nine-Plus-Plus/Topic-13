@@ -43,4 +43,10 @@ public class MentorScheduleController {
         Response response = mentorScheduleService.deleteMentorSchedule(id);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
+
+    @GetMapping("/user/get-mentor-schedules-by-mentor/{mentorId}")
+    public ResponseEntity<Response> getMentorSchedulesByMentor(@PathVariable Long mentorId) {
+        Response response = mentorScheduleService.getAllMentorScheduleByMentor(mentorId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
 }

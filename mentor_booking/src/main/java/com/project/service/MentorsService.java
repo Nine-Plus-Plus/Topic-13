@@ -1,9 +1,6 @@
 package com.project.service;
 
-import com.project.dto.CreateMentorRequest;
-import com.project.dto.MentorsDTO;
-import com.project.dto.Response;
-import com.project.dto.SkillsDTO;
+import com.project.dto.*;
 import com.project.enums.AvailableStatus;
 import com.project.exception.OurException;
 import com.project.model.Mentors;
@@ -44,11 +41,11 @@ public class MentorsService {
                     .stream()
                     .map(Converter::convertMentorToMentorDTO)
                     .collect(Collectors.toList());
-            if(!mentorsDTOList.isEmpty()){
+            if (!mentorsDTOList.isEmpty()) {
                 response.setMentorsDTOList(mentorsDTOList);
                 response.setStatusCode(200);
                 response.setMessage("Mentors fetched successfully");
-            }else{
+            } else {
                 response.setMentorsDTOList(mentorsDTOList);
                 response.setMessage("No data found");
                 response.setStatusCode(400);
@@ -69,12 +66,12 @@ public class MentorsService {
         MentorsDTO mentorsDTO = new MentorsDTO();
         try {
             Mentors mentor = mentorsRepository.findByIdAndAvailableStatus(id, AvailableStatus.ACTIVE);
-            if(mentor != null){
+            if (mentor != null) {
                 mentorsDTO = Converter.convertMentorToMentorDTO(mentor);
                 response.setMentorsDTO(mentorsDTO);
                 response.setStatusCode(200);
                 response.setMessage("Mentor fetched successfully");
-            }else{
+            } else {
                 response.setMentorsDTO(mentorsDTO);
                 response.setStatusCode(400);
                 response.setMessage("data not found");
@@ -136,7 +133,7 @@ public class MentorsService {
             mentorUpdate.setSkills(skillsList);
             mentorsRepository.save(mentorUpdate);
 
-            MentorsDTO mentorsDTO =Converter.convertMentorToMentorDTO(mentorUpdate);
+            MentorsDTO mentorsDTO = Converter.convertMentorToMentorDTO(mentorUpdate);
             response.setMentorsDTO(mentorsDTO);
             response.setStatusCode(200);
             response.setMessage("Mentor updated successfully");
@@ -152,13 +149,13 @@ public class MentorsService {
         return str == null || str.trim().isEmpty();
     }
 
-    public Response findMentorWithNameAndSkills(String name, List<Long> skillIds){
+    public Response findMentorWithNameAndSkills(String name, List<Long> skillIds) {
         Response response = new Response();
-        try{
+        try {
             List<MentorsDTO> mentorsDTOList = new ArrayList<>();
 
             // Nếu cả name và skills đều rỗng
-            if (isNullOrEmpty(name) && (skillIds  == null || skillIds.isEmpty())) {
+            if (isNullOrEmpty(name) && (skillIds == null || skillIds.isEmpty())) {
                 List<Mentors> mentorsList = mentorsRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
                 mentorsDTOList = mentorsList
                         .stream()
@@ -166,7 +163,7 @@ public class MentorsService {
                         .collect(Collectors.toList());
             }
             // Nếu có cả name và skills
-            else if(!isNullOrEmpty(name) && skillIds!= null && !skillIds.isEmpty()){
+            else if (!isNullOrEmpty(name) && skillIds != null && !skillIds.isEmpty()) {
                 // Tìm các đối tượng Skills dựa trên skillIds
                 List<Skills> skillsList = skillsRepository.findAllById(skillIds);
                 if (skillsList.isEmpty()) {
@@ -181,7 +178,7 @@ public class MentorsService {
                         .collect(Collectors.toList());
             }
             // Nếu chỉ có name
-            else if (!isNullOrEmpty(name)){
+            else if (!isNullOrEmpty(name)) {
                 List<Mentors> mentorsList = mentorsRepository.findByName(name, AvailableStatus.ACTIVE);
                 mentorsDTOList = mentorsList
                         .stream()
@@ -189,7 +186,7 @@ public class MentorsService {
                         .collect(Collectors.toList());
             }
             // Nếu chỉ có skills
-            else if (skillIds != null && !skillIds .isEmpty()) {
+            else if (skillIds != null && !skillIds.isEmpty()) {
                 // Tìm các đối tượng Skills dựa trên skillIds
                 List<Skills> skillsList = skillsRepository.findAllById(skillIds);
                 if (skillsList.isEmpty()) {
@@ -221,4 +218,23 @@ public class MentorsService {
         return response;
     }
 
+    public UsersDTO getMentorInformation(Long mentorId) {
+        Response response = new Response();
+
+        UsersDTO usersDTO = new UsersDTO();
+        Mentors mentor = mentorsRepository.findByIdAndAvailableStatus(mentorId, AvailableStatus.ACTIVE);
+        if (mentor == null) {
+            return usersDTO;
+        }
+        usersDTO.setId(mentor.getUser().getId());
+        usersDTO.setFullName(mentor.getUser().getFullName());
+        usersDTO.setAvatar(mentor.getUser().getAvatar());
+        usersDTO.setAddress(mentor.getUser().getAddress());
+        usersDTO.setBirthDate(mentor.getUser().getBirthDate());
+        usersDTO.setGender(mentor.getUser().getGender());
+        usersDTO.setEmail(mentor.getUser().getEmail());
+
+        response.setUsersDTO(usersDTO);
+        return usersDTO;
+    }
 }

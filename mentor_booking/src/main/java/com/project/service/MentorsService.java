@@ -147,5 +147,78 @@ public class MentorsService {
         return response;
     }
 
+    // Hàm kiểm tra chuỗi rỗng
+    private boolean isNullOrEmpty(String str) {
+        return str == null || str.trim().isEmpty();
+    }
+
+    public Response findMentorWithNameAndSkills(String name, List<Long> skillIds){
+        Response response = new Response();
+        try{
+            List<MentorsDTO> mentorsDTOList = new ArrayList<>();
+
+            // Nếu cả name và skills đều rỗng
+            if (isNullOrEmpty(name) && (skillIds  == null || skillIds.isEmpty())) {
+                List<Mentors> mentorsList = mentorsRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
+                mentorsDTOList = mentorsList
+                        .stream()
+                        .map(Converter::convertMentorToMentorDTO)
+                        .collect(Collectors.toList());
+            }
+            // Nếu có cả name và skills
+            else if(!isNullOrEmpty(name) && skillIds!= null && !skillIds.isEmpty()){
+                // Tìm các đối tượng Skills dựa trên skillIds
+                List<Skills> skillsList = skillsRepository.findAllById(skillIds);
+                if (skillsList.isEmpty()) {
+                    response.setStatusCode(400);
+                    response.setMessage("Skills not found.");
+                    return response;
+                }
+                List<Mentors> mentorsList = mentorsRepository.findByNameAndSkills(name, skillsList, AvailableStatus.ACTIVE);
+                mentorsDTOList = mentorsList
+                        .stream()
+                        .map(Converter::convertMentorToMentorDTO)
+                        .collect(Collectors.toList());
+            }
+            // Nếu chỉ có name
+            else if (!isNullOrEmpty(name)){
+                List<Mentors> mentorsList = mentorsRepository.findByName(name, AvailableStatus.ACTIVE);
+                mentorsDTOList = mentorsList
+                        .stream()
+                        .map(Converter::convertMentorToMentorDTO)
+                        .collect(Collectors.toList());
+            }
+            // Nếu chỉ có skills
+            else if (skillIds != null && !skillIds .isEmpty()) {
+                // Tìm các đối tượng Skills dựa trên skillIds
+                List<Skills> skillsList = skillsRepository.findAllById(skillIds);
+                if (skillsList.isEmpty()) {
+                    response.setStatusCode(400);
+                    response.setMessage("Skills not found.");
+                    return response;
+                }
+                List<Mentors> mentorsList = mentorsRepository.findBySkills(skillsList, AvailableStatus.ACTIVE);
+                mentorsDTOList = mentorsList
+                        .stream()
+                        .map(Converter::convertMentorToMentorDTO)
+                        .collect(Collectors.toList());
+            }
+            if (mentorsDTOList.isEmpty()) {
+                response.setStatusCode(400);
+                response.setMessage("No mentors found.");
+            } else {
+                response.setStatusCode(200);
+                response.setMentorsDTOList(mentorsDTOList);
+                response.setMessage("Mentors found successfully.");
+            }
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred while fetching mentor: " + e.getMessage());
+        }
+        return response;
+    }
 
 }

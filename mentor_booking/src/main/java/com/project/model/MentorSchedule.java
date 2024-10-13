@@ -29,11 +29,11 @@ public class MentorSchedule {
     private Long id;
     
     @Column(name = "available_from")
-    @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
+    @JsonFormat(pattern = "dd-MM-yyyy HH:mm")
     private LocalDateTime availableFrom;
     
     @Column(name = "available_to")
-    @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
+    @JsonFormat(pattern = "dd-MM-yyyy HH:mm")
     private LocalDateTime availableTo;
     
     @Enumerated(EnumType.STRING)

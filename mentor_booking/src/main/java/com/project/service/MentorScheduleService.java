@@ -53,6 +53,19 @@ public class MentorScheduleService {
                 return response;
             }
 
+            // Kiểm tra lịch hẹn không bị trùng
+            boolean isScheduleConflict = mentorScheduleRepository.existsByMentorAndAvailableFromLessThanEqualAndAvailableToGreaterThanEqual(
+                    mentor,
+                    inputRequest.getAvailableTo(),
+                    inputRequest.getAvailableFrom()
+            );
+
+            if (isScheduleConflict) {
+                response.setStatusCode(400);
+                response.setMessage("Schedule conflicts with existing mentor availability");
+                return response;
+            }
+
             // Tạo mới MentorSchedule từ input
             MentorSchedule mentorSchedule = new MentorSchedule();
             mentorSchedule.setAvailableFrom(inputRequest.getAvailableFrom());
@@ -137,7 +150,7 @@ public class MentorScheduleService {
             MentorSchedule mentorSchedule = mentorScheduleRepository.findByIdAndAvailableStatus(id, AvailableStatus.ACTIVE);
             if(mentorSchedule != null){
                 mentorSchedule.setAvailableStatus(AvailableStatus.DELETED);
-                mentorScheduleRepository.delete(mentorSchedule);
+                mentorScheduleRepository.save(mentorSchedule);
                 response.setStatusCode(200);
                 response.setMessage("Mentor Schedule deleted successfully");
             }else{
@@ -177,6 +190,19 @@ public class MentorScheduleService {
             if (updateRequest.getAvailableFrom().isAfter(updateRequest.getAvailableTo())) {
                 response.setStatusCode(400);
                 response.setMessage("Available from time must be before available to time");
+                return response;
+            }
+
+            // Kiểm tra không có lịch trình nào trùng với thời gian mới
+            boolean isScheduleConflict = mentorScheduleRepository.existsByMentorAndAvailableFromLessThanEqualAndAvailableToGreaterThanEqual(
+                    mentorSchedule.getMentor(),
+                    updateRequest.getAvailableTo(),
+                    updateRequest.getAvailableFrom()
+            );
+
+            if (isScheduleConflict) {
+                response.setStatusCode(400);
+                response.setMessage("Schedule conflicts with an existing schedule.");
                 return response;
             }
 

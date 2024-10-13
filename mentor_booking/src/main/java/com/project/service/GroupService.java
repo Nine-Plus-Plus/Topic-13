@@ -55,8 +55,7 @@ public class GroupService {
             studentsList.add(student);
             group.setStudents(studentsList);
             
-            Projects project = projectsRepository.findById(inputRequest.getProject().getId()).get();
-            group.setProject(project);
+            group.setProject(null);
             
             Class aClass = classRepository.findById(inputRequest.getClassDTO().getId()).get();
             group.setAClass(aClass);

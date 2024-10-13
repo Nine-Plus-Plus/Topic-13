@@ -7,6 +7,7 @@ import com.project.exception.OurException;
 import com.project.model.Mentors;
 import com.project.model.Semester;
 import com.project.model.Topic;
+import com.project.repository.ClassRepository;
 import com.project.repository.MentorsRepository;
 import com.project.repository.SemesterRepository;
 import com.project.repository.TopicRepository;
@@ -33,6 +34,9 @@ public class TopicService {
 
     @Autowired
     private SemesterRepository semesterRepository;
+
+    @Autowired
+    private ClassRepository classRepository;
 
     public Response createTopic(TopicDTO createRequest) {
         Response response = new Response();
@@ -239,6 +243,33 @@ public class TopicService {
             } else {
                 response.setTopicDTOList(new ArrayList<>());
                 throw new OurException("Cannot find topics with the input: " + topicName);
+            }
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred during get all topics " + e.getMessage());
+        }
+        return response;
+    }
+
+    public Response getUnchosenTopicsInClass(Long classId) {
+        Response response = new Response();
+        try {
+            List<TopicDTO> topicListDTO = new ArrayList<>();
+            if (classRepository.findById(classId).isPresent()) {
+                List<Topic> topicList = topicRepository.findUnchosenTopicsInClass(classId);
+                if (topicList != null) {
+                    topicListDTO = topicList.stream()
+                            .map(Converter::convertTopicToTopicDTO)
+                            .collect(Collectors.toList());
+                    response.setTopicDTOList(topicListDTO);
+                    response.setStatusCode(200);
+                    response.setMessage("Topics fetched successfully");
+                }
+            }else{
+                throw new OurException("Cannot find class by id: "+classId);
             }
         } catch (OurException e) {
             response.setStatusCode(400);

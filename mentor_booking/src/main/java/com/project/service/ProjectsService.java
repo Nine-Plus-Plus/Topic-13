@@ -27,6 +27,8 @@ public class ProjectsService {
     private ProjectsRepository projectsRepository;
     @Autowired
     private TopicRepository topicRepository;
+    @Autowired
+    private GroupRepository groupRepository;
 
     public Response createProject(ProjectsDTO createRequest) {
         Response response = new Response();
@@ -46,7 +48,9 @@ public class ProjectsService {
             project.setAvailableStatus(AvailableStatus.ACTIVE); // Set status to ACTIVE when creating a new project
             project.setDescription(createRequest.getDescription());
             project.setProjectName(createRequest.getProjectName());
-            project.setGroup(null);
+
+            Group group = groupRepository.findByIdAndAvailableStatus(createRequest.getGroup().getId(), AvailableStatus.ACTIVE);
+            project.setGroup(group);
             if (createRequest.getTopic() != null) {
                 Topic topic = topicRepository.findByIdAndAvailableStatus(createRequest.getTopic().getId(), AvailableStatus.ACTIVE);
                 if (topic == null) {

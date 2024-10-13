@@ -62,4 +62,10 @@ public class TopicController {
         Response response = topicService.getTopicBySemesterId(semesterId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
+    
+    @GetMapping("/user/get-unchosen-topics-in-class/{classId}")
+    public ResponseEntity<Response> getUnchosenTopicsInClass(@PathVariable Long classId){
+        Response response = topicService.getUnchosenTopicsInClass(classId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
 }

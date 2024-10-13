@@ -155,6 +155,7 @@ public class Converter {
         GroupDTO groupDTO = new GroupDTO();
         StudentsDTO studentsDTO = new StudentsDTO();
         List<StudentsDTO> studentsListDTO = new ArrayList<>();
+        ProjectsDTO projectsDTO = new ProjectsDTO();
         groupDTO.setId(convertGroup.getId());
         groupDTO.setGroupName(convertGroup.getGroupName());
         groupDTO.setTotalPoint(convertGroup.getTotalPoint());
@@ -167,6 +168,11 @@ public class Converter {
             studentsDTO.setDateCreated(null);
             studentsListDTO.add(studentsDTO);
         }
+        
+        if (convertGroup.getProject() != null){
+            groupDTO.setProject(convertProjectToProjectDTO(convertGroup.getProject()));
+        }
+        
         groupDTO.setStudents(studentsListDTO);
         groupDTO.setClassDTO(convertClassToClassDTO(convertGroup.getAClass()));
 

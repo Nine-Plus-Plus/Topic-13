@@ -46,6 +46,9 @@ public class UsersService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private MentorsService mentorsService;
+
     // Phương thức tạo user
     public Response createUser(UsersDTO registerRequest) {
         Response response = new Response();
@@ -376,6 +379,8 @@ public class UsersService {
                     .orElseThrow(() -> new OurException("User not found"));
             if(userProfile.getRole().getRoleName().equalsIgnoreCase("STUDENT")){
                 Students student = studentsRepository.findByUser_Id(userProfile.getId());
+                UsersDTO metorUserDTO = mentorsService.getMentorInformation(student.getAClass().getMentor().getId());
+                response.setUsersDTO(metorUserDTO);
                 response.setStudentsDTO(Converter.convertStudentToStudentDTO(student));
                 response.setStatusCode(200);
                 response.setMessage("Successfully");

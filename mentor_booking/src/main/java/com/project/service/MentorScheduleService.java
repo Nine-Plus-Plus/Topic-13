@@ -39,6 +39,12 @@ public class MentorScheduleService {
                 return response;
             }
 
+            if (inputRequest.getAvailableFrom() == null || inputRequest.getAvailableTo() == null) {
+                response.setStatusCode(400);
+                response.setMessage("AvailableFrom and AvailableTo must be provided");
+                return response;
+            }
+
             // Kiểm tra availableFrom phải trong tương lai
             if (inputRequest.getAvailableFrom().isBefore(LocalDateTime.now())) {
                 response.setStatusCode(400);
@@ -54,8 +60,9 @@ public class MentorScheduleService {
             }
 
             // Kiểm tra lịch hẹn không bị trùng
-            boolean isScheduleConflict = mentorScheduleRepository.existsByMentorAndAvailableFromLessThanEqualAndAvailableToGreaterThanEqual(
+            boolean isScheduleConflict = mentorScheduleRepository.existsByMentorAndAvailableStatusAndAvailableFromLessThanEqualAndAvailableToGreaterThanEqual(
                     mentor,
+                    AvailableStatus.ACTIVE,
                     inputRequest.getAvailableTo(),
                     inputRequest.getAvailableFrom()
             );
@@ -194,8 +201,9 @@ public class MentorScheduleService {
             }
 
             // Kiểm tra không có lịch trình nào trùng với thời gian mới
-            boolean isScheduleConflict = mentorScheduleRepository.existsByMentorAndAvailableFromLessThanEqualAndAvailableToGreaterThanEqualAndIdNot(
+            boolean isScheduleConflict = mentorScheduleRepository.existsByMentorAndAvailableStatusAndAvailableFromLessThanEqualAndAvailableToGreaterThanEqualAndIdNot(
                     mentorSchedule.getMentor(),
+                    AvailableStatus.ACTIVE,
                     updateRequest.getAvailableTo(),
                     updateRequest.getAvailableFrom(),
                     mentorSchedule.getId()  // Bỏ qua chính lịch trình hiện tại

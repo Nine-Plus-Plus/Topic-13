@@ -12,7 +12,7 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MentorsDTO {
     private Long id;
-    private int star;
+    private float star;
     private String mentorCode;
     private int totalTimeRemain;
     private LocalDate dateCreated;

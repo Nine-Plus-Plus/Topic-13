@@ -45,6 +45,12 @@ public class ClassController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
+    @GetMapping("/user/get-class-by-mentor/{mentorId}")
+    public ResponseEntity<Response> getClassByMentor(@PathVariable Long mentorId) {
+        Response response = classService.getClassByMentorId(mentorId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
     @GetMapping("/admin/get-classes-by-semester/{semesterId}")
     public ResponseEntity<Response> getClassesBySemester(@PathVariable Long semesterId) {
         Response response = classService.getClassesSemesterId(semesterId);
@@ -60,6 +66,12 @@ public class ClassController {
     @DeleteMapping("/admin/delete-class/{id}")
     public ResponseEntity<Response> deleteClass(@PathVariable Long id){
         Response response = classService.deleteClass(id);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @GetMapping("/admin/unassigned-mentors")
+    public ResponseEntity<Response> getUnassignedMentors() {
+        Response response = classService.getUnassignedMentors();
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }

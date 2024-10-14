@@ -1,5 +1,8 @@
 package com.project.service;
 
+import com.project.dto.ClassDTO;
+import com.project.enums.AvailableStatus;
+import com.project.model.Class;
 import com.project.dto.Response;
 import com.project.dto.SemesterDTO;
 import com.project.enums.AvailableStatus;
@@ -8,6 +11,7 @@ import com.project.model.Semester;
 import com.project.repository.ClassRepository;
 import com.project.repository.SemesterRepository;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,13 +25,10 @@ public class SemesterService {
     @Autowired
     private SemesterRepository semesterRepository;
 
-    @Autowired
-    private ClassRepository classRepository;
-
     public Response createSemester(SemesterDTO createRequest) {
         Response response = new Response();
         try {
-            if (semesterRepository.findBySemesterName(createRequest.getSemesterName()).isPresent()) {
+            if (semesterRepository.findBySemesterName(createRequest.getSemesterName(), AvailableStatus.ACTIVE).isPresent()) {
                 throw new OurException("Semester has already existed");
             }
             Semester semester = new Semester();
@@ -37,12 +38,10 @@ public class SemesterService {
             semesterRepository.save(semester);
             if (semester.getId() > 0) {
                 SemesterDTO dto = Converter.convertSemesterToSemesterDTO(semester);
-                dto.setClasses(createRequest.getClasses());
                 response.setSemesterDTO(dto);
-                response.setStatusCode(201);
+                response.setStatusCode(200);
                 response.setMessage("Semester added successfully");
             }
-
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -58,16 +57,21 @@ public class SemesterService {
     public Response getAllSemesters(){
         Response response = new Response();
         try {
-            List<Semester> semesterList = semesterRepository.findAll();
+            List<Semester> semesterList = semesterRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
+            List<SemesterDTO> semesterListDTO = new ArrayList<>();
             if (!semesterList.isEmpty()) {
-                List<SemesterDTO> semesterListDTO = semesterList
+                semesterListDTO = semesterList
                         .stream()
                         .map(Converter::convertSemesterToSemesterDTO)
                         .collect(Collectors.toList());
                 response.setSemesterDTOList(semesterListDTO);
                 response.setStatusCode(200);
                 response.setMessage("Semester fetched successfully");
-            }else throw new OurException("There is no semester in the database");
+            }else{
+                response.setSemesterDTOList(semesterListDTO);
+                response.setStatusCode(400);
+                response.setMessage("No data found");
+            }
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -82,13 +86,18 @@ public class SemesterService {
     public Response getSemesterById(Long id){
         Response response = new Response();
         try {
-            Semester findSemester = semesterRepository.findById(id).orElse(null);
+            Semester findSemester = semesterRepository.findByIdAndAvailableStatus(id,AvailableStatus.ACTIVE);
+            SemesterDTO semesterDTO = new SemesterDTO();
             if (findSemester != null) {
-                SemesterDTO dto = Converter.convertSemesterToSemesterDTO(findSemester);
-                response.setSemesterDTO(dto);
+                semesterDTO = Converter.convertSemesterToSemesterDTO(findSemester);
+                response.setSemesterDTO(semesterDTO);
                 response.setStatusCode(200);
                 response.setMessage("Successfully");
-            }else throw new OurException("Cannot find semester");
+            }else{
+                response.setSemesterDTO(semesterDTO);
+                response.setStatusCode(400);
+                response.setMessage("No data found");
+            }
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -105,11 +114,12 @@ public class SemesterService {
         try {
             Semester presentSemester = semesterRepository.findById(id)
                     .orElseThrow(() -> new OurException("Cannot find semester with id: "+id));
-            if (semesterRepository.findBySemesterName(newSemester.getSemesterName()).isPresent()) {
+            if (semesterRepository.findBySemesterName(newSemester.getSemesterName(), AvailableStatus.ACTIVE).isPresent()) {
                 throw new OurException("Semester has already existed");
             }
             presentSemester.setSemesterName(newSemester.getSemesterName());
             semesterRepository.save(presentSemester);
+
             SemesterDTO dto = Converter.convertSemesterToSemesterDTO(presentSemester);
             response.setSemesterDTO(dto);
             response.setStatusCode(200);
@@ -132,6 +142,7 @@ public class SemesterService {
                     .orElseThrow(() -> new OurException("Cannot find semester with id: " + id));
             deleteSemester.setAvailableStatus(AvailableStatus.DELETED);
             semesterRepository.save(deleteSemester);
+
             response.setStatusCode(200);
             response.setMessage("Semester deleted successfully");
         } catch (OurException e) {

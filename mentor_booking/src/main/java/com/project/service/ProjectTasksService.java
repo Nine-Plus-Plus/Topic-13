@@ -11,20 +11,18 @@ import com.project.repository.ProjectsRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
+//Need Justify
 @Service
 public class ProjectTasksService {
 
     @Autowired
     private ProjectTasksRepository projectTasksRepository;
-
     @Autowired
     private ProjectsRepository projectsRepository;
-
     @Autowired
     private ModelMapper modelMapper;
 
@@ -35,11 +33,9 @@ public class ProjectTasksService {
             task.setStatus(ProjectTaskStatus.INPROGRESS);
             task.setDateCreated(LocalDateTime.now());
             task.setDateUpdated(LocalDateTime.now());
-
             Projects project = projectsRepository.findById(taskDTO.getProjects().getId())
                     .orElseThrow(() -> new OurException("Project not found"));
             task.setProjects(project);
-
             projectTasksRepository.save(task);
             ProjectTasksDTO dto = modelMapper.map(task, ProjectTasksDTO.class);
             response.setProjectTasksDTOList(Arrays.asList(dto));
@@ -94,7 +90,6 @@ public class ProjectTasksService {
         try {
             ProjectTasks task = projectTasksRepository.findById(id)
                     .orElseThrow(() -> new OurException("Task not found"));
-
             if (taskDTO.getTaskName() != null) {
                 task.setTaskName(taskDTO.getTaskName());
             }
@@ -108,7 +103,6 @@ public class ProjectTasksService {
                 task.setStatus(taskDTO.getStatus());
             }
             task.setDateUpdated(LocalDateTime.now());
-
             projectTasksRepository.save(task);
             ProjectTasksDTO dto = modelMapper.map(task, ProjectTasksDTO.class);
             response.setProjectTasksDTOList(Arrays.asList(dto));
@@ -124,6 +118,7 @@ public class ProjectTasksService {
         return response;
     }
 
+    //Need justify
     public Response deleteTask(Long id) {
         Response response = new Response();
         try {

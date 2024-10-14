@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 @Service
 public class ProjectsService {
 
@@ -30,7 +29,6 @@ public class ProjectsService {
     private TopicRepository topicRepository;
     @Autowired
     private GroupRepository groupRepository;
-
 
     public Response createProject(ProjectsDTO createRequest) {
         Response response = new Response();

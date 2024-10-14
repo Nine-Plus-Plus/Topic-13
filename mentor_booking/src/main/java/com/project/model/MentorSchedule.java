@@ -1,6 +1,7 @@
 
 package com.project.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.project.enums.AvailableStatus;
 import com.project.enums.MentorScheduleStatus;
 import jakarta.persistence.CascadeType;
@@ -28,9 +29,11 @@ public class MentorSchedule {
     private Long id;
     
     @Column(name = "available_from")
+    @JsonFormat(pattern = "dd-MM-yyyy HH:mm")
     private LocalDateTime availableFrom;
     
     @Column(name = "available_to")
+    @JsonFormat(pattern = "dd-MM-yyyy HH:mm")
     private LocalDateTime availableTo;
     
     @Enumerated(EnumType.STRING)

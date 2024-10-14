@@ -2,6 +2,7 @@ package com.project.controller;
 
 import com.project.dto.Response;
 import com.project.dto.SkillsDTO;
+import com.project.repository.SkillsRepository;
 import com.project.service.SkillsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

@@ -48,7 +48,7 @@ public class GroupService {
             group.setDateUpdated(LocalDate.now());
 
             Students student = studentsRepository.findById(inputRequest.getStudents().get(0).getId()).get();
-            if (student.getGroup() == null) {
+            if (student.getGroup().getId() > 0) {
                 throw new OurException("The student have a group");
             }
             student.setGroupRole(GroupRole.LEADER);

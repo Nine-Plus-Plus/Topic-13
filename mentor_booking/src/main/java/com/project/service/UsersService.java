@@ -48,6 +48,9 @@ public class UsersService {
 
     @Autowired
     private MentorsService mentorsService;
+    
+    @Autowired
+    private GroupRepository groupRepository;
 
     // Phương thức tạo user
     public Response createUser(UsersDTO registerRequest) {
@@ -381,10 +384,13 @@ public class UsersService {
             if(userProfile.getRole().getRoleName().equalsIgnoreCase("STUDENT")){
                 Students student = studentsRepository.findByUser_Id(userProfile.getId());
                 UsersDTO metorUserDTO = mentorsService.getMentorInformation(student.getAClass().getMentor().getId());
+                Group group = groupRepository.findByIdAndAvailableStatus(student.getGroup().getId(), AvailableStatus.ACTIVE);
+                GroupDTO groupDTO = Converter.convertGroupToGroupDTO(group);
                 List<SkillsDTO> skillsDTOList = mentorsService.getSkillsByMentor(student.getAClass().getMentor().getId());
                 response.setUsersDTO(metorUserDTO);
                 response.setSkillsDTOList(skillsDTOList);
                 response.setStudentsDTO(Converter.convertStudentToStudentDTO(student));
+                response.setGroupDTO(groupDTO);
                 response.setStatusCode(200);
                 response.setMessage("Successfully");
             } else if (userProfile.getRole().getRoleName().equalsIgnoreCase("MENTOR")) {

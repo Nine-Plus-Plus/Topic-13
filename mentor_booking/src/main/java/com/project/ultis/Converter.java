@@ -82,6 +82,7 @@ public class Converter {
         studentsDTO.setDateUpdated(convertStudent.getDateUpdated());
         studentsDTO.setDateCreated(convertStudent.getDateCreated());
         studentsDTO.setPoint(convertStudent.getPoint());
+        studentsDTO.setGroupRole(convertStudent.getGroupRole());
         if (convertStudent.getAClass() != null) {
             studentsDTO.setAClass(convertClassToClassDTO(convertStudent.getAClass()));
         }
@@ -162,17 +163,20 @@ public class Converter {
         groupDTO.setDateCreated(convertGroup.getDateCreated());
 
         for (Students student : convertGroup.getStudents()) {
-            studentsDTO = convertStudentToStudentDTO(student);
-            studentsDTO.setAClass(null);
-            studentsDTO.setDateUpdated(null);
-            studentsDTO.setDateCreated(null);
+            studentsDTO.setId(student.getId());
+            studentsDTO.setStudentCode(student.getStudentCode());
+            studentsDTO.setExpertise(student.getExpertise());
+            studentsDTO.setDateUpdated(student.getDateUpdated());
+            studentsDTO.setDateCreated(student.getDateCreated());
+            studentsDTO.setPoint(student.getPoint());
+            studentsDTO.setGroupRole(student.getGroupRole());
             studentsListDTO.add(studentsDTO);
         }
-        
-        if (convertGroup.getProject() != null){
+
+        if (convertGroup.getProject() != null) {
             groupDTO.setProject(convertProjectToProjectDTO(convertGroup.getProject()));
         }
-        
+
         groupDTO.setStudents(studentsListDTO);
         groupDTO.setClassDTO(convertClassToClassDTO(convertGroup.getAClass()));
 
@@ -180,7 +184,7 @@ public class Converter {
         return groupDTO;
     }
 
-    public static MentorScheduleDTO convertMentorScheduleToMentorScheduleDTO(MentorSchedule mentorSchedule){
+    public static MentorScheduleDTO convertMentorScheduleToMentorScheduleDTO(MentorSchedule mentorSchedule) {
         MentorScheduleDTO mentorScheduleDTO = new MentorScheduleDTO();
 
         mentorScheduleDTO.setId(mentorSchedule.getId());
@@ -202,20 +206,20 @@ public class Converter {
 
         return mentorScheduleDTO;
     }
-    
-    public static ProjectsDTO convertProjectToProjectDTO(Projects convertProject){
+
+    public static ProjectsDTO convertProjectToProjectDTO(Projects convertProject) {
         ProjectsDTO projectsDTO = new ProjectsDTO();
-        
+
         projectsDTO.setId(convertProject.getId());
         projectsDTO.setDateCreated(convertProject.getDateCreated());
         projectsDTO.setDateUpdated(convertProject.getDateUpdated());
         projectsDTO.setDescription(convertProject.getDescription());
         projectsDTO.setProjectName(convertProject.getProjectName());
         projectsDTO.setPercentage(convertProject.getPercentage());
-        if (convertProject.getProjectTasks() != null){
+        if (convertProject.getProjectTasks() != null) {
             List<ProjectTasksDTO> projectTasksDTOList = new ArrayList<>();
             ProjectTasksDTO tasksDTO = new ProjectTasksDTO();
-            for (ProjectTasks task: convertProject.getProjectTasks()){
+            for (ProjectTasks task : convertProject.getProjectTasks()) {
                 tasksDTO.setId(task.getId());
                 tasksDTO.setTaskName(task.getTaskName());
                 tasksDTO.setStatus(task.getStatus());

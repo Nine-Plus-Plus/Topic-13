@@ -50,6 +50,7 @@ public class ProjectsService {
             project.setProjectName(createRequest.getProjectName());
 
             Group group = groupRepository.findByIdAndAvailableStatus(createRequest.getGroup().getId(), AvailableStatus.ACTIVE);
+            group.setProject(project);
             project.setGroup(group);
             if (createRequest.getTopic() != null) {
                 Topic topic = topicRepository.findByIdAndAvailableStatus(createRequest.getTopic().getId(), AvailableStatus.ACTIVE);

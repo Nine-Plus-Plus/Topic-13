@@ -49,6 +49,7 @@ public class GroupService {
 
             Students student = studentsRepository.findById(inputRequest.getStudents().get(0).getId()).get();
             student.setGroupRole(GroupRole.LEADER);
+            student.setGroup(group);
             List<Students> studentsList = new ArrayList<>();
             studentsList.add(student);
             group.setStudents(studentsList);

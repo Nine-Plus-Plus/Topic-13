@@ -39,7 +39,7 @@ public class GroupService {
     public Response createGroup(GroupDTO inputRequest) {
         Response response = new Response();
         try {
-            if (groupRepository.findGroup(inputRequest.getGroupName(), inputRequest.getId(), AvailableStatus.ACTIVE).isPresent()) {
+            if (groupRepository.findGroup(inputRequest.getGroupName(), inputRequest.getClassDTO().getId(), AvailableStatus.ACTIVE).isPresent()) {
                 throw new OurException("Group name have existed");
             }
             Group group = new Group();
@@ -48,10 +48,15 @@ public class GroupService {
             group.setDateUpdated(LocalDate.now());
 
             Students student = studentsRepository.findById(inputRequest.getStudents().get(0).getId()).get();
+            if (student.getGroup() != null) {
+                throw new OurException("The student have a group");
+            }
             student.setGroupRole(GroupRole.LEADER);
+            student.setGroup(group);
             List<Students> studentsList = new ArrayList<>();
             studentsList.add(student);
             group.setStudents(studentsList);
+            group.setTotalPoint(student.getPoint());
 
             group.setProject(null);
 
@@ -180,9 +185,15 @@ public class GroupService {
             if (findGroup != null) {
                 Students student = studentsRepository.findByIdAndAvailableStatus(newMember.getId(), AvailableStatus.ACTIVE);
                 if (student != null) {
+                    if (student.getGroup() != null) {
+                        throw new OurException("The student have a group");
+                    }
                     List<Students> studentsList = findGroup.getStudents();
                     student.setGroupRole(GroupRole.MEMBER);
                     studentsList.add(student);
+                    student.setGroup(findGroup);
+                    int currentPoint = findGroup.getTotalPoint();
+                    findGroup.setTotalPoint(currentPoint + student.getPoint());
                     studentsRepository.save(student);
                     groupRepository.save(findGroup);
                     response.setStatusCode(200);
@@ -212,7 +223,10 @@ public class GroupService {
                 if (student != null) {
                     List<Students> studentsList = findGroup.getStudents();
                     student.setGroupRole(null);
+                    student.setGroup(null);
                     studentsList.remove(student);
+                    int currentPoint = findGroup.getTotalPoint();
+                    findGroup.setTotalPoint(currentPoint - student.getPoint());
                     findGroup.setStudents(studentsList);
                     studentsRepository.save(student);
                     groupRepository.save(findGroup);

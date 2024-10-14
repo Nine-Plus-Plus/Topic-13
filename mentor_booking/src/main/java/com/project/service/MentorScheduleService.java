@@ -187,17 +187,18 @@ public class MentorScheduleService {
             }
 
             // Kiểm tra availableFrom phải nhỏ hơn availableTo
-            if (updateRequest.getAvailableFrom().isAfter(updateRequest.getAvailableTo())) {
+            if (updateRequest.getAvailableFrom().isEqual(updateRequest.getAvailableTo()) || updateRequest.getAvailableFrom().isAfter(updateRequest.getAvailableTo())) {
                 response.setStatusCode(400);
                 response.setMessage("Available from time must be before available to time");
                 return response;
             }
 
             // Kiểm tra không có lịch trình nào trùng với thời gian mới
-            boolean isScheduleConflict = mentorScheduleRepository.existsByMentorAndAvailableFromLessThanEqualAndAvailableToGreaterThanEqual(
+            boolean isScheduleConflict = mentorScheduleRepository.existsByMentorAndAvailableFromLessThanEqualAndAvailableToGreaterThanEqualAndIdNot(
                     mentorSchedule.getMentor(),
                     updateRequest.getAvailableTo(),
-                    updateRequest.getAvailableFrom()
+                    updateRequest.getAvailableFrom(),
+                    mentorSchedule.getId()  // Bỏ qua chính lịch trình hiện tại
             );
 
             if (isScheduleConflict) {

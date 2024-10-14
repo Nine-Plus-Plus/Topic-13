@@ -386,7 +386,9 @@ public class UsersService {
                 UsersDTO metorUserDTO = mentorsService.getMentorInformation(student.getAClass().getMentor().getId());
                 Group group = groupRepository.findByIdAndAvailableStatus(student.getGroup().getId(), AvailableStatus.ACTIVE);
                 GroupDTO groupDTO = Converter.convertGroupToGroupDTO(group);
+                List<SkillsDTO> skillsDTOList = mentorsService.getSkillsByMentor(student.getAClass().getMentor().getId());
                 response.setUsersDTO(metorUserDTO);
+                response.setSkillsDTOList(skillsDTOList);
                 response.setStudentsDTO(Converter.convertStudentToStudentDTO(student));
                 response.setGroupDTO(groupDTO);
                 response.setStatusCode(200);

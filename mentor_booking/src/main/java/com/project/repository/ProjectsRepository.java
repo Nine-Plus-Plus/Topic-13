@@ -13,3 +13,4 @@ public interface ProjectsRepository extends JpaRepository<Projects, Long>{
     
     Projects findByIdAndAvailableStatus (Long id, AvailableStatus availableStatus);
 }
+

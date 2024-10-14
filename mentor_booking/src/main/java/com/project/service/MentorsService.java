@@ -31,6 +31,9 @@ public class MentorsService {
     @Autowired
     private UsersRepository usersRepository;
 
+    @Autowired
+    private MentorScheduleService mentorScheduleService;
+
     // Phương thức lấy tất cả mentors
     public Response getAllMentors() {
         Response response = new Response();
@@ -204,6 +207,13 @@ public class MentorsService {
                 response.setStatusCode(400);
                 response.setMessage("No mentors found.");
             } else {
+
+                List<MentorScheduleDTO> mentorScheduleDTOList = null;
+                for (MentorsDTO m : mentorsDTOList) {
+                    List<MentorScheduleDTO> scheduleDTOList = mentorScheduleService.findAllMentorScheduleByMentor(m.getId());
+                    m.setMentorSchedules(scheduleDTOList);
+                }
+
                 response.setStatusCode(200);
                 response.setMentorsDTOList(mentorsDTOList);
                 response.setMessage("Mentors found successfully.");
@@ -236,5 +246,15 @@ public class MentorsService {
 
         response.setUsersDTO(usersDTO);
         return usersDTO;
+    }
+
+    public List<SkillsDTO> getSkillsByMentor(Long mentorId){
+        List<SkillsDTO> skillsDTOList = new ArrayList<>();
+        List<Skills> skillsList = mentorsRepository.findByIdAndAvailableStatus(mentorId,AvailableStatus.ACTIVE).getSkills();
+        skillsDTOList = skillsList
+                .stream()
+                .map(Converter::convertSkillToSkillDTO)
+                .collect(Collectors.toList());
+        return skillsDTOList;
     }
 }

@@ -187,17 +187,18 @@ public class MentorScheduleService {
             }
 
             // Kiểm tra availableFrom phải nhỏ hơn availableTo
-            if (updateRequest.getAvailableFrom().isAfter(updateRequest.getAvailableTo())) {
+            if (updateRequest.getAvailableFrom().isEqual(updateRequest.getAvailableTo()) || updateRequest.getAvailableFrom().isAfter(updateRequest.getAvailableTo())) {
                 response.setStatusCode(400);
                 response.setMessage("Available from time must be before available to time");
                 return response;
             }
 
             // Kiểm tra không có lịch trình nào trùng với thời gian mới
-            boolean isScheduleConflict = mentorScheduleRepository.existsByMentorAndAvailableFromLessThanEqualAndAvailableToGreaterThanEqual(
+            boolean isScheduleConflict = mentorScheduleRepository.existsByMentorAndAvailableFromLessThanEqualAndAvailableToGreaterThanEqualAndIdNot(
                     mentorSchedule.getMentor(),
                     updateRequest.getAvailableTo(),
-                    updateRequest.getAvailableFrom()
+                    updateRequest.getAvailableFrom(),
+                    mentorSchedule.getId()  // Bỏ qua chính lịch trình hiện tại
             );
 
             if (isScheduleConflict) {
@@ -223,5 +224,47 @@ public class MentorScheduleService {
             response.setMessage("Error occurred while update mentor schedule: " + e.getMessage());
         }
         return response;
+    }
+
+    public Response getAllMentorScheduleByMentor(Long mentorId){
+        Response response = new Response();
+        try{
+            List<MentorScheduleDTO> mentorScheduleDTOList = new ArrayList<>();
+            List<MentorSchedule> mentorScheduleList = mentorScheduleRepository.findByMentorIdAndAvailableStatusAndStatus(mentorId, AvailableStatus.ACTIVE, MentorScheduleStatus.AVAILABLE);
+            if(!mentorScheduleList.isEmpty()){
+                mentorScheduleDTOList = mentorScheduleList.stream()
+                        .map(Converter::convertMentorScheduleToMentorScheduleDTO)
+                        .collect(Collectors.toList());
+
+                response.setMentorScheduleDTOList(mentorScheduleDTOList);
+                response.setStatusCode(200);
+                response.setMessage("Mentor Schedule fetched successfully");
+            }else{
+                response.setMentorScheduleDTOList(mentorScheduleDTOList);
+                response.setStatusCode(400);
+                response.setMessage("No data found");
+            }
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred while fetch mentor schedule: " + e.getMessage());
+        }
+        return response;
+    }
+
+    public List<MentorScheduleDTO> findAllMentorScheduleByMentor(Long mentorId){
+        List<MentorScheduleDTO> mentorScheduleDTOList = new ArrayList<>();
+        List<MentorSchedule> mentorScheduleList = mentorScheduleRepository.findByMentorIdAndAvailableStatusAndStatus(mentorId, AvailableStatus.ACTIVE, MentorScheduleStatus.AVAILABLE);
+        if(!mentorScheduleList.isEmpty()){
+            mentorScheduleDTOList = mentorScheduleList.stream()
+                    .map(Converter::convertMentorScheduleToMentorScheduleDTO)
+                    .collect(Collectors.toList());
+        }
+        if (mentorScheduleList.isEmpty()) {
+            return new ArrayList<>(); // Trả về danh sách trống thay vì null
+        }
+        return mentorScheduleDTOList;
     }
 }

@@ -108,13 +108,15 @@ public class ProjectsService {
         Response response = new Response();
         try {
             Projects project = projectsRepository.findByIdAndAvailableStatus(id, AvailableStatus.ACTIVE);
+            // dat sai thu tu logic, nen check null truoc de throw
+            if (project == null) {
+                throw new OurException("No data found");
+            }
             ProjectsDTO dto = Converter.convertProjectToProjectDTO(project);
             response.setProjectsDTO(dto);
             if (project != null) {
                 response.setStatusCode(200);
                 response.setMessage("Successfully");
-            } else {
-                throw new OurException("No data found");
             }
         } catch (OurException e) {
             response.setStatusCode(400);

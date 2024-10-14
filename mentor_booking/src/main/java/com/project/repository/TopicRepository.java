@@ -28,3 +28,4 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
     @Query("SELECT t FROM Topic t WHERE t.id NOT IN (SELECT g.project.topic.id FROM Group g WHERE g.aClass.id = :classId)")
     List<Topic> findUnchosenTopicsInClass(@Param("classId") Long classId);
 }
+

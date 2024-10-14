@@ -153,6 +153,7 @@ public class UsersService {
                 student.setDateCreated(LocalDate.now());
                 student.setPoint(100);
                 student.setAClass(aClass);
+                student.setGroupRole(null);
                 student.setAvailableStatus(AvailableStatus.ACTIVE);
                 student.setGroup(null); // Để group_id null
                 studentsRepository.save(student);

@@ -44,6 +44,7 @@ public class Students {
     @JsonIgnore
     private Class aClass;
     
+    @Enumerated(EnumType.STRING)
     @Column(name = "group_role")
     private GroupRole groupRole;
 

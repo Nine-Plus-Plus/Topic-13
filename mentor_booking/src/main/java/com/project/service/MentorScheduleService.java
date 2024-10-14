@@ -252,4 +252,18 @@ public class MentorScheduleService {
         }
         return response;
     }
+
+    public List<MentorScheduleDTO> findAllMentorScheduleByMentor(Long mentorId){
+        List<MentorScheduleDTO> mentorScheduleDTOList = new ArrayList<>();
+        List<MentorSchedule> mentorScheduleList = mentorScheduleRepository.findByMentorIdAndAvailableStatusAndStatus(mentorId, AvailableStatus.ACTIVE, MentorScheduleStatus.AVAILABLE);
+        if(!mentorScheduleList.isEmpty()){
+            mentorScheduleDTOList = mentorScheduleList.stream()
+                    .map(Converter::convertMentorScheduleToMentorScheduleDTO)
+                    .collect(Collectors.toList());
+        }
+        if (mentorScheduleList.isEmpty()) {
+            return new ArrayList<>(); // Trả về danh sách trống thay vì null
+        }
+        return mentorScheduleDTOList;
+    }
 }

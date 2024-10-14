@@ -31,6 +31,9 @@ public class MentorsService {
     @Autowired
     private UsersRepository usersRepository;
 
+    @Autowired
+    private MentorScheduleService mentorScheduleService;
+
     // Phương thức lấy tất cả mentors
     public Response getAllMentors() {
         Response response = new Response();
@@ -204,6 +207,13 @@ public class MentorsService {
                 response.setStatusCode(400);
                 response.setMessage("No mentors found.");
             } else {
+
+                List<MentorScheduleDTO> mentorScheduleDTOList = null;
+                for (MentorsDTO m : mentorsDTOList) {
+                    List<MentorScheduleDTO> scheduleDTOList = mentorScheduleService.findAllMentorScheduleByMentor(m.getId());
+                    m.setMentorSchedules(scheduleDTOList);
+                }
+
                 response.setStatusCode(200);
                 response.setMentorsDTOList(mentorsDTOList);
                 response.setMessage("Mentors found successfully.");

@@ -39,7 +39,13 @@ public class UsersController {
     }
 
     @PostMapping("/admin/create-mentor")
-    public ResponseEntity<Response> createMentorRequestResponseEntity(@RequestBody CreateMentorRequest createMentorRequest){
+    public ResponseEntity<Response> createMentorRequestResponseEntity(
+            @RequestPart("mentor") CreateMentorRequest createMentorRequest,
+            @RequestPart(value = "avatarFile", required = false) MultipartFile avatarFile
+    ){
+        if (avatarFile != null && !avatarFile.isEmpty()) {
+            createMentorRequest.setAvatarFile(avatarFile);
+        }
         Response response = userService.createMentors(createMentorRequest);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }

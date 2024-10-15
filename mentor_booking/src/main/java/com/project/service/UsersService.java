@@ -220,13 +220,20 @@ public class UsersService {
             newUser.setPassword(encodedPassword);
             newUser.setFullName(request.getFullName());
             newUser.setBirthDate(request.getBirthDate());
-            newUser.setAvatar(request.getAvatar());
             newUser.setAddress(request.getAddress());
             newUser.setPhone(request.getPhone());
             newUser.setGender(request.getGender());
             newUser.setDateCreated(LocalDateTime.now());
             newUser.setRole(role);
             newUser.setAvailableStatus(AvailableStatus.ACTIVE);
+            try {
+                if (request.getAvatarFile() != null && !request.getAvatarFile().isEmpty()) {
+                    String avatarUrl = awsS3Service.saveImageToS3(request.getAvatarFile());
+                    newUser.setAvatar(avatarUrl);
+                }
+            } catch (Exception e) {
+                throw new OurException("Error uploading avatar: " + e.getMessage());
+            }
             // Lưu người dùng vào database
             usersRepository.save(newUser);
             if (newUser.getId() > 0) {

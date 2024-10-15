@@ -12,9 +12,11 @@ import com.project.repository.MentorScheduleRepository;
 import com.project.repository.MentorsRepository;
 import com.project.repository.SkillsRepository;
 import com.project.repository.UsersRepository;
+import com.project.security.AwsS3Service;
 import com.project.ultis.Converter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -39,6 +41,9 @@ public class MentorsService {
 
     @Autowired
     private MentorScheduleRepository mentorScheduleRepository;
+
+    @Autowired
+    private AwsS3Service awsS3Service;
 
     // Phương thức lấy tất cả mentors
     public Response getAllMentors() {
@@ -97,7 +102,7 @@ public class MentorsService {
     }
 
 
-    public Response updateMentor(Long userId, CreateMentorRequest updateRequest) {
+    public Response updateMentor(Long userId, CreateMentorRequest updateRequest, MultipartFile avatarFile) {
         Response response = new Response();
         try {
             // Tìm kiếm user với userId và trạng thái ACTIVE
@@ -116,12 +121,17 @@ public class MentorsService {
                 return response; // Trả về phản hồi nếu không tìm thấy mentor
             }
 
+            if (avatarFile != null && !avatarFile.isEmpty()) {
+                String avatarUrl = awsS3Service.saveImageToS3(avatarFile);
+                updateUser.setAvatar(avatarUrl);
+                System.out.println("Avatar URL: " + avatarUrl); // Kiểm tra URL
+            }
+
             // Cập nhật thông tin người dùng hiện có
             updateUser.setUsername(updateRequest.getUsername());
             updateUser.setEmail(updateRequest.getEmail());
             updateUser.setFullName(updateRequest.getFullName());
             updateUser.setBirthDate(updateRequest.getBirthDate());
-            updateUser.setAvatar(updateRequest.getAvatar());
             updateUser.setAddress(updateRequest.getAddress());
             updateUser.setPhone(updateRequest.getPhone());
             updateUser.setGender(updateRequest.getGender());

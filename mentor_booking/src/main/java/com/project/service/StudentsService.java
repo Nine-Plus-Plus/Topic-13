@@ -11,9 +11,11 @@ import com.project.model.Users;
 import com.project.repository.ClassRepository;
 import com.project.repository.StudentsRepository;
 import com.project.repository.UsersRepository;
+import com.project.security.AwsS3Service;
 import com.project.ultis.Converter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -33,6 +35,8 @@ public class StudentsService {
     @Autowired
     private ClassRepository classRepository;
 
+    @Autowired
+    private AwsS3Service awsS3Service;
 
     // Phương thức lấy tất cả sinh viên
     public Response getAllStudents() {
@@ -153,7 +157,7 @@ public class StudentsService {
         return str == null || str.trim().isEmpty();
     }
 
-    public Response updateStudent(Long userId, CreateStudentRequest updateRequest) {
+    public Response updateStudent(Long userId, CreateStudentRequest updateRequest, MultipartFile avatarFile) {
         Response response = new Response();
         try {
 
@@ -165,6 +169,12 @@ public class StudentsService {
                 return response; // Trả về phản hồi nếu không tìm thấy user
             }
 
+            if (avatarFile != null && !avatarFile.isEmpty()) {
+                String avatarUrl = awsS3Service.saveImageToS3(avatarFile);
+                updateUser.setAvatar(avatarUrl);
+                System.out.println("Avatar URL: " + avatarUrl); // Kiểm tra URL
+            }
+
             // Kiểm tra Class
             Class aClass = classRepository.findById(updateRequest.getAClass().getId())
                     .orElseThrow(() -> new OurException("Class not found"));
@@ -173,7 +183,6 @@ public class StudentsService {
             updateUser.setEmail(updateRequest.getEmail());
             updateUser.setFullName(updateRequest.getFullName());
             updateUser.setBirthDate(updateRequest.getBirthDate());
-            updateUser.setAvatar(updateRequest.getAvatar());
             updateUser.setAddress(updateRequest.getAddress());
             updateUser.setPhone(updateRequest.getPhone());
             updateUser.setGender(updateRequest.getGender());

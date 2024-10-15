@@ -57,4 +57,27 @@ public class AwsS3Service {
 
         return s3LocationImage;
     }
+
+    // Cập nhật file S3: Xóa file cũ và upload file mới
+    public String updateImageInS3(String oldImageName, MultipartFile newPhoto) {
+        if (oldImageName != null && !oldImageName.isEmpty()) {
+            deleteImageFromS3(oldImageName);
+        }
+        return saveImageToS3(newPhoto);
+    }
+
+    // Xóa file khỏi S3
+    public void deleteImageFromS3(String fileName) {
+        try {
+            BasicAWSCredentials awsCredentials = new BasicAWSCredentials(awsS3AccessKey, awsS3SecretKey);
+            AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
+                    .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
+                    .withRegion("ap-southeast-2")
+                    .build();
+
+            s3Client.deleteObject(bucketName, fileName);
+        } catch (Exception e) {
+            throw new OurException("Unable to delete image from S3 bucket: " + e.getMessage());
+        }
+    }
 }

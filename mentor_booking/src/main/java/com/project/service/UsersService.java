@@ -383,14 +383,21 @@ public class UsersService {
                     .orElseThrow(() -> new OurException("User not found"));
             if(userProfile.getRole().getRoleName().equalsIgnoreCase("STUDENT")){
                 Students student = studentsRepository.findByUser_Id(userProfile.getId());
-                UsersDTO metorUserDTO = mentorsService.getMentorInformation(student.getAClass().getMentor().getId());
-                Group group = groupRepository.findByIdAndAvailableStatus(student.getGroup().getId(), AvailableStatus.ACTIVE);
-                GroupDTO groupDTO = Converter.convertGroupToGroupDTO(group);
-                List<SkillsDTO> skillsDTOList = mentorsService.getSkillsByMentor(student.getAClass().getMentor().getId());
-                response.setUsersDTO(metorUserDTO);
-                response.setSkillsDTOList(skillsDTOList);
+                UsersDTO mentorUserDTO = mentorsService.getMentorInformation(student.getAClass().getMentor().getId());
+                // Kiểm tra nếu sinh viên có group và group ID không null
+                if (student.getGroup() != null && student.getGroup().getId() != null) {
+                    Group group = groupRepository.findByIdAndAvailableStatus(student.getGroup().getId(), AvailableStatus.ACTIVE);
+                    GroupDTO groupDTO = Converter.convertGroupToGroupDTO(group);
+                    response.setGroupDTO(groupDTO);
+                }
+                // Kiểm tra nếu mentor ID không null trước khi lấy kỹ năng của mentor
+                if (student.getAClass().getMentor().getId() != null && student.getAClass().getMentor().getSkills().isEmpty()) {
+                    List<SkillsDTO> skillsDTOList = mentorsService.getSkillsByMentor(student.getAClass().getMentor().getId());
+                    response.setSkillsDTOList(skillsDTOList);
+                }
+                // Gán thông tin sinh viên và mentor vào response
+                response.setUsersDTO(mentorUserDTO);
                 response.setStudentsDTO(Converter.convertStudentToStudentDTO(student));
-                response.setGroupDTO(groupDTO);
                 response.setStatusCode(200);
                 response.setMessage("Successfully");
             } else if (userProfile.getRole().getRoleName().equalsIgnoreCase("MENTOR")) {

@@ -17,7 +17,7 @@ public class Mentors {
     private Long id;
 
     @Column(name = "star")
-    private int star;
+    private float star;
     @Column(name = "mentor_code")
     private String mentorCode;
     @Column(name = "total_time_remain")

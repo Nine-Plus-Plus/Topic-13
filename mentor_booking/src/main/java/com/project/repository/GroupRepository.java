@@ -21,4 +21,6 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     List<Group> findByAvailableStatus(AvailableStatus availableStatus);
     
     Group findByIdAndAvailableStatus(Long id, AvailableStatus availableStatus);
+    
+    List<Group> findByAClassIdAndAvailableStatus(Long classId, AvailableStatus availableStatus);
 }

@@ -247,4 +247,29 @@ public class GroupService {
         }
         return response;
     }
+
+    public Response getGroupsInClass(Long classId) {
+        Response response = new Response();
+        try {
+            List<Group> groupList = groupRepository.findByAClassIdAndAvailableStatus(classId, AvailableStatus.ACTIVE);
+            List<GroupDTO> groupListDTO = new ArrayList<>();
+            if (groupList != null) {
+                groupListDTO = groupList.stream()
+                        .map(Converter::convertGroupToGroupDTO)
+                        .collect(Collectors.toList());
+                response.setGroupDTOList(groupListDTO);
+                response.setStatusCode(200);
+                response.setMessage("Successfully");
+            } else {
+                throw new OurException("Cannot find group");
+            }
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occured during get group " + e.getMessage());
+        }
+        return response;
+    }
 }

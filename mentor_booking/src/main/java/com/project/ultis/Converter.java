@@ -232,5 +232,19 @@ public class Converter {
         projectsDTO.setTopic(convertTopicToTopicDTO(convertProject.getTopic()));
         return projectsDTO;
     }
+    
+    public static BookingDTO convertBookingToBookingDTO(Booking convertBooking){
+        BookingDTO bookingDTO = new BookingDTO();
+        
+        bookingDTO.setDateCreated(convertBooking.getDateCreated());
+        bookingDTO.setDateUpdated(convertBooking.getDateUpdated());
+        bookingDTO.setPointPay(convertBooking.getPointPay());
+        bookingDTO.setGroup(convertGroupToGroupDTO(convertBooking.getGroup()));
+        bookingDTO.setStatus(convertBooking.getStatus());
+        bookingDTO.setMentorSchedule(convertMentorScheduleToMentorScheduleDTO(convertBooking.getMentorSchedule()));
+        bookingDTO.setAvailableStatus(convertBooking.getAvailableStatus());
+        
+        return bookingDTO;
+    }
 }
 

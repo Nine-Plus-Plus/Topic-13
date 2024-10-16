@@ -70,4 +70,10 @@ public class GroupController {
         Response response = groupService.removeMember(id, newMember);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
+    
+    @GetMapping("/user/get-groups-in-class/{classId}")
+    public ResponseEntity<Response> getGroupsByClassId(@PathVariable Long classId){
+        Response response = groupService.getGroupsInClass(classId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
 }

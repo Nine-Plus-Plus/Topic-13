@@ -11,5 +11,5 @@ package com.project.enums;
 public enum ProjectTaskStatus {
     DONE,
     INPROGRESS,
-    NOTDONE
+    NOTSTARTED
 }

@@ -49,4 +49,10 @@ public class MentorScheduleController {
         Response response = mentorScheduleService.getAllMentorScheduleByMentor(mentorId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
+
+    @PutMapping("/user/expire-mentor-schedule/{id}")
+    public ResponseEntity<Response> expireMentorSchedule(@PathVariable Long id){
+        Response response = mentorScheduleService.expireMentorSchedule(id);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
 }

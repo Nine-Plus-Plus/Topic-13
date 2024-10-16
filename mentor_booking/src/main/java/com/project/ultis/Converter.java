@@ -216,7 +216,8 @@ public class Converter {
         projectsDTO.setDescription(convertProject.getDescription());
         projectsDTO.setProjectName(convertProject.getProjectName());
         projectsDTO.setPercentage(convertProject.getPercentage());
-        if (convertProject.getProjectTasks() != null) {
+        projectsDTO.setAvailableStatus(convertProject.getAvailableStatus());
+        if (convertProject.getProjectTasks() != null){
             List<ProjectTasksDTO> projectTasksDTOList = new ArrayList<>();
             ProjectTasksDTO tasksDTO = new ProjectTasksDTO();
             for (ProjectTasks task : convertProject.getProjectTasks()) {
@@ -224,7 +225,7 @@ public class Converter {
                 tasksDTO.setTaskName(task.getTaskName());
                 tasksDTO.setStatus(task.getStatus());
                 tasksDTO.setDescription(task.getDescription());
-                tasksDTO.setPercentage(task.getPercentage());
+                tasksDTO.setAvailableStatus(task.getAvailableStatus());
                 projectTasksDTOList.add(tasksDTO);
             }
             projectsDTO.setProjectTasks(projectTasksDTOList);

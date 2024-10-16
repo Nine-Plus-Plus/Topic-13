@@ -29,9 +29,6 @@ public class ProjectTasks {
     @Column(name = "description")
     private String description;
     
-    @Column(name = "percentage")
-    private float percentage;
-    
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private ProjectTaskStatus status;

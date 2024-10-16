@@ -2,6 +2,7 @@ package com.project.model;
 
 import com.project.enums.AvailableStatus;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,6 +16,7 @@ public class Projects {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
+    @NotNull
     @Column(name = "project_name")
     private String projectName;
     

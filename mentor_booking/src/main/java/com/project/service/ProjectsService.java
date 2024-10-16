@@ -50,6 +50,9 @@ public class ProjectsService {
             project.setProjectName(createRequest.getProjectName());
 
             Group group = groupRepository.findByIdAndAvailableStatus(createRequest.getGroup().getId(), AvailableStatus.ACTIVE);
+            if (group == null) {
+                throw new OurException("Cannot find group with id: " + createRequest.getGroup().getId());
+            }
             group.setProject(project);
             project.setGroup(group);
             if (createRequest.getTopic() != null) {

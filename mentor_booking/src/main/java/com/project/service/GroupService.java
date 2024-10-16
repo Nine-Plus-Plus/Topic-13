@@ -251,7 +251,7 @@ public class GroupService {
     public Response getGroupsInClass(Long classId) {
         Response response = new Response();
         try {
-            List<Group> groupList = groupRepository.findByAClassIdAndAvailableStatus(classId, AvailableStatus.ACTIVE);
+            List<Group> groupList = groupRepository.findGroupsByClassId(classId, AvailableStatus.ACTIVE);
             List<GroupDTO> groupListDTO = new ArrayList<>();
             if (groupList != null) {
                 groupListDTO = groupList.stream()

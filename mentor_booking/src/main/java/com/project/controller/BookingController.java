@@ -24,13 +24,13 @@ public class BookingController {
     private BookingService bookingService;
 
     @PostMapping("/student/create-booking")
-    public ResponseEntity<Response> createClass(@RequestBody BookingDTO createResponse) {
+    public ResponseEntity<Response> createBooking(@RequestBody BookingDTO createResponse) {
         Response response = bookingService.createBooking(createResponse);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @GetMapping("/user/get-all-pending-bookings")
-    public ResponseEntity<Response> getAllPendingBookings() {
+    @GetMapping("/user/get-all-active-bookings")
+    public ResponseEntity<Response> getAllActiveBookings() {
         Response response = bookingService.getAllActiveBookings();
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
@@ -47,13 +47,13 @@ public class BookingController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PostMapping("/mentor/accept-booking/{bookingId}")
+    @PostMapping("/user/accept-booking/{bookingId}")
     public ResponseEntity<Response> acceptBooking(@PathVariable Long bookingId) {
         Response response = bookingService.acceptBooking(bookingId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PostMapping("/mentor/reject-booking/{bookingId}")
+    @PostMapping("/user/reject-booking/{bookingId}")
     public ResponseEntity<Response> rejectBooking(@PathVariable Long bookingId) {
         Response response = bookingService.rejectBooking(bookingId);
         return ResponseEntity.status(response.getStatusCode()).body(response);

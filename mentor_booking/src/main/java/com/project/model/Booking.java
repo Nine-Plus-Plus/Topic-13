@@ -35,9 +35,6 @@ public class Booking {
     @Column(name = "pointPay")
     private int pointPay;
     
-    @Column(name = "duration")
-    private LocalDateTime duration;
-    
     @Column(name = "date_updated")
     private LocalDateTime dateUpdated;
     

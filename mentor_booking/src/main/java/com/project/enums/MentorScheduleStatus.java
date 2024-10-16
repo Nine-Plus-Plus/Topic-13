@@ -10,5 +10,6 @@ package com.project.enums;
  */
 public enum MentorScheduleStatus {
     AVAILABLE,
-    BOOKED
+    BOOKED,
+    EXPIRED,
 }

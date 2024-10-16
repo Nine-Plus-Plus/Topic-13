@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import com.project.security.AwsS3Service;
 import com.project.ultis.Converter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,27 +31,30 @@ public class UsersService {
 
     @Autowired
     private UsersRepository usersRepository;
-    
+
     @Autowired
     private RoleRepository roleRepository;
-    
+
     @Autowired
     private MentorsRepository mentorsRepository;
-    
+
     @Autowired
     private StudentsRepository studentsRepository;
 
     @Autowired
     private ClassRepository classRepository;
-    
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
     private MentorsService mentorsService;
-    
+
     @Autowired
     private GroupRepository groupRepository;
+
+    @Autowired
+    private AwsS3Service awsS3Service;
 
     // Phương thức tạo user
     public Response createUser(UsersDTO registerRequest) {
@@ -63,7 +67,7 @@ public class UsersService {
             if (usersRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
                 throw new OurException("Email already exists");
             }
-            
+
             Role role = roleRepository.findByRoleName(registerRequest.getRoleString())
                     .orElseThrow(() -> new OurException("No role name: " + registerRequest.getRole().getRoleName()));
             // Mã hóa mật khẩu
@@ -138,13 +142,20 @@ public class UsersService {
             newUser.setPassword(encodedPassword);
             newUser.setFullName(request.getFullName());
             newUser.setBirthDate(request.getBirthDate());
-            newUser.setAvatar(request.getAvatar());
             newUser.setAddress(request.getAddress());
             newUser.setPhone(request.getPhone());
             newUser.setGender(request.getGender());
             newUser.setDateCreated(LocalDateTime.now());
             newUser.setRole(role);
             newUser.setAvailableStatus(AvailableStatus.ACTIVE);
+            try {
+                if (request.getAvatarFile() != null && !request.getAvatarFile().isEmpty()) {
+                    String avatarUrl = awsS3Service.saveImageToS3(request.getAvatarFile());
+                    newUser.setAvatar(avatarUrl);
+                }
+            } catch (Exception e) {
+                throw new OurException("Error uploading avatar: " + e.getMessage());
+            }
             // Lưu người dùng vào database
             usersRepository.save(newUser);
             if (newUser.getId() > 0) {
@@ -209,13 +220,20 @@ public class UsersService {
             newUser.setPassword(encodedPassword);
             newUser.setFullName(request.getFullName());
             newUser.setBirthDate(request.getBirthDate());
-            newUser.setAvatar(request.getAvatar());
             newUser.setAddress(request.getAddress());
             newUser.setPhone(request.getPhone());
             newUser.setGender(request.getGender());
             newUser.setDateCreated(LocalDateTime.now());
             newUser.setRole(role);
             newUser.setAvailableStatus(AvailableStatus.ACTIVE);
+            try {
+                if (request.getAvatarFile() != null && !request.getAvatarFile().isEmpty()) {
+                    String avatarUrl = awsS3Service.saveImageToS3(request.getAvatarFile());
+                    newUser.setAvatar(avatarUrl);
+                }
+            } catch (Exception e) {
+                throw new OurException("Error uploading avatar: " + e.getMessage());
+            }
             // Lưu người dùng vào database
             usersRepository.save(newUser);
             if (newUser.getId() > 0) {
@@ -265,7 +283,7 @@ public class UsersService {
                  listDTO = list.stream()
                         .map(Converter::convertUserToUserDTO)
                         .collect(Collectors.toList());
-                
+
                 response.setUsersDTOList(listDTO);
                 response.setStatusCode(200);
                 response.setMessage("Users fetched successfully");
@@ -281,7 +299,7 @@ public class UsersService {
             response.setStatusCode(500);
             response.setMessage("Error occurred during get all user " + e.getMessage());
         }
-        
+
         return response;
     }
 
@@ -318,13 +336,13 @@ public class UsersService {
             Users user = usersRepository.findById(id)
                     .orElseThrow(
                             () -> new OurException("User not found with id: " + id));
-            
+
             Mentors deleteMentor = mentorsRepository.findByUser_Id(user.getId());
             if (deleteMentor != null) {
                 deleteMentor.setAvailableStatus(AvailableStatus.DELETED);
                 mentorsRepository.save(deleteMentor);
             }
-            
+
             Students deleteStudent = studentsRepository.findByUser_Id(user.getId());
             if (deleteStudent != null) {
                 deleteStudent.setAvailableStatus(AvailableStatus.DELETED);
@@ -371,7 +389,7 @@ public class UsersService {
             response.setStatusCode(500);
             response.setMessage("Error occurred while updating user: " + e.getMessage());
         }
-        
+
         return response;
     }
 

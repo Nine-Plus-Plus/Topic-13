@@ -3,6 +3,7 @@ package com.project.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.project.enums.Gender;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -29,6 +30,7 @@ public class CreateStudentRequest {
     private List<NotificationsDTO> notifications;
     private List<ReviewsDTO> reviews;
     private StudentsDTO student;
+    private MultipartFile avatarFile;
 
     //Student
     private String className;

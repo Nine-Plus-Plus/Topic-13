@@ -275,4 +275,28 @@ public class MentorScheduleService {
         }
         return mentorScheduleDTOList;
     }
+
+    public Response expireMentorSchedule(Long scheduleId){
+        Response response = new Response();
+        try{
+            MentorScheduleDTO mentorScheduleDTO = new MentorScheduleDTO();
+            MentorSchedule mentorSchedule = mentorScheduleRepository.findByIdAndAvailableStatus(scheduleId, AvailableStatus.ACTIVE);
+            if(mentorSchedule !=null){
+                mentorSchedule.setStatus(MentorScheduleStatus.EXPIRED);
+                mentorScheduleRepository.save(mentorSchedule);
+
+                mentorScheduleDTO = Converter.convertMentorScheduleToMentorScheduleDTO(mentorSchedule);
+                response.setMentorScheduleDTO(mentorScheduleDTO);
+                response.setStatusCode(200);
+                response.setMessage("Mentor schedule updated successfully");
+            }
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred while fetch mentor schedule: " + e.getMessage());
+        }
+        return response;
+    }
 }

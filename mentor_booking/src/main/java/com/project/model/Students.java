@@ -2,6 +2,7 @@ package com.project.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.project.enums.AvailableStatus;
+import com.project.enums.GroupRole;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -42,6 +43,10 @@ public class Students {
     @JoinColumn(name = "class_id", nullable = true)
     @JsonIgnore
     private Class aClass;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "group_role")
+    private GroupRole groupRole;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "available_status")

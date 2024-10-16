@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api")
@@ -42,9 +43,12 @@ public class StudentsController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PutMapping("/admin/update-student/{id}")
-    public ResponseEntity<Response> updateStudent(@PathVariable Long id, @RequestBody CreateStudentRequest updateStudent) {
-        Response response = studentsService.updateStudent(id, updateStudent);
+    @PutMapping(value = "/admin/update-student/{id}", consumes = { "multipart/form-data" })
+    public ResponseEntity<Response> updateStudent(
+            @PathVariable Long id,
+            @RequestPart("student") CreateStudentRequest updateStudent,
+            @RequestPart(value = "avatarFile", required = false) MultipartFile avatarFile) {
+        Response response = studentsService.updateStudent(id, updateStudent, avatarFile);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }

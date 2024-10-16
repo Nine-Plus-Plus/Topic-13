@@ -5,6 +5,7 @@ package com.project.controller;
 
 import com.project.dto.GroupDTO;
 import com.project.dto.Response;
+import com.project.dto.StudentsDTO;
 import com.project.model.Group;
 import com.project.service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +56,24 @@ public class GroupController {
     @DeleteMapping("/student/delete-group/{id}")
     public ResponseEntity<Response> deleteGroup(@PathVariable Long id){
         Response response = groupService.deleteGroup(id);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+    
+    @PostMapping("/student/add-new-group-member/{id}")
+    public ResponseEntity<Response> addNewGroupMember(@PathVariable Long id, @RequestBody StudentsDTO newMember){
+        Response response = groupService.addNewMember(id, newMember);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+    
+    @DeleteMapping("/student/remove-group-member/{id}")
+    public ResponseEntity<Response> removeGroupMembre(@PathVariable Long id, @RequestBody StudentsDTO newMember){
+        Response response = groupService.removeMember(id, newMember);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+    
+    @GetMapping("/user/get-groups-in-class/{classId}")
+    public ResponseEntity<Response> getGroupsByClassId(@PathVariable Long classId){
+        Response response = groupService.getGroupsInClass(classId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }

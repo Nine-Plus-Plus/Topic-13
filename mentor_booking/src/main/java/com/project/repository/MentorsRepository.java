@@ -10,6 +10,7 @@ import java.util.Optional;
 import com.project.model.Skills;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -23,12 +24,6 @@ public interface MentorsRepository extends JpaRepository<Mentors, Long>{
     Mentors findByIdAndAvailableStatus(Long id, AvailableStatus availableStatus);
 
     Mentors findByMentorCodeAndAvailableStatus(String mentorCode, AvailableStatus availableStatus);
-
-    @Query("SELECT DISTINCT m FROM Mentors m JOIN m.skills s WHERE m.user.fullName LIKE %:name% AND s IN :skills AND m.availableStatus = :availableStatus")
-    List<Mentors> findByNameAndSkills(
-            String name,
-            List<Skills> skills,
-            AvailableStatus availableStatus);
 
     @Query("SELECT m FROM Mentors m WHERE m.user.fullName LIKE %:name% AND m.availableStatus = :availableStatus")
     List<Mentors> findByName(

@@ -50,6 +50,12 @@ public class MentorScheduleController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
+    @GetMapping("/user/get-mentor-schedules-by-mentor-for-mentor/{mentorId}")
+    public ResponseEntity<Response> getMentorSchedulesByMentorForMentor(@PathVariable Long mentorId){
+        Response response = mentorScheduleService.getAllMentorScheduleByMentorForMentor(mentorId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
     @PutMapping("/user/expire-mentor-schedule/{id}")
     public ResponseEntity<Response> expireMentorSchedule(@PathVariable Long id){
         Response response = mentorScheduleService.expireMentorSchedule(id);

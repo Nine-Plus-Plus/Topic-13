@@ -29,8 +29,22 @@ public interface MentorScheduleRepository extends JpaRepository<MentorSchedule, 
     );
 
 
-    @Query("SELECT m FROM MentorSchedule m WHERE m.mentor.id = :mentorId AND m.availableStatus = :availableStatus AND m.status = :status")
-    List<MentorSchedule> findByMentorIdAndAvailableStatusAndStatus(@Param("mentorId") Long mentorId, @Param("availableStatus") AvailableStatus availableStatus, @Param("status") MentorScheduleStatus status);
+    @Query("SELECT m FROM MentorSchedule m " +
+            "WHERE m.mentor.id = :mentorId " +
+            "AND m.availableStatus = :availableStatus " +
+            "AND m.status = :status")
+    List<MentorSchedule> findByMentorIdAndAvailableStatusAndStatus(
+            @Param("mentorId") Long mentorId,
+            @Param("availableStatus") AvailableStatus availableStatus,
+            @Param("status") MentorScheduleStatus status);
+
+    @Query("SELECT m FROM MentorSchedule m " +
+            "WHERE m.mentor.id = :mentorId " +
+            "AND m.availableStatus = :availableStatus")
+    List<MentorSchedule> findByMentorIdAndAvailableStatusForMentor(
+            @Param("mentorId") Long mentorId,
+            @Param("availableStatus") AvailableStatus availableStatus
+    );
 
     boolean existsByMentorAndAvailableStatusAndAvailableFromLessThanEqualAndAvailableToGreaterThanEqual(
             Mentors mentor,

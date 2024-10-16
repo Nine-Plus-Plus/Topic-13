@@ -1,6 +1,7 @@
 package com.project.service;
 
 import com.project.dto.ProjectTasksDTO;
+import com.project.dto.ProjectsDTO;
 import com.project.dto.Response;
 import com.project.enums.ProjectTaskStatus;
 import com.project.exception.OurException;
@@ -8,14 +9,13 @@ import com.project.model.ProjectTasks;
 import com.project.model.Projects;
 import com.project.repository.ProjectTasksRepository;
 import com.project.repository.ProjectsRepository;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
-//Need Justify
 @Service
 public class ProjectTasksService {
 
@@ -23,13 +23,13 @@ public class ProjectTasksService {
     private ProjectTasksRepository projectTasksRepository;
     @Autowired
     private ProjectsRepository projectsRepository;
-    @Autowired
-    private ModelMapper modelMapper;
 
     public Response createTask(ProjectTasksDTO taskDTO) {
         Response response = new Response();
         try {
-            ProjectTasks task = modelMapper.map(taskDTO, ProjectTasks.class);
+            ProjectTasks task = new ProjectTasks();
+            task.setTaskName(taskDTO.getTaskName());
+            task.setDescription(taskDTO.getDescription());
             task.setStatus(ProjectTaskStatus.INPROGRESS);
             task.setDateCreated(LocalDateTime.now());
             task.setDateUpdated(LocalDateTime.now());
@@ -37,7 +37,8 @@ public class ProjectTasksService {
                     .orElseThrow(() -> new OurException("Project not found"));
             task.setProjects(project);
             projectTasksRepository.save(task);
-            ProjectTasksDTO dto = modelMapper.map(task, ProjectTasksDTO.class);
+
+            ProjectTasksDTO dto = mapToDTO(task);
             response.setProjectTasksDTOList(Arrays.asList(dto));
             response.setStatusCode(201);
             response.setMessage("Task created successfully");
@@ -55,7 +56,7 @@ public class ProjectTasksService {
         Response response = new Response();
         try {
             List<ProjectTasks> tasksList = projectTasksRepository.findAll();
-            List<ProjectTasksDTO> tasksDTOList = Arrays.asList(modelMapper.map(tasksList, ProjectTasksDTO[].class));
+            List<ProjectTasksDTO> tasksDTOList = tasksList.stream().map(this::mapToDTO).collect(Collectors.toList());
             response.setProjectTasksDTOList(tasksDTOList);
             response.setStatusCode(200);
             response.setMessage("Tasks retrieved successfully");
@@ -71,7 +72,7 @@ public class ProjectTasksService {
         try {
             ProjectTasks task = projectTasksRepository.findById(id)
                     .orElseThrow(() -> new OurException("Task not found"));
-            ProjectTasksDTO dto = modelMapper.map(task, ProjectTasksDTO.class);
+            ProjectTasksDTO dto = mapToDTO(task);
             response.setProjectTasksDTOList(Arrays.asList(dto));
             response.setStatusCode(200);
             response.setMessage("Task retrieved successfully");
@@ -104,7 +105,8 @@ public class ProjectTasksService {
             }
             task.setDateUpdated(LocalDateTime.now());
             projectTasksRepository.save(task);
-            ProjectTasksDTO dto = modelMapper.map(task, ProjectTasksDTO.class);
+
+            ProjectTasksDTO dto = mapToDTO(task);
             response.setProjectTasksDTOList(Arrays.asList(dto));
             response.setStatusCode(200);
             response.setMessage("Task updated successfully");
@@ -118,14 +120,13 @@ public class ProjectTasksService {
         return response;
     }
 
-    //Need justify
     public Response deleteTask(Long id) {
         Response response = new Response();
         try {
             ProjectTasks task = projectTasksRepository.findById(id)
                     .orElseThrow(() -> new OurException("Task not found"));
             projectTasksRepository.delete(task);
-            response.setStatusCode(204);
+            response.setStatusCode(200);
             response.setMessage("Task deleted successfully");
         } catch (OurException e) {
             response.setStatusCode(400);
@@ -135,5 +136,31 @@ public class ProjectTasksService {
             response.setMessage("Error occurred during task deletion: " + e.getMessage());
         }
         return response;
+    }
+
+    private ProjectTasksDTO mapToDTO(ProjectTasks task) {
+        ProjectTasksDTO dto = new ProjectTasksDTO();
+        dto.setId(task.getId());
+        dto.setTaskName(task.getTaskName());
+        dto.setDescription(task.getDescription());
+        dto.setStatus(task.getStatus());
+        dto.setDateCreated(task.getDateCreated());
+        dto.setDateUpdated(task.getDateUpdated());
+        dto.setProjects(mapToProjectsDTO(task.getProjects()));
+        return dto;
+    }
+
+    private ProjectsDTO mapToProjectsDTO(Projects project) {
+        ProjectsDTO dto = new ProjectsDTO();
+        dto.setId(project.getId());
+        dto.setProjectName(project.getProjectName());
+        dto.setPercentage(project.getPercentage());
+        dto.setDescription(project.getDescription());
+        dto.setDateCreated(project.getDateCreated());
+        dto.setDateUpdated(project.getDateUpdated());
+        dto.setAvailableStatus(project.getAvailableStatus());
+        // Exclude projectTasks to avoid infinite loop
+        dto.setProjectTasks(null);
+        return dto;
     }
 }

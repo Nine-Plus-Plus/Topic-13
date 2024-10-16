@@ -22,5 +22,6 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     
     Group findByIdAndAvailableStatus(Long id, AvailableStatus availableStatus);
     
-    List<Group> findByAClassIdAndAvailableStatus(Long classId, AvailableStatus availableStatus);
+    @Query("SELECT g FROM Group g WHERE g.aClass.id = :classId AND g.availableStatus = :availableStatus")
+    List<Group> findGroupsByClassId(Long classId, AvailableStatus availableStatus);
 }

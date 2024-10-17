@@ -78,11 +78,18 @@ public class BookingService {
             LocalDateTime timeStart = mentorSchedule.getAvailableFrom();
             LocalDateTime timeEnd = mentorSchedule.getAvailableTo();
             int time = (int) timeStart.until(timeEnd, ChronoUnit.MINUTES);
+
+            if (mentor.getTotalTimeRemain() < time) {
+                throw new OurException("This mentor has reached their support time this semester");
+            }
+
             time /= 30;
 
             int pointPay = group.getStudents().size() * 10 * (int) time;
-            
-            if (group.getTotalPoint() - pointPay < 0) throw new OurException("Your group doesn't have enough points to book a mentor");
+
+            if (group.getTotalPoint() - pointPay < 0) {
+                throw new OurException("Your group doesn't have enough points to make a booking");
+            }
 
             Booking booking = new Booking();
             booking.setDateCreated(LocalDateTime.now());

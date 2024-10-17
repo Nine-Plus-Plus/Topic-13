@@ -1,13 +1,8 @@
 package com.project.model;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import com.project.enums.AvailableStatus;
+import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Data;
@@ -28,5 +23,11 @@ public class Semester {
     
     @OneToMany(mappedBy = "semester", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Class> classes;
-    
+
+    @OneToMany(mappedBy = "semester", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Topic> topics;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "available_status")
+    private AvailableStatus availableStatus;
 }

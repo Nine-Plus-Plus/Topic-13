@@ -1,6 +1,7 @@
 package com.project.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.project.enums.AvailableStatus;
 import com.project.enums.BookingStatus;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,4 +22,5 @@ public class BookingDTO {
     private MeetingDTO meeting;
     private MentorScheduleDTO mentorSchedule;
     private List<PointHistoryDTO> pointHistories;
+    private AvailableStatus availableStatus;
 }

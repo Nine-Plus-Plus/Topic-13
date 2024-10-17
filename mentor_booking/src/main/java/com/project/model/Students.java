@@ -1,15 +1,10 @@
 package com.project.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import com.project.enums.AvailableStatus;
+import com.project.enums.GroupRole;
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
 import lombok.Data;
 
@@ -48,4 +43,12 @@ public class Students {
     @JoinColumn(name = "class_id", nullable = true)
     @JsonIgnore
     private Class aClass;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "group_role")
+    private GroupRole groupRole;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "available_status")
+    private AvailableStatus availableStatus;
 }

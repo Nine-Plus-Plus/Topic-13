@@ -54,7 +54,7 @@ public class AuthService {
 
         } catch (OurException e) {
             response.setStatusCode(500);
-            response.getMessage();
+            response.setMessage(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(400);
             response.setMessage("Incorrect Username or Password");

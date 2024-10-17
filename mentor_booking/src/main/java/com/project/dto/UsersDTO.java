@@ -2,6 +2,7 @@
 package com.project.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.project.enums.AvailableStatus;
 import com.project.enums.Gender;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,9 +16,10 @@ public class UsersDTO {
     private String email;
     private String username;
     private String password;
+    private String fullName;
     private String roleString;
     private LocalDate birthDate;
-    private String avarta;
+    private String avatar;
     private String address;
     private String phone;
     private Gender gender;
@@ -27,6 +29,7 @@ public class UsersDTO {
     private List<NotificationsDTO> notifications;
     private List<ReviewsDTO> reviews;
     private StudentsDTO student;
-
     private MentorsDTO mentor;
+    private CreateStudentRequest createStudentRequest;
+    private AvailableStatus availableStatus;
 }

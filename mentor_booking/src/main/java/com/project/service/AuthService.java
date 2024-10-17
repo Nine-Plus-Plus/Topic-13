@@ -1,6 +1,7 @@
 package com.project.service;
 
 import com.project.dto.Response;
+import com.project.dto.UsersDTO;
 import com.project.exception.OurException;
 import com.project.model.Users;
 import com.project.repository.UsersRepository;
@@ -30,7 +31,7 @@ public class AuthService {
      * Phương thức thực hiện đăng nhập cho người dùng.
      *
      * @param loginRequest Đối tượng chứa thông tin đăng nhập (username và
-     * password).
+     *                     password).
      * @return Đối tượng Response chứa thông tin về kết quả đăng nhập, bao gồm
      * mã trạng thái và token nếu đăng nhập thành công.
      */
@@ -42,7 +43,7 @@ public class AuthService {
                             loginRequest.getUsername(),
                             loginRequest.getPassword()));
             var user = usersRepository.findByUsername(loginRequest
-                    .getUsername())
+                            .getUsername())
                     .orElseThrow(() -> new OurException("User not found"));
             var jwt = jWTUltis.generateToken(user);
 
@@ -50,7 +51,7 @@ public class AuthService {
             response.setToken(jwt);
             response.setRole(user.getRole().getRoleName());
             response.setExpirationTime("24 hours");
-            response.setMessage("Succesfully");
+            response.setMessage("Successfully");
 
         } catch (OurException e) {
             response.setStatusCode(500);
@@ -65,9 +66,9 @@ public class AuthService {
     /**
      * Phương thức thay đổi mật khẩu của người dùng.
      *
-     * @param email Địa chỉ email của người dùng cần thay đổi mật khẩu.
+     * @param email           Địa chỉ email của người dùng cần thay đổi mật khẩu.
      * @param currentPassword Mật khẩu hiện tại của người dùng.
-     * @param newPassword Mật khẩu mới mà người dùng muốn đặt.
+     * @param newPassword     Mật khẩu mới mà người dùng muốn đặt.
      * @return Đối tượng Response chứa thông tin về kết quả của việc thay đổi
      * mật khẩu.
      */
@@ -89,6 +90,29 @@ public class AuthService {
             // Trả về phản hồi thành công
             response.setStatusCode(200);
             response.setMessage("Password changed successfully");
+
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred during password change: " + e.getMessage());
+        }
+
+        return response;
+    }
+
+    public Response processOAuthPostLogin(String email, String fullName) {
+        Response response = new Response();
+        try {
+            var user = usersRepository.findByEmail(email)
+                    .orElseThrow(() -> new OurException("User not found"));
+            var jwt = jWTUltis.generateToken(user);
+            response.setStatusCode(200);
+            response.setToken(jwt);
+            response.setRole(user.getRole().getRoleName());
+            response.setExpirationTime("24 hours");
+            response.setMessage("Successfully");
 
         } catch (OurException e) {
             response.setStatusCode(400);

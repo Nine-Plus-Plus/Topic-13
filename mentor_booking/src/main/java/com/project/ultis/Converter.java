@@ -44,6 +44,8 @@ public class Converter {
         semesterDTO.setSemesterName(convertSemester.getSemesterName());
         semesterDTO.setDateCreated(convertSemester.getDateCreated());
         semesterDTO.setAvailableStatus(convertSemester.getAvailableStatus());
+        semesterDTO.setDateStart(convertSemester.getDateStart());
+        semesterDTO.setDateEnd(convertSemester.getDateEnd());
         return semesterDTO;
     }
 

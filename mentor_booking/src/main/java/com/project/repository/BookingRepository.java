@@ -32,15 +32,18 @@ public interface BookingRepository extends JpaRepository<Booking, Long>{
     
     List<Booking> findByAvailableStatus(AvailableStatus availableStatus);
     
-    @Query("SELECT b FROM Booking b WHERE b.group.aClass.id = :classId AND b.availableStatus = :availableStatus")
-    List<Booking> findAllByClassIdAndAvailableStatus(
-        @Param("classId") Long classId, 
-        @Param("availableStatus") AvailableStatus availableStatus
+    @Query("SELECT b FROM Booking b WHERE b.group.aClass.id = :classId")
+    List<Booking> findBookingsByClassId(
+        @Param("classId") Long classId
     );
     
-    List<Booking> findByMentorIdAndAvailableStatusAndStatus(
+    List<Booking> findByMentorIdAndStatus(
             Long mentorId,
-            AvailableStatus availableStatus,
+            BookingStatus status
+    );
+    
+    List<Booking> findByGroupIdAndStatus(
+            Long groupId,
             BookingStatus status
     );
     

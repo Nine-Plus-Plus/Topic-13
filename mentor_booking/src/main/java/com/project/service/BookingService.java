@@ -81,6 +81,8 @@ public class BookingService {
             time /= 30;
 
             int pointPay = group.getStudents().size() * 10 * (int) time;
+            
+            if (group.getTotalPoint() - pointPay < 0) throw new OurException("Your group doesn't have enough points to book a mentor");
 
             Booking booking = new Booking();
             booking.setDateCreated(LocalDateTime.now());
@@ -182,7 +184,7 @@ public class BookingService {
     public Response getBookingsInClass(Long classId) {
         Response response = new Response();
         try {
-            List<Booking> bookingList = bookingRepository.findAllByClassIdAndAvailableStatus(classId, AvailableStatus.ACTIVE);
+            List<Booking> bookingList = bookingRepository.findBookingsByClassId(classId);
             List<BookingDTO> bookingListDTO = new ArrayList<>();
             if (!bookingList.isEmpty()) {
                 bookingListDTO = bookingList.stream()
@@ -234,16 +236,27 @@ public class BookingService {
                 booking.setPointHistories(pointHistoryList);
 
                 List<Students> groupMembers = booking.getGroup().getStudents();
-                int pointMinusForAllMembers = booking.getPointPay() / groupMembers.size();
-                for (Students member : groupMembers) {
-                    member.setPoint(member.getPoint() - pointMinusForAllMembers);
-                }
+
                 Group group = groupRepository.findByIdAndAvailableStatus(booking.getGroup().getId(), AvailableStatus.ACTIVE);
                 group.setStudents(groupMembers);
                 group.setTotalPoint(group.getTotalPoint() - booking.getPointPay());
 
+                int newPoint = group.getTotalPoint() / groupMembers.size();
+
+                for (Students member : groupMembers) {
+                    member.setPoint(newPoint);
+                }
+
                 MentorSchedule schedule = mentorScheduleRepository.findByIdAndAvailableStatus(booking.getMentorSchedule().getId(), AvailableStatus.ACTIVE);
                 schedule.setStatus(MentorScheduleStatus.BOOKED);
+
+                Mentors mentor = mentorsRepository.findByIdAndAvailableStatus(booking.getMentorSchedule().getMentor().getId(), AvailableStatus.ACTIVE);
+                LocalDateTime timeStart = schedule.getAvailableFrom();
+                LocalDateTime timeEnd = schedule.getAvailableTo();
+                int time = (int) timeStart.until(timeEnd, ChronoUnit.MINUTES);
+                mentor.setTotalTimeRemain(mentor.getTotalTimeRemain() - time);
+                mentorsRepository.save(mentor);
+
                 mentorScheduleRepository.save(schedule);
 
                 groupRepository.save(group);
@@ -323,16 +336,25 @@ public class BookingService {
                     booking.setPointHistories(pointHistoryList);
 
                     List<Students> groupMembers = booking.getGroup().getStudents();
-                    int pointPlusForAllMembers = booking.getPointPay() / groupMembers.size();
-                    for (Students member : groupMembers) {
-                        member.setPoint(member.getPoint() + pointPlusForAllMembers);
-                    }
+
                     Group group = groupRepository.findByIdAndAvailableStatus(booking.getGroup().getId(), AvailableStatus.ACTIVE);
                     group.setStudents(groupMembers);
                     group.setTotalPoint(group.getTotalPoint() + booking.getPointPay());
 
+                    int newPoint = group.getTotalPoint() / groupMembers.size();
+
+                    for (Students member : groupMembers) {
+                        member.setPoint(newPoint);
+                    }
+
                     MentorSchedule schedule = mentorScheduleRepository.findByIdAndAvailableStatus(booking.getMentorSchedule().getId(), AvailableStatus.ACTIVE);
                     schedule.setStatus(MentorScheduleStatus.AVAILABLE);
+                    Mentors mentor = mentorsRepository.findByIdAndAvailableStatus(booking.getMentorSchedule().getMentor().getId(), AvailableStatus.ACTIVE);
+                    LocalDateTime timeStart = schedule.getAvailableFrom();
+                    LocalDateTime timeEnd = schedule.getAvailableTo();
+                    int time = (int) timeStart.until(timeEnd, ChronoUnit.MINUTES);
+                    mentor.setTotalTimeRemain(mentor.getTotalTimeRemain() + time);
+                    mentorsRepository.save(mentor);
                     mentorScheduleRepository.save(schedule);
 
                     groupRepository.save(group);
@@ -343,7 +365,7 @@ public class BookingService {
                     response.setStatusCode(200);
                     response.setMessage("Booking canceled by mentor");
                 }
-                if (type.equalsIgnoreCase("STUDENT")) {
+                if (type.equalsIgnoreCase("STUDENTS")) {
                     booking.setStatus(BookingStatus.CANCELLED);
                     booking.setAvailableStatus(AvailableStatus.INACTIVE);
                     booking.setDateUpdated(LocalDateTime.now());
@@ -368,6 +390,12 @@ public class BookingService {
 
                     MentorSchedule schedule = mentorScheduleRepository.findByIdAndAvailableStatus(booking.getMentorSchedule().getId(), AvailableStatus.ACTIVE);
                     schedule.setStatus(MentorScheduleStatus.AVAILABLE);
+                    Mentors mentor = mentorsRepository.findByIdAndAvailableStatus(booking.getMentorSchedule().getMentor().getId(), AvailableStatus.ACTIVE);
+                    LocalDateTime timeStart = schedule.getAvailableFrom();
+                    LocalDateTime timeEnd = schedule.getAvailableTo();
+                    int time = (int) timeStart.until(timeEnd, ChronoUnit.MINUTES);
+                    mentor.setTotalTimeRemain(mentor.getTotalTimeRemain() + time);
+                    mentorsRepository.save(mentor);
                     mentorScheduleRepository.save(schedule);
 
                     bookingRepository.save(booking);
@@ -393,7 +421,7 @@ public class BookingService {
     public Response getBookingsByMentorId(Long mentorId, BookingStatus status) {
         Response response = new Response();
         try {
-            List<Booking> bookingList = bookingRepository.findByMentorIdAndAvailableStatusAndStatus(mentorId, AvailableStatus.ACTIVE, status);
+            List<Booking> bookingList = bookingRepository.findByMentorIdAndStatus(mentorId, status);
             List<BookingDTO> bookingListDTO = new ArrayList<>();
             if (!bookingList.isEmpty()) {
                 bookingListDTO = bookingList.stream()
@@ -421,7 +449,7 @@ public class BookingService {
     public Response getBookingsByGroupId(Long groupId, BookingStatus status) {
         Response response = new Response();
         try {
-            List<Booking> bookingList = bookingRepository.findByGroupIdAndAvailableStatusAndStatus(groupId, AvailableStatus.ACTIVE, status);
+            List<Booking> bookingList = bookingRepository.findByGroupIdAndStatus(groupId, status);
             List<BookingDTO> bookingListDTO = new ArrayList<>();
             if (!bookingList.isEmpty()) {
                 bookingListDTO = bookingList.stream()

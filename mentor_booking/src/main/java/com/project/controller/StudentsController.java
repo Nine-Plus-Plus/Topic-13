@@ -2,13 +2,9 @@ package com.project.controller;
 
 import com.project.dto.CreateStudentRequest;
 import com.project.dto.Response;
-import com.project.dto.StudentsDTO;
-import com.project.model.Users;
 import com.project.service.StudentsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 

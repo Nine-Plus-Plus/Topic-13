@@ -37,4 +37,11 @@ public interface BookingRepository extends JpaRepository<Booking, Long>{
         @Param("classId") Long classId, 
         @Param("availableStatus") AvailableStatus availableStatus
     );
+    
+    List<Booking> findByMentorIdAndAvailableStatusAndStatus(
+            Long mentorId,
+            AvailableStatus availableStatus,
+            BookingStatus status
+    );
+    
 }

@@ -172,6 +172,9 @@ public class Converter {
             studentsDTO.setDateCreated(student.getDateCreated());
             studentsDTO.setPoint(student.getPoint());
             studentsDTO.setGroupRole(student.getGroupRole());
+            if (student.getUser() != null) {
+                studentsDTO.setUser(convertUserToUserDTO(student.getUser()));
+            }
             studentsListDTO.add(studentsDTO);
         }
 
@@ -219,7 +222,7 @@ public class Converter {
         projectsDTO.setProjectName(convertProject.getProjectName());
         projectsDTO.setPercentage(convertProject.getPercentage());
         projectsDTO.setAvailableStatus(convertProject.getAvailableStatus());
-        if (convertProject.getProjectTasks() != null){
+        if (convertProject.getProjectTasks() != null) {
             List<ProjectTasksDTO> projectTasksDTOList = new ArrayList<>();
             ProjectTasksDTO tasksDTO = new ProjectTasksDTO();
             for (ProjectTasks task : convertProject.getProjectTasks()) {
@@ -235,19 +238,20 @@ public class Converter {
         projectsDTO.setTopic(convertTopicToTopicDTO(convertProject.getTopic()));
         return projectsDTO;
     }
-    
-    public static BookingDTO convertBookingToBookingDTO(Booking convertBooking){
+
+    public static BookingDTO convertBookingToBookingDTO(Booking convertBooking) {
         BookingDTO bookingDTO = new BookingDTO();
-        
+
+        bookingDTO.setId(convertBooking.getId());
         bookingDTO.setDateCreated(convertBooking.getDateCreated());
         bookingDTO.setDateUpdated(convertBooking.getDateUpdated());
         bookingDTO.setPointPay(convertBooking.getPointPay());
         bookingDTO.setGroup(convertGroupToGroupDTO(convertBooking.getGroup()));
         bookingDTO.setStatus(convertBooking.getStatus());
         bookingDTO.setMentorSchedule(convertMentorScheduleToMentorScheduleDTO(convertBooking.getMentorSchedule()));
+        bookingDTO.setMentor(convertMentorToMentorDTO(convertBooking.getMentor()));
         bookingDTO.setAvailableStatus(convertBooking.getAvailableStatus());
-        
+
         return bookingDTO;
     }
 }
-

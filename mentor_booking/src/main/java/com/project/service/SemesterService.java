@@ -111,7 +111,7 @@ public class SemesterService {
     }
 
     // phương thức cập nhập mới Semester
-    public Response updateSemester(Long id, Semester newSemester){
+    public Response updateSemester(Long id, SemesterDTO newSemester){
         Response response = new Response();
         try {
             Semester presentSemester = semesterRepository.findById(id)

@@ -41,7 +41,7 @@ public class SemesterController {
     }
 
     @PutMapping("/admin/update-semester/{id}")
-    public ResponseEntity<Response> updateSemester(@PathVariable Long id, @RequestBody Semester newSemester){
+    public ResponseEntity<Response> updateSemester(@PathVariable Long id, @RequestBody SemesterDTO newSemester){
         Response response = semesterService.updateSemester(id, newSemester);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }

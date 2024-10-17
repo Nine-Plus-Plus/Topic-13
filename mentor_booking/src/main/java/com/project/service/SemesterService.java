@@ -116,9 +116,6 @@ public class SemesterService {
         try {
             Semester presentSemester = semesterRepository.findById(id)
                     .orElseThrow(() -> new OurException("Cannot find semester with id: "+id));
-            if (semesterRepository.findBySemesterName(newSemester.getSemesterName(), AvailableStatus.ACTIVE).isPresent()) {
-                throw new OurException("Semester has already existed");
-            }
             presentSemester.setSemesterName(newSemester.getSemesterName());
             presentSemester.setDateStart(newSemester.getDateStart());
             presentSemester.setDateEnd(newSemester.getDateEnd());

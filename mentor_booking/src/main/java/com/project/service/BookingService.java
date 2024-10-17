@@ -56,20 +56,20 @@ public class BookingService {
                 throw new OurException("Cannot find schedule");
             }
             //The group has already have a confirmed booking
-//            if (bookingRepository.findByGroupIdAndAvailableStatusAndStatus(createRequest.getGroup().getId(), AvailableStatus.ACTIVE, BookingStatus.CONFIRMED) != null) {
-//                throw new OurException("You already have a booking that is confirmed");
-//            }
+            if (!bookingRepository.findByGroupIdAndAvailableStatusAndStatus(createRequest.getGroup().getId(), AvailableStatus.ACTIVE, BookingStatus.CONFIRMED).isEmpty()) {
+                throw new OurException("You already have a booking that is confirmed");
+            }
 
             //This mentor has accepted another group's booking
-//            if (bookingRepository.findByAvailableStatusAndStatusAndMentorScheduleId(AvailableStatus.ACTIVE, BookingStatus.CONFIRMED, createRequest.getMentorSchedule().getId()) != null) {
-//                throw new OurException("The mentor has already have a meeting with this schedule");
-//            }
+            if (!bookingRepository.findByAvailableStatusAndStatusAndMentorScheduleId(AvailableStatus.ACTIVE, BookingStatus.CONFIRMED, createRequest.getMentorSchedule().getId()).isEmpty()) {
+                throw new OurException("The mentor has already have a meeting with this schedule");
+            }
 
             //This group has already booked this mentor with the same schedule, prevent spamming
-//            if (bookingRepository.findByAvailableStatusAndStatusAndMentorScheduleIdAndGroupId(AvailableStatus.ACTIVE, BookingStatus.PENDING,
-//                    createRequest.getMentorSchedule().getId(), createRequest.getGroup().getId()) != null) {
-//                throw new OurException("You have booked this mentor with this schedule");
-//            }
+            if (!bookingRepository.findByAvailableStatusAndStatusAndMentorScheduleIdAndGroupId(AvailableStatus.ACTIVE, BookingStatus.PENDING,
+                    createRequest.getMentorSchedule().getId(), createRequest.getGroup().getId()).isEmpty()) {
+                throw new OurException("You have booked this mentor with this schedule");
+            }
 
             MentorSchedule mentorSchedule = mentorScheduleRepository.findByIdAndAvailableStatus(createRequest.getMentorSchedule().getId(), AvailableStatus.ACTIVE);
             Mentors mentor = mentorsRepository.findByIdAndAvailableStatus(mentorSchedule.getMentor().getId(), AvailableStatus.ACTIVE);
@@ -357,7 +357,7 @@ public class BookingService {
                     }
                     pointHistoryList.add(pointHistory);
                     booking.setPointHistories(pointHistoryList);
-                    
+
                     bookingRepository.save(booking);
 
                     BookingDTO dto = Converter.convertBookingToBookingDTO(booking);

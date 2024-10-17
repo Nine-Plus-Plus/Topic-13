@@ -1,10 +1,10 @@
 package com.project.service;
 
 import com.project.dto.BookingDTO;
-import com.project.dto.ClassDTO;
 import com.project.dto.Response;
 import com.project.enums.AvailableStatus;
 import com.project.enums.BookingStatus;
+import com.project.enums.MentorScheduleStatus;
 import com.project.enums.PointHistoryStatus;
 import com.project.exception.OurException;
 import com.project.model.Booking;
@@ -242,6 +242,10 @@ public class BookingService {
                 group.setStudents(groupMembers);
                 group.setTotalPoint(group.getTotalPoint() - booking.getPointPay());
 
+                MentorSchedule schedule = mentorScheduleRepository.findByIdAndAvailableStatus(booking.getMentorSchedule().getId(), AvailableStatus.ACTIVE);
+                schedule.setStatus(MentorScheduleStatus.BOOKED);
+                mentorScheduleRepository.save(schedule);
+
                 groupRepository.save(group);
                 bookingRepository.save(booking);
 
@@ -327,6 +331,10 @@ public class BookingService {
                     group.setStudents(groupMembers);
                     group.setTotalPoint(group.getTotalPoint() + booking.getPointPay());
 
+                    MentorSchedule schedule = mentorScheduleRepository.findByIdAndAvailableStatus(booking.getMentorSchedule().getId(), AvailableStatus.ACTIVE);
+                    schedule.setStatus(MentorScheduleStatus.AVAILABLE);
+                    mentorScheduleRepository.save(schedule);
+
                     groupRepository.save(group);
                     bookingRepository.save(booking);
 
@@ -358,6 +366,10 @@ public class BookingService {
                     pointHistoryList.add(pointHistory);
                     booking.setPointHistories(pointHistoryList);
 
+                    MentorSchedule schedule = mentorScheduleRepository.findByIdAndAvailableStatus(booking.getMentorSchedule().getId(), AvailableStatus.ACTIVE);
+                    schedule.setStatus(MentorScheduleStatus.AVAILABLE);
+                    mentorScheduleRepository.save(schedule);
+
                     bookingRepository.save(booking);
 
                     BookingDTO dto = Converter.convertBookingToBookingDTO(booking);
@@ -374,6 +386,62 @@ public class BookingService {
         } catch (Exception e) {
             response.setStatusCode(500);
             response.setMessage("Error occurred during cancel booking: " + e.getMessage());
+        }
+        return response;
+    }
+
+    public Response getBookingsByMentorId(Long mentorId, BookingStatus status) {
+        Response response = new Response();
+        try {
+            List<Booking> bookingList = bookingRepository.findByMentorIdAndAvailableStatusAndStatus(mentorId, AvailableStatus.ACTIVE, status);
+            List<BookingDTO> bookingListDTO = new ArrayList<>();
+            if (!bookingList.isEmpty()) {
+                bookingListDTO = bookingList.stream()
+                        .map(Converter::convertBookingToBookingDTO)
+                        .collect(Collectors.toList());
+
+                response.setBookingDTOList(bookingListDTO);
+                response.setStatusCode(200);
+                response.setMessage("Bookings fetched successfully");
+            } else {
+                response.setBookingDTOList(bookingListDTO);
+                response.setStatusCode(400);
+                response.setMessage("Cannot find any booking");
+            }
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred during get all bookings: " + e.getMessage());
+        }
+        return response;
+    }
+
+    public Response getBookingsByGroupId(Long groupId, BookingStatus status) {
+        Response response = new Response();
+        try {
+            List<Booking> bookingList = bookingRepository.findByGroupIdAndAvailableStatusAndStatus(groupId, AvailableStatus.ACTIVE, status);
+            List<BookingDTO> bookingListDTO = new ArrayList<>();
+            if (!bookingList.isEmpty()) {
+                bookingListDTO = bookingList.stream()
+                        .map(Converter::convertBookingToBookingDTO)
+                        .collect(Collectors.toList());
+
+                response.setBookingDTOList(bookingListDTO);
+                response.setStatusCode(200);
+                response.setMessage("Bookings fetched successfully");
+            } else {
+                response.setBookingDTOList(bookingListDTO);
+                response.setStatusCode(400);
+                response.setMessage("Cannot find any booking");
+            }
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred during get all bookings: " + e.getMessage());
         }
         return response;
     }

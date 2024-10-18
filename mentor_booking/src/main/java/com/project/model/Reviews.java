@@ -3,7 +3,7 @@ package com.project.model;
 import com.project.enums.AvailableStatus;
 import jakarta.persistence.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.Data;
 
 @Data
@@ -21,7 +21,7 @@ public class Reviews {
     private int rating;
     
     @Column(name = "date_created")
-    private LocalDate dateCreated;
+    private LocalDateTime dateCreated;
     
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false) 

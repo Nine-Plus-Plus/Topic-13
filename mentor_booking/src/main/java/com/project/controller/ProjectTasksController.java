@@ -43,4 +43,10 @@ public class ProjectTasksController {
         Response response = projectTasksService.deleteTask(id);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
+    @GetMapping("/student/project-tasks/group/{groupId}")
+    public ResponseEntity<Response> getProjectTasksByGroupId(@PathVariable Long groupId) {
+        Response response = projectTasksService.getProjectTasksByGroupId(groupId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+    
 }

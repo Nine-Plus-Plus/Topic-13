@@ -29,8 +29,22 @@ public interface MentorScheduleRepository extends JpaRepository<MentorSchedule, 
     );
 
 
-    @Query("SELECT m FROM MentorSchedule m WHERE m.mentor.id = :mentorId AND m.availableStatus = :availableStatus AND m.status = :status")
-    List<MentorSchedule> findByMentorIdAndAvailableStatusAndStatus(@Param("mentorId") Long mentorId, @Param("availableStatus") AvailableStatus availableStatus, @Param("status") MentorScheduleStatus status);
+    @Query("SELECT m FROM MentorSchedule m " +
+            "WHERE m.mentor.id = :mentorId " +
+            "AND m.availableStatus = :availableStatus " +
+            "AND m.status = :status")
+    List<MentorSchedule> findByMentorIdAndAvailableStatusAndStatus(
+            @Param("mentorId") Long mentorId,
+            @Param("availableStatus") AvailableStatus availableStatus,
+            @Param("status") MentorScheduleStatus status);
+
+    @Query("SELECT m FROM MentorSchedule m " +
+            "WHERE m.mentor.id = :mentorId " +
+            "AND m.availableStatus = :availableStatus")
+    List<MentorSchedule> findByMentorIdAndAvailableStatusForMentor(
+            @Param("mentorId") Long mentorId,
+            @Param("availableStatus") AvailableStatus availableStatus
+    );
 
     boolean existsByMentorAndAvailableStatusAndAvailableFromLessThanEqualAndAvailableToGreaterThanEqual(
             Mentors mentor,
@@ -38,6 +52,9 @@ public interface MentorScheduleRepository extends JpaRepository<MentorSchedule, 
             LocalDateTime availableTo,
             LocalDateTime availableFrom
     );
+
+    @Query("SELECT ms FROM MentorSchedule ms WHERE ms.availableTo < :now AND ms.status = :status")
+    List<MentorSchedule> findByAvailableToBeforeAndStatus(LocalDateTime now, MentorScheduleStatus status);
 
     //
     @Query("SELECT DISTINCT m.mentor FROM MentorSchedule m " +

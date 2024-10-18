@@ -11,7 +11,9 @@ import com.project.model.Mentors;
 import com.project.repository.MentorScheduleRepository;
 import com.project.repository.MentorsRepository;
 import com.project.ultis.Converter;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -262,6 +264,34 @@ public class MentorScheduleService {
         return response;
     }
 
+    public Response getAllMentorScheduleByMentorForMentor(Long mentorId){
+        Response response = new Response();
+        try{
+            List<MentorScheduleDTO> mentorScheduleDTOList = new ArrayList<>();
+            List<MentorSchedule> mentorScheduleList = mentorScheduleRepository.findByMentorIdAndAvailableStatusForMentor(mentorId, AvailableStatus.ACTIVE);
+            if(!mentorScheduleList.isEmpty()){
+                mentorScheduleDTOList = mentorScheduleList.stream()
+                        .map(Converter::convertMentorScheduleToMentorScheduleDTO)
+                        .collect(Collectors.toList());
+
+                response.setMentorScheduleDTOList(mentorScheduleDTOList);
+                response.setStatusCode(200);
+                response.setMessage("Mentor Schedule fetched successfully");
+            }else{
+                response.setMentorScheduleDTOList(mentorScheduleDTOList);
+                response.setStatusCode(400);
+                response.setMessage("No data found");
+            }
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred while get all mentor schedule: " + e.getMessage());
+        }
+        return response;
+    }
+
     public List<MentorScheduleDTO> findAllMentorScheduleByMentor(Long mentorId){
         List<MentorScheduleDTO> mentorScheduleDTOList = new ArrayList<>();
         List<MentorSchedule> mentorScheduleList = mentorScheduleRepository.findByMentorIdAndAvailableStatusAndStatus(mentorId, AvailableStatus.ACTIVE, MentorScheduleStatus.AVAILABLE);
@@ -298,5 +328,22 @@ public class MentorScheduleService {
             response.setMessage("Error occurred while fetch mentor schedule: " + e.getMessage());
         }
         return response;
+    }
+
+    // Phương thức sẽ chạy định kỳ
+    @Scheduled(fixedRate = 60000)  // Chạy mỗi 60 giây (1 phút)
+    @Transactional
+    public void expireMentorSchedulesAutomatically() {
+        try {
+            List<MentorSchedule> expiredSchedules = mentorScheduleRepository.findByAvailableToBeforeAndStatus(LocalDateTime.now(), MentorScheduleStatus.AVAILABLE);
+
+            for (MentorSchedule schedule : expiredSchedules) {
+                schedule.setStatus(MentorScheduleStatus.EXPIRED);
+                mentorScheduleRepository.save(schedule);
+            }
+            System.out.println("Expired schedules updated successfully.");
+        } catch (Exception e) {
+            System.err.println("Error while expiring mentor schedules: " + e.getMessage());
+        }
     }
 }

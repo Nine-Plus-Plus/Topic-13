@@ -20,7 +20,7 @@ public class UsersController {
     @Autowired
     private UsersService userService;
     
-    @PostMapping("/admin/create-user")
+    @PostMapping("/auth/create-user")
     public ResponseEntity<Response> createUser(@RequestBody UsersDTO createRes){
         Response response = userService.createUser(createRes);
         return ResponseEntity.status(response.getStatusCode()).body(response);

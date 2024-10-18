@@ -1,8 +1,10 @@
 package com.project.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.project.enums.AvailableStatus;
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Data;
@@ -30,4 +32,10 @@ public class Semester {
     @Enumerated(EnumType.STRING)
     @Column(name = "available_status")
     private AvailableStatus availableStatus;
+
+    @Column(name = "dateStart")
+    private LocalDate dateStart;
+
+    @Column(name = "dateEnd")
+    private LocalDate dateEnd;
 }

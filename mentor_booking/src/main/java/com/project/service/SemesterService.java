@@ -34,6 +34,8 @@ public class SemesterService {
             Semester semester = new Semester();
             semester.setDateCreated(LocalDateTime.now());
             semester.setSemesterName(createRequest.getSemesterName());
+            semester.setDateStart(createRequest.getDateStart());
+            semester.setDateEnd(createRequest.getDateEnd());
             semester.setAvailableStatus(AvailableStatus.ACTIVE);
             semesterRepository.save(semester);
             if (semester.getId() > 0) {
@@ -109,15 +111,14 @@ public class SemesterService {
     }
 
     // phương thức cập nhập mới Semester
-    public Response updateSemester(Long id, Semester newSemester){
+    public Response updateSemester(Long id, SemesterDTO newSemester){
         Response response = new Response();
         try {
             Semester presentSemester = semesterRepository.findById(id)
                     .orElseThrow(() -> new OurException("Cannot find semester with id: "+id));
-            if (semesterRepository.findBySemesterName(newSemester.getSemesterName(), AvailableStatus.ACTIVE).isPresent()) {
-                throw new OurException("Semester has already existed");
-            }
             presentSemester.setSemesterName(newSemester.getSemesterName());
+            presentSemester.setDateStart(newSemester.getDateStart());
+            presentSemester.setDateEnd(newSemester.getDateEnd());
             semesterRepository.save(presentSemester);
 
             SemesterDTO dto = Converter.convertSemesterToSemesterDTO(presentSemester);

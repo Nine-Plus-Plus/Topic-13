@@ -4,7 +4,10 @@
  */
 package com.project.security;
 
+import com.project.service.AuthService;
+import com.project.service.CustomOAuth2UserService;
 import com.project.service.CustomUserDetailsService;
+import com.project.ultis.JWTUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,6 +40,12 @@ public class SecurityConfig {
     
     @Autowired
     private JWTAuthFilter jWTAuthFilter;
+
+    @Autowired
+    private JWTUtils jwtUtils;
+
+    @Autowired
+    private CustomOAuth2UserService customOAuth2UserService;
     
     private final String[] ADMIN_LIST = {"api/admin/**"};
     private final String[] STUDENT_LIST = {"api/student/**"};
@@ -46,7 +55,7 @@ public class SecurityConfig {
     private final String[] SWAGGERUI = {"/swagger-ui/**", "/v3/api-docs/**","/swagger-ui.html"};
     
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception{
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler   ) throws Exception{
         httpSecurity.csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(request -> request
@@ -57,11 +66,21 @@ public class SecurityConfig {
                         .requestMatchers(STUDENT_LIST).hasAuthority("STUDENT")
                         .requestMatchers(ADMINUSER_LIST).hasAnyAuthority("STUDENT", "MENTOR", "ADMIN")
                         .anyRequest().authenticated())
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("http://localhost:5173/public/login")
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                        .successHandler(oAuth2LoginSuccessHandler)
+                )
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jWTAuthFilter, UsernamePasswordAuthenticationFilter.class);
         
         return httpSecurity.build();        
+    }
+
+    @Bean
+    public OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler(AuthService authService) {
+        return new OAuth2LoginSuccessHandler(jwtUtils, authService);
     }
     
     @Bean

@@ -55,8 +55,8 @@ public class Booking {
     @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL)
     private Meeting meeting;
     
-    // Quan hệ OneToOne với MentorSchedule
-    @OneToOne
+    // Quan hệ ManyToOne với MentorSchedule
+    @ManyToOne
     @JoinColumn(name = "mentor_schedule_id")
     private MentorSchedule mentorSchedule;
     

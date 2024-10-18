@@ -15,9 +15,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.Data;
 
 @Data
@@ -44,9 +46,9 @@ public class MentorSchedule {
     @JoinColumn(name = "mentor_id")
     private Mentors mentor;
 
-    // Quan hệ OneToOne với Booking
-    @OneToOne(mappedBy = "mentorSchedule", cascade = CascadeType.ALL)
-    private Booking booking;
+    // Quan hệ OneToMany với Booking
+    @OneToMany(mappedBy = "mentorSchedule", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Booking> booking;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "available_status")

@@ -233,6 +233,30 @@ public class StudentsService {
         return response;
     }
 
+    public Response findStudentsNotInGroup(Long classId){
+        Response response = new Response();
+        try {
+            List<Students> findStudents = studentsRepository.findStudentsThatAreNotInGroup(classId, AvailableStatus.ACTIVE);
+            if (findStudents != null) {
+                List<StudentsDTO> findStudentsDTO = findStudents.stream()
+                        .map(Converter::convertStudentToStudentDTO)
+                        .collect(Collectors.toList());
+                response.setStudentsDTOList(findStudentsDTO);
+                response.setStatusCode(200);
+                response.setMessage("Successfully");
+            } else {
+                throw new OurException("Cannot find group");
+            }
+          } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occured during get group " + e.getMessage());
+        }
+        return response;
+    }
+
     public Response importStudentsFromExcel(MultipartFile file){
         Response response = new Response();
         try{

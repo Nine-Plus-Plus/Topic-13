@@ -47,6 +47,12 @@ public class StudentsController {
         Response response = studentsService.updateStudent(id, updateStudent, avatarFile);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
+    
+    @GetMapping("/user/get-students-not-in-group/{classId}")
+    public ResponseEntity<Response> getStudentsNotInGroup(@PathVariable Long classId) {
+        Response response = studentsService.findStudentsNotInGroup(classId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
 
     @PostMapping("/admin/import-student")
     public Response importStudents(@RequestParam("file") MultipartFile file) {

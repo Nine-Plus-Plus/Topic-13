@@ -47,4 +47,9 @@ public class StudentsController {
         Response response = studentsService.updateStudent(id, updateStudent, avatarFile);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
+
+    @PostMapping("/admin/import-student")
+    public Response importStudents(@RequestParam("file") MultipartFile file) {
+        return studentsService.importStudentsFromExcel(file);
+    }
 }

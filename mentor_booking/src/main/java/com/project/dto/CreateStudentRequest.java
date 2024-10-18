@@ -42,5 +42,4 @@ public class CreateStudentRequest {
     private UsersDTO user;
     private GroupDTO group;  // Mỗi sinh viên chỉ thuộc 1 nhóm
     private ClassDTO aClass;
-
 }

@@ -19,12 +19,14 @@ import com.project.repository.MentorScheduleRepository;
 import com.project.repository.MentorsRepository;
 import com.project.repository.PointHistoryRepository;
 import com.project.ultis.Converter;
+import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 /**
@@ -100,6 +102,9 @@ public class BookingService {
             booking.setGroup(group);
             booking.setPointPay(pointPay);
             booking.setAvailableStatus(AvailableStatus.ACTIVE);
+
+            booking.setExpiredTime(LocalDateTime.now().plusHours(time));
+
             bookingRepository.save(booking);
 
             if (booking.getId() > 0) {
@@ -223,6 +228,17 @@ public class BookingService {
             if (booking != null) {
                 booking.setStatus(BookingStatus.CONFIRMED);
                 booking.setDateUpdated(LocalDateTime.now());
+                booking.setExpiredTime(null);
+
+                List<Booking> pendingBookingList = bookingRepository.findByStatusAndMentorScheduleId(BookingStatus.PENDING, booking.getMentorSchedule().getId());
+                if (!pendingBookingList.isEmpty()) {
+                    for (Booking pendingBookings : pendingBookingList) {
+                        pendingBookings.setStatus(BookingStatus.REJECTED);
+                        pendingBookings.setAvailableStatus(AvailableStatus.INACTIVE);
+                        pendingBookings.setDateUpdated(LocalDateTime.now());
+                        bookingRepository.save(pendingBookings);
+                    }
+                }
 
                 PointHistory pointHistory = new PointHistory();
                 pointHistory.setStatus(PointHistoryStatus.REDEEMED);
@@ -294,6 +310,7 @@ public class BookingService {
                 booking.setStatus(BookingStatus.REJECTED);
                 booking.setAvailableStatus(AvailableStatus.INACTIVE);
                 booking.setDateUpdated(LocalDateTime.now());
+                booking.setExpiredTime(null);
 
                 bookingRepository.save(booking);
 
@@ -323,6 +340,7 @@ public class BookingService {
                     booking.setStatus(BookingStatus.CANCELLED);
                     booking.setAvailableStatus(AvailableStatus.INACTIVE);
                     booking.setDateUpdated(LocalDateTime.now());
+                    booking.setExpiredTime(null);
 
                     PointHistory pointHistory = new PointHistory();
                     pointHistory.setStatus(PointHistoryStatus.ADJUSTED);
@@ -376,6 +394,7 @@ public class BookingService {
                     booking.setStatus(BookingStatus.CANCELLED);
                     booking.setAvailableStatus(AvailableStatus.INACTIVE);
                     booking.setDateUpdated(LocalDateTime.now());
+                    booking.setExpiredTime(null);
 
                     PointHistory pointHistory = new PointHistory();
                     pointHistory.setStatus(PointHistoryStatus.EXPIRED);
@@ -479,5 +498,51 @@ public class BookingService {
             response.setMessage("Error occurred during get all bookings: " + e.getMessage());
         }
         return response;
+    }
+
+    @Scheduled(fixedRate = 60000)
+    @Transactional
+    public void setBookingAvailableStatusAndStatusAutomatically() {
+        try {
+            List<Booking> bookingList;
+
+            //Check if the pending bookings are at the expired time
+            bookingList = bookingRepository.findAllByStatusAndExpiredTimeBefore(BookingStatus.PENDING, LocalDateTime.now());
+            if (!bookingList.isEmpty()) {
+                for (Booking booking : bookingList) {
+                    booking.setStatus(BookingStatus.REJECTED);
+                    booking.setAvailableStatus(AvailableStatus.INACTIVE);
+                    booking.setDateUpdated(LocalDateTime.now());
+                    booking.setExpiredTime(null);
+                    bookingRepository.save(booking);
+                }
+            }
+
+            //Check if the booking is not accepted by mentor before the meeting start time
+            bookingList = bookingRepository.findAllByStatusAndAvailableFromBefore(BookingStatus.PENDING, LocalDateTime.now().minusMinutes(30));
+            if (!bookingList.isEmpty()) {
+                for (Booking booking : bookingList) {
+                    booking.setStatus(BookingStatus.REJECTED);
+                    booking.setAvailableStatus(AvailableStatus.INACTIVE);
+                    booking.setDateUpdated(LocalDateTime.now());
+                    booking.setExpiredTime(null);
+                    bookingRepository.save(booking);
+                }
+            }
+
+            //Set confirmed active bookings to inactive (The meeting has been started)
+            bookingList = bookingRepository.findAllByStatusAndAvailableFromBefore(BookingStatus.CONFIRMED, LocalDateTime.now());
+            if (!bookingList.isEmpty()) {
+                for (Booking booking : bookingList) {
+                    booking.setAvailableStatus(AvailableStatus.INACTIVE);
+                    booking.setDateUpdated(LocalDateTime.now());
+                    booking.setExpiredTime(null);
+                    bookingRepository.save(booking);
+                }
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error while setting booking status automatically: " + e.getMessage());
+        }
     }
 }

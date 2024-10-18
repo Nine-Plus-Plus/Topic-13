@@ -6,14 +6,18 @@ import com.project.dto.StudentsDTO;
 import com.project.enums.AvailableStatus;
 import com.project.exception.OurException;
 import com.project.model.Class;
+import com.project.model.Role;
 import com.project.model.Students;
 import com.project.model.Users;
 import com.project.repository.ClassRepository;
+import com.project.repository.RoleRepository;
 import com.project.repository.StudentsRepository;
 import com.project.repository.UsersRepository;
 import com.project.security.AwsS3Service;
 import com.project.ultis.Converter;
+import com.project.ultis.ExcelHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,6 +42,14 @@ public class StudentsService {
     @Autowired
     private AwsS3Service awsS3Service;
 
+    @Autowired
+    private UsersService usersService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private RoleRepository roleRepository;
     // Phương thức lấy tất cả sinh viên
     public Response getAllStudents() {
         Response response = new Response();
@@ -217,6 +229,124 @@ public class StudentsService {
         } catch (Exception e) {
             response.setStatusCode(500);
             response.setMessage("Error occurred while fetching student: " + e.getMessage());
+        }
+        return response;
+    }
+
+    public Response importStudentsFromExcel(MultipartFile file){
+        Response response = new Response();
+        try{
+            List<CreateStudentRequest> studentRequests = ExcelHelper.excelToStudents(file);
+
+            List<String> errors = new ArrayList<>();
+            for (CreateStudentRequest request : studentRequests) {
+                try {
+                    Response createResponse = createStudentFormExcel(request);
+                    if (createResponse.getStatusCode() != 200) {
+                        errors.add("Error creating student: " + request.getUsername() +
+                                " [Username: " + request.getUsername() +
+                                ", Email: " + request.getEmail() +
+                                ", Password: " + request.getPassword() +
+                                ", FullName: " + request.getFullName() +
+                                ", BirthDate: " + request.getBirthDate() +
+                                ", Address: " + request.getAddress() +
+                                ", Phone: " + request.getPhone() +
+                                ", Gender: " + request.getGender() +
+                                ", Class Name: " + request.getClassName() +
+                                ", Expertise: " + request.getExpertise() +
+                                ", StudentCode: " + request.getStudentCode() + "]");
+                    }
+                } catch (OurException e) {
+                    errors.add("Error creating student: " + request.getUsername() + " - " + e.getMessage());
+                }
+            }
+            if (!errors.isEmpty()) {
+                response.setStatusCode(400);
+                response.setMessage(String.join(", ", errors));
+            } else {
+                response.setStatusCode(200);
+                response.setMessage("All students created successfully");
+            }
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred during import: " + e.getMessage());
+        }
+        return response;
+    }
+
+    public Response createStudentFormExcel(CreateStudentRequest request){
+        Response response = new Response();
+        try{
+            // Kiểm tra nếu username hoặc email đã tồn tại
+            if (usersRepository.findByUsername(request.getUsername()).isPresent()) {
+                throw new OurException("Username already exists");
+            }
+            // Kiểm tra email
+            if (usersRepository.findByEmail(request.getEmail()).isPresent()) {
+                throw new OurException("Email already exists");
+            }
+            if (usersRepository.findByPhone(request.getPhone()).isPresent()) {
+                throw new OurException("Phone already exists");
+            }
+            if (studentsRepository.findByStudentCode(request.getStudentCode()).isPresent()) {
+                throw new OurException("StudentCode already exists");
+            }
+            // Kiểm tra Class
+            Class aClass = classRepository.findByClassNameContainingIgnoreCaseAndAvailableStatus(request.getClassName(), AvailableStatus.ACTIVE);
+            if (aClass == null) {
+                throw new OurException("Class not found");
+            }
+
+            // Kiểm tra Role
+            Role role = roleRepository.findByRoleName("STUDENT")
+                    .orElseThrow(() -> new OurException("No role name"));
+
+            // Mã hóa mật khẩu
+            String encodedPassword = passwordEncoder.encode(request.getPassword());
+
+            // Tạo đối tượng User mới
+            Users newUser = new Users();
+            newUser.setUsername(request.getUsername());
+            newUser.setEmail(request.getEmail());
+            newUser.setPassword(encodedPassword);
+            newUser.setFullName(request.getFullName());
+            newUser.setBirthDate(request.getBirthDate());
+            newUser.setAddress(request.getAddress());
+            newUser.setPhone(request.getPhone());
+            newUser.setGender(request.getGender());
+            newUser.setDateCreated(LocalDateTime.now());
+            newUser.setRole(role);
+            newUser.setAvailableStatus(AvailableStatus.ACTIVE);
+
+            usersRepository.save(newUser);
+
+            // Tạo đối tượng Student mới
+            Students student = new Students();
+            student.setUser(newUser);
+            student.setExpertise(request.getExpertise());
+            student.setStudentCode(request.getStudentCode());
+            student.setDateCreated(LocalDate.now());
+            student.setPoint(100);
+            student.setAClass(aClass);
+            student.setGroupRole(null);
+            student.setAvailableStatus(AvailableStatus.ACTIVE);
+            student.setGroup(null); // Để group_id null
+            studentsRepository.save(student);
+
+            newUser.setStudent(student);
+            usersRepository.save(newUser);
+
+            response.setStatusCode(200);
+            response.setMessage("Student created successfully");
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred during student creation: " + e.getMessage());
         }
         return response;
     }

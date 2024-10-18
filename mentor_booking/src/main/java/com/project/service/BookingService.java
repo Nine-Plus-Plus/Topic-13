@@ -229,6 +229,7 @@ public class BookingService {
                 booking.setStatus(BookingStatus.CONFIRMED);
                 booking.setDateUpdated(LocalDateTime.now());
                 booking.setExpiredTime(null);
+                bookingRepository.save(booking);
 
                 List<Booking> pendingBookingList = bookingRepository.findByStatusAndMentorScheduleId(BookingStatus.PENDING, booking.getMentorSchedule().getId());
                 if (!pendingBookingList.isEmpty()) {
@@ -236,6 +237,7 @@ public class BookingService {
                         pendingBookings.setStatus(BookingStatus.REJECTED);
                         pendingBookings.setAvailableStatus(AvailableStatus.INACTIVE);
                         pendingBookings.setDateUpdated(LocalDateTime.now());
+                        booking.setExpiredTime(null);
                         bookingRepository.save(pendingBookings);
                     }
                 }

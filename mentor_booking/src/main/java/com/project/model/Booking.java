@@ -57,7 +57,7 @@ public class Booking {
     
     // Quan hệ OneToOne với MentorSchedule
     @OneToOne
-    @JoinColumn(name = "mentor_schedule_id", unique = true)
+    @JoinColumn(name = "mentor_schedule_id")
     private MentorSchedule mentorSchedule;
     
     @OneToMany(mappedBy = "booking")

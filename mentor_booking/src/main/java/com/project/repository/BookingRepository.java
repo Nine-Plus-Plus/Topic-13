@@ -4,6 +4,7 @@ package com.project.repository;
 import com.project.enums.AvailableStatus;
 import com.project.enums.BookingStatus;
 import com.project.model.Booking;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -47,4 +48,17 @@ public interface BookingRepository extends JpaRepository<Booking, Long>{
             BookingStatus status
     );
     
+    List<Booking> findByStatusAndMentorScheduleId(BookingStatus status, Long mentorScheduleId);
+    
+    @Query("SELECT b FROM Booking b WHERE b.status = :bookingStatus AND b.expiredTime < :currentDateTime")
+    List<Booking> findAllByStatusAndExpiredTimeBefore(
+        @Param("bookingStatus") BookingStatus bookingStatus, 
+        @Param("currentDateTime") LocalDateTime currentDateTime
+    );
+    
+    @Query("SELECT b FROM Booking b WHERE b.status = :bookingStatus AND b.mentorSchedule.availableFrom < :currentDateTime")
+    List<Booking> findAllByStatusAndAvailableFromBefore(
+        @Param("bookingStatus") BookingStatus bookingStatus, 
+        @Param("currentDateTime") LocalDateTime currentDateTime
+    );
 }

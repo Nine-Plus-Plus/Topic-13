@@ -46,7 +46,8 @@ public class SecurityConfig {
 
     @Autowired
     private CustomOAuth2UserService customOAuth2UserService;
-    
+
+    private final String[] EMAIL_LIST = {"/api/emails/**"};
     private final String[] ADMIN_LIST = {"api/admin/**"};
     private final String[] STUDENT_LIST = {"api/student/**"};
     private final String[] MENTOR_LIST = {"api/mentor/**"};
@@ -59,6 +60,7 @@ public class SecurityConfig {
         httpSecurity.csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(request -> request
+                        .requestMatchers(EMAIL_LIST).permitAll()
                         .requestMatchers(SWAGGERUI).permitAll()
                         .requestMatchers(PUBLIC_LIST).permitAll()
                         .requestMatchers(ADMIN_LIST).hasAuthority("ADMIN")

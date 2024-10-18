@@ -2,6 +2,7 @@ package com.project.service;
 
 import com.project.dto.Response;
 import com.project.dto.UsersDTO;
+import com.project.enums.AvailableStatus;
 import com.project.exception.OurException;
 import com.project.model.Users;
 import com.project.repository.UsersRepository;
@@ -42,9 +43,13 @@ public class AuthService {
                     new UsernamePasswordAuthenticationToken(
                             loginRequest.getUsername(),
                             loginRequest.getPassword()));
-            var user = usersRepository.findByUsername(loginRequest
-                            .getUsername())
-                    .orElseThrow(() -> new OurException("User not found"));
+            var user = usersRepository.findByUsernameLogin(loginRequest
+                            .getUsername().trim(), AvailableStatus.ACTIVE).orElse(null);
+            if(user== null){
+                response.setMessage("Incorrect Username or Password");
+                response.setStatusCode(400);
+                return response;
+            }
             var jwt = jWTUltis.generateToken(user);
 
             response.setStatusCode(200);

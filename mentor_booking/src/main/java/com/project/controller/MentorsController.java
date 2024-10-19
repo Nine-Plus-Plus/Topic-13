@@ -56,4 +56,10 @@ public class MentorsController {
         Response response = mentorsService.findMentorWithNameAndSkillsAndAvaibility(name.trim(), skillIds, availableFrom, availableTo);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
+
+    @PostMapping("/admin/import-mentor")
+    public Response importStudents(@RequestParam("file") MultipartFile file) {
+        return mentorsService.importMentorFromExcel(file);
+    }
+
 }

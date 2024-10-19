@@ -63,6 +63,9 @@ public class Booking {
     @OneToMany(mappedBy = "booking")
     private List<PointHistory> pointHistories;
 
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Notifications> notifications;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "available_status")
     private AvailableStatus availableStatus;

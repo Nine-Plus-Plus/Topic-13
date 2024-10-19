@@ -164,6 +164,7 @@ public class Converter {
         groupDTO.setDateCreated(convertGroup.getDateCreated());
 
         for (Students student : convertGroup.getStudents()) {
+            studentsDTO = new StudentsDTO();
             studentsDTO.setId(student.getId());
             studentsDTO.setStudentCode(student.getStudentCode());
             studentsDTO.setExpertise(student.getExpertise());

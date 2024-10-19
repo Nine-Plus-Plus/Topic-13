@@ -22,6 +22,11 @@ public interface SkillsRepository extends JpaRepository<Skills, Long>{
 
     List<Skills> findByAvailableStatus(AvailableStatus availableStatus);
 
+    @Query("SELECT s FROM Skills s WHERE s.skillName = :skillName AND s.availableStatus = :availableStatus")
+    Optional<Skills> findBySkillNameExcel(
+            @Param("skillName") String skillName,
+            @Param("availableStatus") AvailableStatus status);
+
     @Query("SELECT s FROM Skills s WHERE s.id = :id AND s.availableStatus = :availableStatus")
     Skills findByIdAndAvailableStatus(
             @Param("id") Long id,

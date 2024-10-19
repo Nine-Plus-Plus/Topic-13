@@ -42,6 +42,9 @@ public class Group {
     @JoinColumn(name = "class_id")
     private Class aClass;
 
+    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Notifications> notifications;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "available_status")
     private AvailableStatus availableStatus;

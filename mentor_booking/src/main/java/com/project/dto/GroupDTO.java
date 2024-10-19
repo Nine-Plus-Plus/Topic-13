@@ -21,4 +21,5 @@ public class GroupDTO {
     private List<BookingDTO> bookings;
     private ClassDTO classDTO;
     private AvailableStatus availableStatus;
+    private List<NotificationsDTO> notificationsDTOList;
 }

@@ -190,8 +190,8 @@ public class GroupService {
                     }
                     List<Students> studentsList = findGroup.getStudents();
                     student.setGroupRole(GroupRole.MEMBER);
-                    studentsList.add(student);
                     student.setGroup(findGroup);
+                    studentsList.add(student);
                     int currentPoint = findGroup.getTotalPoint();
                     findGroup.setTotalPoint(currentPoint + student.getPoint());
                     studentsRepository.save(student);

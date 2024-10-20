@@ -79,7 +79,7 @@ public class BookingService {
 
             LocalDateTime timeStart = mentorSchedule.getAvailableFrom();
             LocalDateTime timeEnd = mentorSchedule.getAvailableTo();
-            int time = (int) timeStart.until(timeEnd, ChronoUnit.MINUTES);
+            float time = (float) timeStart.until(timeEnd, ChronoUnit.HOURS);
 
             if (mentor.getTotalTimeRemain() < time) {
                 throw new OurException("This mentor has reached their support time this semester");
@@ -103,7 +103,7 @@ public class BookingService {
             booking.setPointPay(pointPay);
             booking.setAvailableStatus(AvailableStatus.ACTIVE);
 
-            booking.setExpiredTime(LocalDateTime.now().plusHours(time));
+            booking.setExpiredTime(LocalDateTime.now().plusHours((long) time));
 
             bookingRepository.save(booking);
 

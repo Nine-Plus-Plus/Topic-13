@@ -14,7 +14,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long>{
     Booking findByIdAndAvailableStatusAndStatus(Long id, AvailableStatus availableStatus, BookingStatus status);
-    
+
+    Booking findByIdAndAvailableStatus(Long id, AvailableStatus availableStatus);
+
     List<Booking> findByAvailableStatusAndStatusAndMentorScheduleId(
             AvailableStatus availableStatus, 
             BookingStatus status,

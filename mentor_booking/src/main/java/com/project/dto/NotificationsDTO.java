@@ -16,7 +16,8 @@ public class NotificationsDTO {
     private NotificationAction action;
     private String message;
     private LocalDateTime dateTimeSent;
-    private UsersDTO user;
+    private UsersDTO sender;
+    private UsersDTO reciver;
     private AvailableStatus availableStatus;
     private BookingDTO bookingDTO;
     private GroupDTO groupDTO;

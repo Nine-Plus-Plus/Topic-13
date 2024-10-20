@@ -17,6 +17,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -73,6 +74,14 @@ public class MentorScheduleService {
                 response.setStatusCode(400);
                 response.setMessage("Schedule conflicts with existing mentor availability");
                 return response;
+            }
+
+            LocalDateTime timeStart = inputRequest.getAvailableFrom();
+            LocalDateTime timeEnd = inputRequest.getAvailableTo();
+            float time = (float) timeStart.until(timeEnd, ChronoUnit.HOURS);
+
+            if (mentor.getTotalTimeRemain() < time) {
+                throw new OurException("You have reached your support time limit for this semester");
             }
 
             // Tạo mới MentorSchedule từ input

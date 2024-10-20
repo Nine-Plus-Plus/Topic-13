@@ -254,4 +254,31 @@ public class Converter {
 
         return bookingDTO;
     }
+
+    public static NotificationsDTO convertNotificationToNotiDTO(Notifications notifications){
+        NotificationsDTO notificationsDTO = new NotificationsDTO();
+        notificationsDTO.setId(notifications.getId());
+        notificationsDTO.setMessage(notificationsDTO.getMessage());
+        notificationsDTO.setDateTimeSent(notificationsDTO.getDateTimeSent());
+        notificationsDTO.setType(notifications.getType());
+        notificationsDTO.setAction(notifications.getAction());
+
+        if(notifications.getReceiver() != null){
+            notificationsDTO.setReciver(convertUserToUserDTO(notifications.getReceiver()));
+        }
+
+        if(notifications.getSender() != null){
+            notificationsDTO.setSender(convertUserToUserDTO(notifications.getSender()));
+        }
+
+        if(notifications.getBooking() != null){
+            notificationsDTO.setBookingDTO(convertBookingToBookingDTO(notifications.getBooking()));
+        }
+
+        if(notifications.getGroup() != null){
+            notificationsDTO.setGroupDTO(convertGroupToGroupDTO(notifications.getGroup()));
+        }
+        
+        return notificationsDTO;
+    }
 }

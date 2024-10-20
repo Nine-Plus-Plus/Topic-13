@@ -21,7 +21,7 @@ public class Mentors {
     @Column(name = "mentor_code")
     private String mentorCode;
     @Column(name = "total_time_remain")
-    private int totalTimeRemain;
+    private float totalTimeRemain;
     @Column(name = "date_created")
     private LocalDate dateCreated;
     @Column(name = "date_updated")

@@ -6,7 +6,12 @@ import com.project.enums.GroupRole;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
+
+//import org.hibernate.mapping.List;
+
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 @Entity
@@ -51,4 +56,8 @@ public class Students {
     @Enumerated(EnumType.STRING)
     @Column(name = "available_status")
     private AvailableStatus availableStatus;
+
+    @OneToMany(mappedBy = "student")
+    private List<PointHistory> pointHistories;
+
 }

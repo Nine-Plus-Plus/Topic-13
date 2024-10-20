@@ -79,7 +79,7 @@ public class BookingService {
 
             LocalDateTime timeStart = mentorSchedule.getAvailableFrom();
             LocalDateTime timeEnd = mentorSchedule.getAvailableTo();
-            float time = (float) timeStart.until(timeEnd, ChronoUnit.HOURS);
+            int time = (int) timeStart.until(timeEnd, ChronoUnit.MINUTES);
 
             if (mentor.getTotalTimeRemain() < time) {
                 throw new OurException("This mentor has reached their support time this semester");
@@ -103,7 +103,7 @@ public class BookingService {
             booking.setPointPay(pointPay);
             booking.setAvailableStatus(AvailableStatus.ACTIVE);
 
-            booking.setExpiredTime(LocalDateTime.now().plusHours((long) time));
+            booking.setExpiredTime(LocalDateTime.now().plusHours(12));
 
             bookingRepository.save(booking);
 
@@ -278,7 +278,7 @@ public class BookingService {
                 Mentors mentor = mentorsRepository.findByIdAndAvailableStatus(booking.getMentorSchedule().getMentor().getId(), AvailableStatus.ACTIVE);
                 LocalDateTime timeStart = schedule.getAvailableFrom();
                 LocalDateTime timeEnd = schedule.getAvailableTo();
-                int time = (int) timeStart.until(timeEnd, ChronoUnit.MINUTES);
+                float time = timeStart.until(timeEnd, ChronoUnit.MINUTES) / 60f;
                 mentor.setTotalTimeRemain(mentor.getTotalTimeRemain() - time);
                 mentorsRepository.save(mentor);
 
@@ -379,7 +379,7 @@ public class BookingService {
                     Mentors mentor = mentorsRepository.findByIdAndAvailableStatus(booking.getMentorSchedule().getMentor().getId(), AvailableStatus.ACTIVE);
                     LocalDateTime timeStart = schedule.getAvailableFrom();
                     LocalDateTime timeEnd = schedule.getAvailableTo();
-                    int time = (int) timeStart.until(timeEnd, ChronoUnit.MINUTES);
+                    float time = timeStart.until(timeEnd, ChronoUnit.MINUTES) / 60f;
                     mentor.setTotalTimeRemain(mentor.getTotalTimeRemain() + time);
                     mentorsRepository.save(mentor);
                     mentorScheduleRepository.save(schedule);
@@ -421,7 +421,7 @@ public class BookingService {
                     Mentors mentor = mentorsRepository.findByIdAndAvailableStatus(booking.getMentorSchedule().getMentor().getId(), AvailableStatus.ACTIVE);
                     LocalDateTime timeStart = schedule.getAvailableFrom();
                     LocalDateTime timeEnd = schedule.getAvailableTo();
-                    int time = (int) timeStart.until(timeEnd, ChronoUnit.MINUTES);
+                    float time = timeStart.until(timeEnd, ChronoUnit.MINUTES) / 60f;
                     mentor.setTotalTimeRemain(mentor.getTotalTimeRemain() + time);
                     mentorsRepository.save(mentor);
                     mentorScheduleRepository.save(schedule);
@@ -521,7 +521,7 @@ public class BookingService {
             }
 
             //Check if the booking is not accepted by mentor before the meeting start time
-            bookingList = bookingRepository.findAllByStatusAndAvailableFromBefore(BookingStatus.PENDING, LocalDateTime.now().minusMinutes(30));
+            bookingList = bookingRepository.findAllByStatusAndAvailableFromBefore(BookingStatus.PENDING, LocalDateTime.now());
             if (!bookingList.isEmpty()) {
                 for (Booking booking : bookingList) {
                     booking.setStatus(BookingStatus.REJECTED);

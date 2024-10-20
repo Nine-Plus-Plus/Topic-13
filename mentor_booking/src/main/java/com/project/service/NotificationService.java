@@ -62,20 +62,8 @@ public class NotificationService {
             }
 
             Group group = groupRepository.findByIdAndAvailableStatus(notificationsDTO.getGroupDTO().getId(), AvailableStatus.ACTIVE);
-            if(group == null){
-                response.setMessage("Group not found");
-                response.setStatusCode(400);
-                response.setNotificationsDTO(sendNotifications);
-                return response;
-            }
 
             Booking booking = bookingRepository.findByIdAndAvailableStatus(notificationsDTO.getBookingDTO().getId(), AvailableStatus.ACTIVE);
-            if(booking == null){
-                response.setMessage("Booking not found");
-                response.setStatusCode(400);
-                response.setNotificationsDTO(sendNotifications);
-                return response;
-            }
 
             Notifications notifications = new Notifications();
             notifications.setMessage(notificationsDTO.getMessage());
@@ -84,8 +72,15 @@ public class NotificationService {
             notifications.setDateTimeSent(LocalDateTime.now());
             notifications.setSender(sender);
             notifications.setReceiver(reciver);
-            notifications.setGroup(group);
-            notifications.setBooking(booking);
+            if(group!=null){
+                notifications.setGroup(group);
+            }
+            if(booking!=null){
+                notifications.setBooking(booking);
+            }
+
+            notifications.setGroup(null);
+            notifications.setBooking(null);
 
             notificationRepository.save(notifications);
 

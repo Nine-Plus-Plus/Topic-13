@@ -10,5 +10,5 @@ import java.util.List;
 @Repository
 public interface ReviewsRepository extends JpaRepository<Reviews, Long>{
     List<Reviews> findByAvailableStatus(AvailableStatus availableStatus);
-    
+    List<Reviews> findByUserId(Long userId);
 }

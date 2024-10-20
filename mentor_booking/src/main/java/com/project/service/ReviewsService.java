@@ -1,15 +1,18 @@
-/* 
 package com.project.service;
 
 import com.project.dto.ReviewsDTO;
+import com.project.dto.UsersDTO;
 import com.project.dto.Response;
 import com.project.enums.AvailableStatus;
 import com.project.exception.OurException;
 import com.project.model.Reviews;
+import com.project.model.Role;
+import com.project.model.Users;
 import com.project.repository.ReviewsRepository;
-import com.project.repository.UsersRepository;
+import com.project.ultis.Converter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,46 +23,33 @@ public class ReviewsService {
     @Autowired
     private ReviewsRepository reviewsRepository;
 
-    @Autowired
-    private UsersRepository usersRepository;
-
-    public Response createReview(ReviewsDTO reviewsDTO) {
+    public Response createReview(ReviewsDTO createRequest) {
         Response response = new Response();
         try {
-            Reviews review = new Reviews();
-            review.setComment(reviewsDTO.getComment());
-            review.setRating(reviewsDTO.getRating());
+            Reviews review = mapToEntity(createRequest);
             review.setDateCreated(LocalDateTime.now());
-            review.setAvailableStatus(AvailableStatus.ACTIVE);
-            review.setUser(usersRepository.findById(reviewsDTO.getUser().getId())
-                    .orElseThrow(() -> new OurException("User not found")));
             reviewsRepository.save(review);
-
-            ReviewsDTO dto = mapToDTO(review);
-            response.setReviewsDTO(dto);
             response.setStatusCode(200);
             response.setMessage("Review created successfully");
-        } catch (OurException e) {
-            response.setStatusCode(400);
-            response.setMessage(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
             response.setMessage("Error occurred during review creation: " + e.getMessage());
         }
-        return response;
+        return response;    
     }
 
     public Response getAllReviews() {
         Response response = new Response();
         try {
-            List<Reviews> reviewsList = reviewsRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
-            List<ReviewsDTO> reviewsDTOList = reviewsList.stream().map(this::mapToDTO).collect(Collectors.toList());
-            response.setReviewsDTOList(reviewsDTOList);
+            List<Reviews> reviews = reviewsRepository.findAll();
+            List<ReviewsDTO> reviewsDTOs = reviews.stream()
+                    .map(this::mapToDTO)
+                    .collect(Collectors.toList());
             response.setStatusCode(200);
-            response.setMessage("Reviews retrieved successfully");
+            response.setReviewsDTOList(reviewsDTOs);
         } catch (Exception e) {
             response.setStatusCode(500);
-            response.setMessage("Error occurred during retrieving reviews: " + e.getMessage());
+            response.setMessage("Error occurred during fetching reviews: " + e.getMessage());
         }
         return response;
     }
@@ -69,36 +59,29 @@ public class ReviewsService {
         try {
             Reviews review = reviewsRepository.findById(id)
                     .orElseThrow(() -> new OurException("Review not found"));
-            ReviewsDTO dto = mapToDTO(review);
-            response.setReviewsDTO(dto);
+            ReviewsDTO reviewDTO = mapToDTO(review);
             response.setStatusCode(200);
-            response.setMessage("Review retrieved successfully");
+            response.setReviewsDTO(reviewDTO);
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
-            response.setMessage("Error occurred during retrieving review: " + e.getMessage());
+            response.setMessage("Error occurred during fetching review: " + e.getMessage());
         }
         return response;
     }
 
-    public Response updateReview(Long id, ReviewsDTO reviewsDTO) {
+    public Response updateReview(Long id, ReviewsDTO updateRequest) {
         Response response = new Response();
         try {
             Reviews review = reviewsRepository.findById(id)
                     .orElseThrow(() -> new OurException("Review not found"));
-            if (reviewsDTO.getComment() != null) {
-                review.setComment(reviewsDTO.getComment());
-            }
-            if (reviewsDTO.getRating() != 0) {
-                review.setRating(reviewsDTO.getRating());
-            }
-            review.setDateCreated(LocalDateTime.now());
+            review.setComment(updateRequest.getComment());
+            review.setRating(updateRequest.getRating());
+            review.setAvailableStatus(updateRequest.getAvailableStatus());
+            review.setDateCreated(updateRequest.getDateCreated());
             reviewsRepository.save(review);
-
-            ReviewsDTO dto = mapToDTO(review);
-            response.setReviewsDTO(dto);
             response.setStatusCode(200);
             response.setMessage("Review updated successfully");
         } catch (OurException e) {
@@ -130,6 +113,22 @@ public class ReviewsService {
         return response;
     }
 
+    public Response getReviewsByUserId(Long userId) {
+        Response response = new Response();
+        try {
+            List<Reviews> reviews = reviewsRepository.findByUserId(userId);
+            List<ReviewsDTO> reviewsDTOs = reviews.stream()
+                    .map(this::mapToDTO)
+                    .collect(Collectors.toList());
+            response.setStatusCode(200);
+            response.setReviewsDTOList(reviewsDTOs);
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred during fetching reviews: " + e.getMessage());
+        }
+        return response;
+    }
+
     private ReviewsDTO mapToDTO(Reviews review) {
         ReviewsDTO dto = new ReviewsDTO();
         dto.setId(review.getId());
@@ -137,18 +136,42 @@ public class ReviewsService {
         dto.setRating(review.getRating());
         dto.setDateCreated(review.getDateCreated());
         dto.setAvailableStatus(review.getAvailableStatus());
-        dto.setUser(mapToUsersDTO(review.getUser()));
+        dto.setUser(Converter.convertUserToUserDTO(review.getUser()));
         return dto;
     }
 
-    private UsersDTO mapToUsersDTO(Users user) {
-        UsersDTO dto = new UsersDTO();
-        dto.setId(user.getId());
-        dto.setUsername(user.getUsername());
-        dto.setEmail(user.getEmail());
-        // other fields...
-        return dto;
+    private Reviews mapToEntity(ReviewsDTO dto) {
+        Reviews review = new Reviews();
+        review.setComment(dto.getComment());
+        review.setRating(dto.getRating());
+        review.setAvailableStatus(dto.getAvailableStatus() != null ? dto.getAvailableStatus() : AvailableStatus.ACTIVE);
+        review.setDateCreated(dto.getDateCreated());
+        Users user = new Users();
+        user.setId(dto.getUser().getId());
+        review.setUser(user);
+        return review;
     }
-    
+
+    private Users convertUserDTOToUser(UsersDTO userDTO) {
+        Users user = new Users();
+        user.setId(userDTO.getId());
+        user.setEmail(userDTO.getEmail());
+        user.setUsername(userDTO.getUsername());
+        user.setFullName(userDTO.getFullName());
+        user.setBirthDate(userDTO.getBirthDate());
+        user.setAvatar(userDTO.getAvatar());
+        user.setAddress(userDTO.getAddress());
+        user.setPhone(userDTO.getPhone());
+        user.setGender(userDTO.getGender());
+        user.setDateUpdated(userDTO.getDateUpdated());
+        user.setDateCreated(userDTO.getDateCreated());
+        
+        Role role = new Role();
+        role.setId(userDTO.getRole().getId());
+        role.setRoleName(userDTO.getRole().getRoleName());
+        user.setRole(role);
+
+        user.setAvailableStatus(userDTO.getAvailableStatus());
+        return user;
+    }
 }
-*/

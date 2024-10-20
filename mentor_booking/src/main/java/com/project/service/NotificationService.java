@@ -39,32 +39,30 @@ public class NotificationService {
     @Autowired
     BookingRepository bookingRepository;
 
-    // Phương thức tạo notification mới
-    public Response createNotification (NotificationsDTO notificationsDTO) {
+    public Response createNotification(NotificationsDTO notificationsDTO) {
         Response response = new Response();
         try {
             NotificationsDTO sendNotifications = new NotificationsDTO();
 
+            // Kiểm tra sender
             Users sender = usersRepository.findByIdAndAvailableStatus(notificationsDTO.getSender().getId(), AvailableStatus.ACTIVE);
-            if(sender == null){
+            if (sender == null) {
                 response.setMessage("Sender not found");
                 response.setStatusCode(400);
                 response.setNotificationsDTO(sendNotifications);
                 return response;
             }
 
+            // Kiểm tra receiver
             Users reciver = usersRepository.findByIdAndAvailableStatus(notificationsDTO.getReciver().getId(), AvailableStatus.ACTIVE);
-            if(reciver == null){
+            if (reciver == null) {
                 response.setMessage("Reciver not found");
                 response.setStatusCode(400);
                 response.setNotificationsDTO(sendNotifications);
                 return response;
             }
 
-            Group group = groupRepository.findByIdAndAvailableStatus(notificationsDTO.getGroupDTO().getId(), AvailableStatus.ACTIVE);
-
-            Booking booking = bookingRepository.findByIdAndAvailableStatus(notificationsDTO.getBookingDTO().getId(), AvailableStatus.ACTIVE);
-
+            // Tạo notification
             Notifications notifications = new Notifications();
             notifications.setMessage(notificationsDTO.getMessage());
             notifications.setType(notificationsDTO.getType());
@@ -72,22 +70,30 @@ public class NotificationService {
             notifications.setDateTimeSent(LocalDateTime.now());
             notifications.setSender(sender);
             notifications.setReceiver(reciver);
-            if(group!=null){
-                notifications.setGroup(group);
-            }
-            if(booking!=null){
-                notifications.setBooking(booking);
+
+            // Kiểm tra GroupDTO và BookingDTO trước khi set
+            if (notificationsDTO.getGroupDTO() != null) {
+                Group group = groupRepository.findByIdAndAvailableStatus(notificationsDTO.getGroupDTO().getId(), AvailableStatus.ACTIVE);
+                if (group != null) {
+                    notifications.setGroup(group);
+                }
             }
 
-            notifications.setGroup(null);
-            notifications.setBooking(null);
+            if (notificationsDTO.getBookingDTO() != null) {
+                Booking booking = bookingRepository.findByIdAndAvailableStatus(notificationsDTO.getBookingDTO().getId(), AvailableStatus.ACTIVE);
+                if (booking != null) {
+                    notifications.setBooking(booking);
+                }
+            }
 
+            // Lưu notification
             notificationRepository.save(notifications);
 
+            // Chuyển đổi sang DTO và trả về response
             sendNotifications = Converter.convertNotificationToNotiDTO(notifications);
             response.setNotificationsDTO(sendNotifications);
             response.setStatusCode(200);
-            response.setMessage("Send message to "+reciver.getUsername() + " successfully");
+            response.setMessage("Send message to " + reciver.getUsername() + " successfully");
         } catch (Exception e) {
             response.setStatusCode(500);
             response.setMessage("Error occurred while creating notification: " + e.getMessage());

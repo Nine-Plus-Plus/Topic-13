@@ -158,13 +158,13 @@ public class Converter {
         GroupDTO groupDTO = new GroupDTO();
         StudentsDTO studentsDTO = new StudentsDTO();
         List<StudentsDTO> studentsListDTO = new ArrayList<>();
-        ProjectsDTO projectsDTO = new ProjectsDTO();
         groupDTO.setId(convertGroup.getId());
         groupDTO.setGroupName(convertGroup.getGroupName());
         groupDTO.setTotalPoint(convertGroup.getTotalPoint());
         groupDTO.setDateCreated(convertGroup.getDateCreated());
 
         for (Students student : convertGroup.getStudents()) {
+            studentsDTO = new StudentsDTO();
             studentsDTO.setId(student.getId());
             studentsDTO.setStudentCode(student.getStudentCode());
             studentsDTO.setExpertise(student.getExpertise());
@@ -253,5 +253,32 @@ public class Converter {
         bookingDTO.setAvailableStatus(convertBooking.getAvailableStatus());
 
         return bookingDTO;
+    }
+
+    public static NotificationsDTO convertNotificationToNotiDTO(Notifications notifications){
+        NotificationsDTO notificationsDTO = new NotificationsDTO();
+        notificationsDTO.setId(notifications.getId());
+        notificationsDTO.setMessage(notifications.getMessage());  // Sửa lại chỗ này
+        notificationsDTO.setDateTimeSent(notifications.getDateTimeSent());  // Sửa lại chỗ này
+        notificationsDTO.setType(notifications.getType());
+        notificationsDTO.setAction(notifications.getAction());
+
+        if(notifications.getReceiver() != null){
+            notificationsDTO.setReciver(convertUserToUserDTO(notifications.getReceiver()));
+        }
+
+        if(notifications.getSender() != null){
+            notificationsDTO.setSender(convertUserToUserDTO(notifications.getSender()));
+        }
+
+        if(notifications.getBooking() != null){
+            notificationsDTO.setBookingDTO(convertBookingToBookingDTO(notifications.getBooking()));
+        }
+
+        if(notifications.getGroup() != null){
+            notificationsDTO.setGroupDTO(convertGroupToGroupDTO(notifications.getGroup()));
+        }
+        
+        return notificationsDTO;
     }
 }

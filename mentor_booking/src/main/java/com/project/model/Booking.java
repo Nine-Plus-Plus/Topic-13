@@ -55,13 +55,16 @@ public class Booking {
     @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL)
     private Meeting meeting;
     
-    // Quan hệ OneToOne với MentorSchedule
-    @OneToOne
-    @JoinColumn(name = "mentor_schedule_id", unique = true)
+    // Quan hệ ManyToOne với MentorSchedule
+    @ManyToOne
+    @JoinColumn(name = "mentor_schedule_id")
     private MentorSchedule mentorSchedule;
     
     @OneToMany(mappedBy = "booking")
     private List<PointHistory> pointHistories;
+
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Notifications> notifications;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "available_status")

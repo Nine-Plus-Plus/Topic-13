@@ -43,4 +43,5 @@ public class CreateMentorRequest {
     private ClassDTO assignedClass;
     private List<TopicDTO> topicDTOS;
     private AvailableStatus availableStatus;
+    private List<String> skilllNamesList;
 }

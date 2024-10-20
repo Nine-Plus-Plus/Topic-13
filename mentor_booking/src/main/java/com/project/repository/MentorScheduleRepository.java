@@ -53,6 +53,9 @@ public interface MentorScheduleRepository extends JpaRepository<MentorSchedule, 
             LocalDateTime availableFrom
     );
 
+    @Query("SELECT ms FROM MentorSchedule ms WHERE ms.availableTo < :now AND ms.status = :status")
+    List<MentorSchedule> findByAvailableToBeforeAndStatus(LocalDateTime now, MentorScheduleStatus status);
+
     //
     @Query("SELECT DISTINCT m.mentor FROM MentorSchedule m " +
             "WHERE m.availableTo <= :availableTo " +

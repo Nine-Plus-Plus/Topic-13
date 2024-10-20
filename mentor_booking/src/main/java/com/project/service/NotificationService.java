@@ -2,17 +2,25 @@ package com.project.service;
 
 import com.project.dto.NotificationsDTO;
 import com.project.dto.Response;
+import com.project.enums.AvailableStatus;
 import com.project.exception.OurException;
+import com.project.model.Booking;
+import com.project.model.Group;
 import com.project.model.Notifications;
 import com.project.model.Users;
+import com.project.repository.BookingRepository;
+import com.project.repository.GroupRepository;
 import com.project.repository.NotificationRepository;
 import com.project.repository.UsersRepository;
+import com.project.ultis.Converter;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,36 +34,66 @@ public class NotificationService {
     UsersRepository usersRepository;
 
     @Autowired
-    @Lazy
-    private ModelMapper modelMapperNotification;
+    GroupRepository groupRepository;
 
-    // Phương thức tạo notification mới
-    public Response createNotification (NotificationsDTO notificationsDTO, String usernameReciver) {
+    @Autowired
+    BookingRepository bookingRepository;
+
+    public Response createNotification(NotificationsDTO notificationsDTO) {
         Response response = new Response();
         try {
-            Users receiver = usersRepository.findByUsername(usernameReciver)
-                    .orElseThrow(() -> new OurException("No receiver found"));
+            NotificationsDTO sendNotifications = new NotificationsDTO();
 
-            Users sender = usersRepository.findByUsername(notificationsDTO.getUser().getUsername())
-                    .orElseThrow(() -> new OurException("No senders found"));
-
-            Notifications newNotification = new Notifications();
-            newNotification.setType(notificationsDTO.getType());
-            newNotification.setStatus(notificationsDTO.getStatus());
-            newNotification.setMessage(notificationsDTO.getMessage());
-            newNotification.setDateTimeCreated(notificationsDTO.getDateTimeCreated());
-            newNotification.setDateTimeSent(notificationsDTO.getDateTimeSent());
-
-            newNotification.setUser(sender);
-            newNotification.setReceiver(receiver);
-
-            notificationRepository.save(newNotification);
-
-            if(newNotification.getId() > 0){
-                response.setNotificationsDTO(convertNotificationsToNotificationsDTO(newNotification));
-                response.setStatusCode(200);
-                response.setMessage("Notification created successfully");
+            // Kiểm tra sender
+            Users sender = usersRepository.findByIdAndAvailableStatus(notificationsDTO.getSender().getId(), AvailableStatus.ACTIVE);
+            if (sender == null) {
+                response.setMessage("Sender not found");
+                response.setStatusCode(400);
+                response.setNotificationsDTO(sendNotifications);
+                return response;
             }
+
+            // Kiểm tra receiver
+            Users reciver = usersRepository.findByIdAndAvailableStatus(notificationsDTO.getReciver().getId(), AvailableStatus.ACTIVE);
+            if (reciver == null) {
+                response.setMessage("Reciver not found");
+                response.setStatusCode(400);
+                response.setNotificationsDTO(sendNotifications);
+                return response;
+            }
+
+            // Tạo notification
+            Notifications notifications = new Notifications();
+            notifications.setMessage(notificationsDTO.getMessage());
+            notifications.setType(notificationsDTO.getType());
+            notifications.setAvailableStatus(AvailableStatus.ACTIVE);
+            notifications.setDateTimeSent(LocalDateTime.now());
+            notifications.setSender(sender);
+            notifications.setReceiver(reciver);
+
+            // Kiểm tra GroupDTO và BookingDTO trước khi set
+            if (notificationsDTO.getGroupDTO() != null) {
+                Group group = groupRepository.findByIdAndAvailableStatus(notificationsDTO.getGroupDTO().getId(), AvailableStatus.ACTIVE);
+                if (group != null) {
+                    notifications.setGroup(group);
+                }
+            }
+
+            if (notificationsDTO.getBookingDTO() != null) {
+                Booking booking = bookingRepository.findByIdAndAvailableStatus(notificationsDTO.getBookingDTO().getId(), AvailableStatus.ACTIVE);
+                if (booking != null) {
+                    notifications.setBooking(booking);
+                }
+            }
+
+            // Lưu notification
+            notificationRepository.save(notifications);
+
+            // Chuyển đổi sang DTO và trả về response
+            sendNotifications = Converter.convertNotificationToNotiDTO(notifications);
+            response.setNotificationsDTO(sendNotifications);
+            response.setStatusCode(200);
+            response.setMessage("Send message to " + reciver.getUsername() + " successfully");
         } catch (Exception e) {
             response.setStatusCode(500);
             response.setMessage("Error occurred while creating notification: " + e.getMessage());
@@ -68,17 +106,28 @@ public class NotificationService {
     public Response getAllNotification() {
         Response response = new Response();
         try {
+            List<NotificationsDTO> notificationsDTOList = new ArrayList<>();
             List<Notifications> notificationsList = notificationRepository.findAll();
-            List<NotificationsDTO> notificationsDTOList = convertNotificationsListToNotificationsDTOList(notificationsList);
+            if(!notificationsList.isEmpty()){
+                notificationsDTOList = notificationsList.stream()
+                        .map(Converter::convertNotificationToNotiDTO)
+                        .collect(Collectors.toList());
 
-            response.setNotificationsDTOList(notificationsDTOList);
-            response.setStatusCode(200);
-            response.setMessage("Notifications fetched successfully");
+                response.setNotificationsDTOList(notificationsDTOList);
+                response.setStatusCode(200);
+                response.setMessage("Notifications fetched successfully");
+            } else {
+                response.setNotificationsDTOList(notificationsDTOList);
+                response.setStatusCode(400);
+                response.setMessage("Notifications not found");
+            }
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
-            response.setMessage("Error occurred while fetching notifications: " + e.getMessage());
+            response.setMessage("Error occurred during get notification: " + e.getMessage());
         }
-
         return response;
     }
 
@@ -86,12 +135,20 @@ public class NotificationService {
     public Response getNotificationById(Long id){
         Response response = new Response();
         try {
+            NotificationsDTO notificationsDTO = new NotificationsDTO();
             Notifications notifications = notificationRepository.findById(id)
-                    .orElseThrow( () -> new OurException("Notification not found"));
+                    .orElseThrow( () -> new OurException("nofications not found"));
 
-            response.setNotificationsDTO(convertNotificationsToNotificationsDTO(notifications));
-            response.setMessage("Successfully");
-            response.setStatusCode(200);
+            if(notifications!= null){
+                notificationsDTO = Converter.convertNotificationToNotiDTO(notifications);
+                response.setNotificationsDTO(notificationsDTO);
+                response.setStatusCode(200);
+                response.setMessage("Notifications fetched successfully");
+            }else {
+                response.setNotificationsDTO(notificationsDTO);
+                response.setStatusCode(400);
+                response.setMessage("Notifications not found");
+            }
 
         } catch (OurException e) {
             response.setStatusCode(400);
@@ -107,14 +164,7 @@ public class NotificationService {
     public Response deleteNotification(Long id){
         Response response = new Response();
         try {
-            Notifications notification = notificationRepository.findById(id)
-                    .orElseThrow( () -> new OurException("Notification not found"));
 
-            if(notification != null){
-                notificationRepository.delete(notification);
-                response.setMessage("Successfully");
-                response.setStatusCode(200);
-            }
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -129,20 +179,7 @@ public class NotificationService {
     public Response updateNotification(Long id, Notifications newNotification){
         Response response = new Response();
         try {
-            Notifications notification = notificationRepository.findById(id)
-                    .orElseThrow( () -> new OurException("Notification not found"));
 
-
-                notification.setMessage(newNotification.getMessage());
-                notification.setType(newNotification.getType());
-                notification.setStatus(newNotification.getStatus());
-                notification.setDateTimeSent(newNotification.getDateTimeSent());
-
-                notificationRepository.save(notification);
-
-                response.setNotificationsDTO(convertNotificationsToNotificationsDTO(notification));
-                response.setMessage("Successfully");
-                response.setStatusCode(200);
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -153,22 +190,31 @@ public class NotificationService {
         return response;
     }
 
-    @Bean
-    public ModelMapper modelMapper() {
-        return new ModelMapper();
-    }
+    public Response getNotificationsByReciverId(Long id){
+        Response response = new Response();
+        try {
+            List<NotificationsDTO> notificationsDTOList = new ArrayList<>();
+            List<Notifications> notificationsList = notificationRepository.findByReceiverId(id);
+            if(!notificationsList.isEmpty()){
+                notificationsDTOList = notificationsList.stream()
+                        .map(Converter::convertNotificationToNotiDTO)
+                        .collect(Collectors.toList());
 
-    // Chuyển đổi từ Notifications sang NotificationsDTO
-    public NotificationsDTO convertNotificationsToNotificationsDTO(Notifications notification) {
-        NotificationsDTO notificationsDTO = modelMapperNotification.map(notification, NotificationsDTO.class);
-
-        return notificationsDTO;
-    }
-
-    // Chuyển đổi danh sách Notifications sang danh sách NotificationsDTO
-    public List<NotificationsDTO> convertNotificationsListToNotificationsDTOList(List<Notifications> notifications) {
-        return notifications.stream()
-                .map(this::convertNotificationsToNotificationsDTO)
-                .collect(Collectors.toList());
+                response.setNotificationsDTOList(notificationsDTOList);
+                response.setStatusCode(200);
+                response.setMessage("Notifications fetched successfully");
+            } else {
+                response.setNotificationsDTOList(notificationsDTOList);
+                response.setStatusCode(400);
+                response.setMessage("Notifications not found");
+            }
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occured during get notification by Id " + e.getMessage());
+        }
+        return response;
     }
 }

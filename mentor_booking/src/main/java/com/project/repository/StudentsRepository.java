@@ -46,4 +46,7 @@ public interface StudentsRepository extends JpaRepository<Students, Long>{
 
     @Query("SELECT s FROM Students s WHERE s.id = :id AND s.availableStatus = :availableStatus")
     Students findByIdAndAvailableStatus(@Param("id") Long id, @Param("availableStatus") AvailableStatus status);
+    
+    @Query("SELECT s FROM Students s WHERE s.aClass.id = :classId AND s.availableStatus = :availableStatus AND s.group IS NULL")
+    List<Students> findStudentsThatAreNotInGroup(@Param("classId") Long classId, @Param("availableStatus") AvailableStatus availableStatus);
 }

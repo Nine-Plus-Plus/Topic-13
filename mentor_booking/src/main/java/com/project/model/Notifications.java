@@ -1,8 +1,8 @@
 package com.project.model;
 
 import com.project.enums.AvailableStatus;
-import com.project.enums.NoficationStatus;
 import com.project.enums.NoficationType;
+import com.project.enums.NotificationAction;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -28,27 +28,32 @@ public class Notifications {
     @Enumerated(EnumType.STRING)
     private NoficationType type;
     
-    @Column(name = "status")
+    @Column(name = "action")
     @Enumerated(EnumType.STRING)
-    private NoficationStatus status; 
+    private NotificationAction action;
     
     @Column(name = "message")
     private String message;
-    
-    @Column(name = "date_Time_created")
-    private LocalDateTime dateTimeCreated;
     
     @Column(name = "date_Time_sent")
     private LocalDateTime dateTimeSent;
     
     @ManyToOne
-    @JoinColumn(name = "user_id") // Thiết lập cột khóa ngoại
-    private Users user;
+    @JoinColumn(name = "sender_id") // Thiết lập cột khóa ngoại
+    private Users sender;
 
     // Thêm thông tin người nhận
     @ManyToOne
     @JoinColumn(name = "receiver_id")
     private Users receiver;
+
+    @ManyToOne
+    @JoinColumn(name = "group_id")
+    private Group group;
+
+    @ManyToOne
+    @JoinColumn(name = "booking_id")
+    private Booking booking;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "available_status")

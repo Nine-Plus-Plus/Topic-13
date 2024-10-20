@@ -2,9 +2,10 @@ package com.project.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.project.enums.AvailableStatus;
-import com.project.enums.NoficationStatus;
 import com.project.enums.NoficationType;
 import java.time.LocalDateTime;
+
+import com.project.enums.NotificationAction;
 import lombok.Data;
 
 @Data
@@ -12,10 +13,12 @@ import lombok.Data;
 public class NotificationsDTO {
     private Long id;
     private NoficationType type;
-    private NoficationStatus status;
+    private NotificationAction action;
     private String message;
-    private LocalDateTime dateTimeCreated;
     private LocalDateTime dateTimeSent;
-    private UsersDTO user;
+    private UsersDTO sender;
+    private UsersDTO reciver;
     private AvailableStatus availableStatus;
+    private BookingDTO bookingDTO;
+    private GroupDTO groupDTO;
 }

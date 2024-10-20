@@ -14,7 +14,7 @@ public class MentorsDTO {
     private Long id;
     private float star;
     private String mentorCode;
-    private int totalTimeRemain;
+    private float totalTimeRemain;
     private LocalDate dateCreated;
     private LocalDate dateUpdated;
     private UsersDTO user;

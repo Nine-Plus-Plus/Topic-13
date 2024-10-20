@@ -257,8 +257,8 @@ public class Converter {
     public static NotificationsDTO convertNotificationToNotiDTO(Notifications notifications){
         NotificationsDTO notificationsDTO = new NotificationsDTO();
         notificationsDTO.setId(notifications.getId());
-        notificationsDTO.setMessage(notificationsDTO.getMessage());
-        notificationsDTO.setDateTimeSent(notificationsDTO.getDateTimeSent());
+        notificationsDTO.setMessage(notifications.getMessage());  // Sửa lại chỗ này
+        notificationsDTO.setDateTimeSent(notifications.getDateTimeSent());  // Sửa lại chỗ này
         notificationsDTO.setType(notifications.getType());
         notificationsDTO.setAction(notifications.getAction());
 

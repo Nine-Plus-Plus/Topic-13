@@ -13,6 +13,8 @@ import java.util.List;
 public interface NotificationRepository extends JpaRepository<Notifications, Long>{
 
     @Query("SELECT n FROM Notifications n " +
-            "WHERE n.receiver.id = :id")
-    List<Notifications> findByReceiverId(Long id);
+            "WHERE n.receiver.id = :id " +
+            "ORDER BY n.dateTimeSent DESC")
+    List<Notifications> findByReceiverIdOrderByDateTimeSentDesc(Long id);
+
 }

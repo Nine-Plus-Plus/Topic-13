@@ -501,6 +501,34 @@ public class BookingService {
         }
         return response;
     }
+    
+    public Response getAllByBookingStatus(BookingStatus status) {
+        Response response = new Response();
+        try {
+            List<Booking> bookingList = bookingRepository.findByStatus(status);
+            List<BookingDTO> bookingListDTO = new ArrayList<>();
+            if (!bookingList.isEmpty()) {
+                bookingListDTO = bookingList.stream()
+                        .map(Converter::convertBookingToBookingDTO)
+                        .collect(Collectors.toList());
+
+                response.setBookingDTOList(bookingListDTO);
+                response.setStatusCode(200);
+                response.setMessage("Bookings fetched successfully");
+            } else {
+                response.setBookingDTOList(bookingListDTO);
+                response.setStatusCode(400);
+                response.setMessage("Cannot find any booking");
+            }
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred during get all bookings: " + e.getMessage());
+        }
+        return response;
+    }
 
     @Scheduled(fixedRate = 60000)
     @Transactional

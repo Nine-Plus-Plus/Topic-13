@@ -63,4 +63,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long>{
         @Param("bookingStatus") BookingStatus bookingStatus, 
         @Param("currentDateTime") LocalDateTime currentDateTime
     );
+    
+    List<Booking> findByStatus(BookingStatus status);
 }

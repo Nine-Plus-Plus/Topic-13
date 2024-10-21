@@ -38,4 +38,11 @@ public class NotificationController {
         Response response = notificationService.getNotificationsByReciverId(reciverId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
+
+    @PutMapping("/user/update-noti/{id}")
+    public ResponseEntity<Response> updateNotifications(
+            @PathVariable Long id, @RequestBody NotificationsDTO newNotificationsDTO){
+        Response response = notificationService.updateNotification(id, newNotificationsDTO);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
 }

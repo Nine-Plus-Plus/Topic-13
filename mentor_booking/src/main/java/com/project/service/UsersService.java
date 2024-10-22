@@ -61,28 +61,28 @@ public class UsersService {
         Response response = new Response();
         try {
             // Kiểm tra nếu username hoặc email đã tồn tại
-            if (usersRepository.findByUsername(registerRequest.getUsername()).isPresent()) {
+            if (usersRepository.findByUsernameAndAvailableStatus(registerRequest.getUsername(), AvailableStatus.ACTIVE).isPresent()) {
                 throw new OurException("Username already exists");
             }
-            if (usersRepository.findByEmail(registerRequest.getEmail()).isPresent()) {
+            if (usersRepository.findByEmailAndAvailableStatus(registerRequest.getEmail(), AvailableStatus.ACTIVE).isPresent()) {
                 throw new OurException("Email already exists");
             }
 
             Role role = roleRepository.findByRoleName(registerRequest.getRoleString())
                     .orElseThrow(() -> new OurException("No role name: " + registerRequest.getRole().getRoleName()));
             // Mã hóa mật khẩu
-            String encodedPassword = passwordEncoder.encode(registerRequest.getPassword());
+            String encodedPassword = passwordEncoder.encode(registerRequest.getPassword().trim());
 
             // Tạo đối tượng User mới
             Users newUser = new Users();
-            newUser.setUsername(registerRequest.getUsername());
-            newUser.setEmail(registerRequest.getEmail());
+            newUser.setUsername(registerRequest.getUsername().trim());
+            newUser.setEmail(registerRequest.getEmail().trim());
             newUser.setPassword(encodedPassword);
-            newUser.setFullName(registerRequest.getFullName());
+            newUser.setFullName(registerRequest.getFullName().trim());
             newUser.setBirthDate(registerRequest.getBirthDate());
             newUser.setAvatar(registerRequest.getAvatar());
-            newUser.setAddress(registerRequest.getAddress());
-            newUser.setPhone(registerRequest.getPhone());
+            newUser.setAddress(registerRequest.getAddress().trim());
+            newUser.setPhone(registerRequest.getPhone().trim());
             newUser.setGender(registerRequest.getGender());
             newUser.setDateCreated(LocalDateTime.now());
             newUser.setAvailableStatus(AvailableStatus.ACTIVE);
@@ -113,17 +113,17 @@ public class UsersService {
         Response response = new Response();
         try {
             // Kiểm tra nếu username hoặc email đã tồn tại
-            if (usersRepository.findByUsername(request.getUsername()).isPresent()) {
+            if (usersRepository.findByUsernameAndAvailableStatus(request.getUsername(), AvailableStatus.ACTIVE).isPresent()) {
                 throw new OurException("Username already exists");
             }
             // Kiểm tra email
-            if (usersRepository.findByEmail(request.getEmail()).isPresent()) {
+            if (usersRepository.findByEmailAndAvailableStatus(request.getEmail(), AvailableStatus.ACTIVE).isPresent()) {
                 throw new OurException("Email already exists");
             }
-            if (usersRepository.findByPhone(request.getPhone()).isPresent()) {
+            if (usersRepository.findByPhoneAndAvailableStatus(request.getPhone(), AvailableStatus.ACTIVE).isPresent()) {
                 throw new OurException("Phone already exists");
             }
-            if (studentsRepository.findByStudentCode(request.getStudentCode()).isPresent()) {
+            if (studentsRepository.findByStudentCodeAndAvailableStatus(request.getStudentCode(), AvailableStatus.ACTIVE).isPresent()) {
                 throw new OurException("StudentCode already exists");
             }
             // Kiểm tra Class
@@ -133,17 +133,17 @@ public class UsersService {
             Role role = roleRepository.findByRoleName("STUDENT")
                     .orElseThrow(() -> new OurException("No role name"));
             // Mã hóa mật khẩu
-            String encodedPassword = passwordEncoder.encode(request.getPassword());
+            String encodedPassword = passwordEncoder.encode(request.getPassword().trim());
 
             // Tạo đối tượng User mới
             Users newUser = new Users();
-            newUser.setUsername(request.getUsername());
-            newUser.setEmail(request.getEmail());
+            newUser.setUsername(request.getUsername().trim());
+            newUser.setEmail(request.getEmail().trim());
             newUser.setPassword(encodedPassword);
-            newUser.setFullName(request.getFullName());
+            newUser.setFullName(request.getFullName().trim());
             newUser.setBirthDate(request.getBirthDate());
-            newUser.setAddress(request.getAddress());
-            newUser.setPhone(request.getPhone());
+            newUser.setAddress(request.getAddress().trim());
+            newUser.setPhone(request.getPhone().trim());
             newUser.setGender(request.getGender());
             newUser.setDateCreated(LocalDateTime.now());
             newUser.setRole(role);
@@ -162,8 +162,8 @@ public class UsersService {
                 // Tạo đối tượng Student mới
                 Students student = new Students();
                 student.setUser(newUser);
-                student.setExpertise(request.getExpertise());
-                student.setStudentCode(request.getStudentCode());
+                student.setExpertise(request.getExpertise().trim());
+                student.setStudentCode(request.getStudentCode().trim());
                 student.setDateCreated(LocalDate.now());
                 student.setPoint(100);
                 student.setAClass(aClass);
@@ -195,33 +195,33 @@ public class UsersService {
         Response response = new Response();
         try {
             // Kiểm tra nếu username hoặc email đã tồn tại
-            if (usersRepository.findByUsername(request.getUsername()).isPresent()) {
+            if (usersRepository.findByUsernameAndAvailableStatus(request.getUsername(), AvailableStatus.ACTIVE).isPresent()) {
                 throw new OurException("Username already exists");
             }
             // Kiểm tra email
-            if (usersRepository.findByEmail(request.getEmail()).isPresent()) {
+            if (usersRepository.findByEmailAndAvailableStatus(request.getEmail(), AvailableStatus.ACTIVE).isPresent()) {
                 throw new OurException("Email already exists");
             }
-            if (usersRepository.findByPhone(request.getPhone()).isPresent()) {
+            if (usersRepository.findByPhoneAndAvailableStatus(request.getPhone(), AvailableStatus.ACTIVE).isPresent()) {
                 throw new OurException("Phone already exists");
             }
-            if (mentorsRepository.findByMentorCode(request.getMentorCode()).isPresent()) {
+            if (mentorsRepository.findByMentorCodeAndAvailableStatus(request.getMentorCode(), AvailableStatus.ACTIVE).isPresent()) {
                 throw new OurException("MentorCode already exists");
             }
             // Kiểm tra Role
             Role role = roleRepository.findByRoleName("MENTOR")
                     .orElseThrow(() -> new OurException("No role name"));
             // Mã hóa mật khẩu
-            String encodedPassword = passwordEncoder.encode(request.getPassword());
+            String encodedPassword = passwordEncoder.encode(request.getPassword().trim());
             // Tạo đối tượng User mới
             Users newUser = new Users();
-            newUser.setUsername(request.getUsername());
-            newUser.setEmail(request.getEmail());
+            newUser.setUsername(request.getUsername().trim());
+            newUser.setEmail(request.getEmail().trim());
             newUser.setPassword(encodedPassword);
-            newUser.setFullName(request.getFullName());
+            newUser.setFullName(request.getFullName().trim());
             newUser.setBirthDate(request.getBirthDate());
-            newUser.setAddress(request.getAddress());
-            newUser.setPhone(request.getPhone());
+            newUser.setAddress(request.getAddress().trim());
+            newUser.setPhone(request.getPhone().trim());
             newUser.setGender(request.getGender());
             newUser.setDateCreated(LocalDateTime.now());
             newUser.setRole(role);
@@ -240,7 +240,7 @@ public class UsersService {
                 // Tạo đối tượng Mentor mới
                 Mentors mentor = new Mentors();
                 mentor.setUser(newUser);
-                mentor.setMentorCode(request.getMentorCode());
+                mentor.setMentorCode(request.getMentorCode().trim());
                 mentor.setStar(5);
                 mentor.setTotalTimeRemain(150);
                 mentor.setDateCreated(LocalDate.now());
@@ -361,42 +361,11 @@ public class UsersService {
         return response;
     } // done
 
-    // Phương thức cập nhật thông tin người dùng
-    public Response updateUser(Long id, Users newUser) {
-        Response response = new Response();
-        try {
-            // Tìm kiếm người dùng theo ID
-            Users user = usersRepository.findById(id)
-                    .orElseThrow(() -> new OurException("User not found with id: " + id));
-            user.setBirthDate(newUser.getBirthDate());
-            user.setAvatar(newUser.getAvatar());
-            user.setAddress(newUser.getAddress());
-            user.setPhone(newUser.getPhone());
-            user.setGender(newUser.getGender());
-            user.setDateUpdated(LocalDateTime.now());
-            usersRepository.save(user);
-
-            // Trả về DTO và phản hồi
-            UsersDTO userDTO = Converter.convertUserToUserDTO(user);
-            response.setUsersDTO(userDTO);
-            response.setStatusCode(200);
-            response.setMessage("User updated successfully");
-        } catch (OurException e) {
-            response.setStatusCode(400);
-            response.setMessage(e.getMessage());
-        } catch (Exception e) {
-            response.setStatusCode(500);
-            response.setMessage("Error occurred while updating user: " + e.getMessage());
-        }
-
-        return response;
-    }
-
     // Phương thức lấy thông tin profile của người dùng dựa trên email
     public Response getMyProfile(String username) {
         Response response = new Response();
         try {
-            Users userProfile = usersRepository.findByUsername(username)
+            Users userProfile = usersRepository.findByUsernameAndAvailableStatus(username, AvailableStatus.ACTIVE)
                     .orElseThrow(() -> new OurException("User not found"));
             if (userProfile.getRole().getRoleName().equalsIgnoreCase("STUDENT")) {
                 Students student = studentsRepository.findByUser_Id(userProfile.getId());

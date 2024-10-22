@@ -24,4 +24,7 @@ public class TopicDTO {
     private SemesterDTO semesterDTO;
     private MentorsDTO mentorsDTO;
     private AvailableStatus availableStatus;
+
+    private String className;
+    private String semesterName;
 }

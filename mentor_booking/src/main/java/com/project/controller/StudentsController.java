@@ -58,4 +58,10 @@ public class StudentsController {
     public Response importStudents(@RequestParam("file") MultipartFile file) {
         return studentsService.importStudentsFromExcel(file);
     }
+
+    @GetMapping("/admin/get-students-by-semester/{semesterId}")
+    public ResponseEntity<Response> getStudentsBySemester(@PathVariable Long semesterId) {
+        Response response = studentsService.getStudentBySemesterId(semesterId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
 }

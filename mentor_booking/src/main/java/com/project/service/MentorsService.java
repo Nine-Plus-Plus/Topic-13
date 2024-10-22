@@ -128,21 +128,23 @@ public class MentorsService {
                 String avatarUrl = awsS3Service.saveImageToS3(avatarFile);
                 updateUser.setAvatar(avatarUrl);
                 System.out.println("Avatar URL: " + avatarUrl); // Kiểm tra URL
+            }else{
+                updateUser.setAvatar("https://mentor-booking-images.s3.amazonaws.com/images.jpeg");
             }
 
             // Cập nhật thông tin người dùng hiện có
-            updateUser.setUsername(updateRequest.getUsername());
-            updateUser.setEmail(updateRequest.getEmail());
-            updateUser.setFullName(updateRequest.getFullName());
+            updateUser.setUsername(updateRequest.getUsername().trim());
+            updateUser.setEmail(updateRequest.getEmail().trim());
+            updateUser.setFullName(updateRequest.getFullName().trim());
             updateUser.setBirthDate(updateRequest.getBirthDate());
-            updateUser.setAddress(updateRequest.getAddress());
-            updateUser.setPhone(updateRequest.getPhone());
+            updateUser.setAddress(updateRequest.getAddress().trim());
+            updateUser.setPhone(updateRequest.getPhone().trim());
             updateUser.setGender(updateRequest.getGender());
             updateUser.setDateUpdated(LocalDateTime.now());
             usersRepository.save(updateUser);
 
             // Cập nhật thông tin mentor
-            mentorUpdate.setMentorCode(updateRequest.getMentorCode());
+            mentorUpdate.setMentorCode(updateRequest.getMentorCode().trim());
             mentorUpdate.setDateUpdated(LocalDate.now());
             mentorUpdate.setStar(updateRequest.getStar());
             mentorUpdate.setTotalTimeRemain(updateRequest.getTotalTimeRemain());
@@ -421,8 +423,8 @@ public class MentorsService {
             for (CreateMentorRequest request : createMentorRequests) {
                 try {
                     Response createResponse = createMentorFormExcel(request);
-                    if (createResponse.getStatusCode() != 200) {
-                        errors.add("Error creating student: " + request.getUsername() +
+                    if (createResponse == null) {
+                        errors.add("Error creating mentor: " + request.getUsername() +
                                 " [Username: " + request.getUsername() +
                                 ", Email: " + request.getEmail() +
                                 ", Password: " + request.getPassword() +
@@ -458,19 +460,19 @@ public class MentorsService {
 
     public Response createMentorFormExcel(CreateMentorRequest request) {
         Response response = new Response();
-        try {
+        try{
             // Kiểm tra nếu username hoặc email đã tồn tại
-            if (usersRepository.findByUsername(request.getUsername()).isPresent()) {
+            if (usersRepository.findByUsernameAndAvailableStatus(request.getUsername(), AvailableStatus.ACTIVE).isPresent()) {
                 throw new OurException("Username already exists");
             }
             // Kiểm tra email
-            if (usersRepository.findByEmail(request.getEmail()).isPresent()) {
+            if (usersRepository.findByEmailAndAvailableStatus(request.getEmail(),AvailableStatus.ACTIVE).isPresent()) {
                 throw new OurException("Email already exists");
             }
-            if (usersRepository.findByPhone(request.getPhone()).isPresent()) {
+            if (usersRepository.findByPhoneAndAvailableStatus(request.getPhone(), AvailableStatus.ACTIVE).isPresent()) {
                 throw new OurException("Phone already exists");
             }
-            if (mentorsRepository.findByMentorCode(request.getMentorCode()).isPresent()) {
+            if (mentorsRepository.findByMentorCodeAndAvailableStatus(request.getMentorCode(), AvailableStatus.ACTIVE).isPresent()) {
                 throw new OurException("MentorCode already exists");
             }
 
@@ -494,38 +496,38 @@ public class MentorsService {
             newUser.setDateCreated(LocalDateTime.now());
             newUser.setRole(role);
             newUser.setAvailableStatus(AvailableStatus.ACTIVE);
+            newUser.setAvatar("https://mentor-booking-images.s3.amazonaws.com/images.jpeg");
 
             usersRepository.save(newUser);
 
-            // Tạo đối tượng Mentor mới
-            Mentors mentor = new Mentors();
-            mentor.setUser(newUser);
-            mentor.setMentorCode(request.getMentorCode());
-            mentor.setStar(5);
-            mentor.setTotalTimeRemain(150);
-            mentor.setDateCreated(LocalDate.now());
-            mentor.setAvailableStatus(AvailableStatus.ACTIVE);
-            // Xử lý danh sách kỹ năng
-            List<String> skillsNameList = request.getSkilllNamesList();
-            List<Skills> skillsList = skillsNameList.stream()
-                    .map(skillName -> skillsRepository.findBySkillNameExcel(skillName, AvailableStatus.ACTIVE)
-                            .orElseThrow(() -> new OurException("Skill not found: " + skillName)))
-                    .collect(Collectors.toList());
+            if (newUser.getId() > 0) {
+                // Tạo đối tượng Mentor mới
+                Mentors mentor = new Mentors();
+                mentor.setUser(newUser);
+                mentor.setMentorCode(request.getMentorCode());
+                mentor.setStar(5);
+                mentor.setTotalTimeRemain(150);
+                mentor.setDateCreated(LocalDate.now());
+                mentor.setAvailableStatus(AvailableStatus.ACTIVE);
+                // Xử lý danh sách kỹ năng
+                List<String> skillsNameList = request.getSkilllNamesList();
+                List<Skills> skillsList = skillsNameList.stream()
+                        .map(skillName -> skillsRepository.findBySkillNameExcel(skillName, AvailableStatus.ACTIVE)
+                                .orElseThrow(() -> new OurException("Skill not found: " + skillName)))
+                        .collect(Collectors.toList());
 
-            mentor.setSkills(skillsList);
-            mentorsRepository.save(mentor);
+                mentor.setSkills(skillsList);
+                mentorsRepository.save(mentor);
 
-            newUser.setMentor(mentor);
-            usersRepository.save(newUser);
-
-            response.setStatusCode(200);
-            response.setMessage("Mentor created successfully");
+                newUser.setMentor(mentor);
+                usersRepository.save(newUser);
+            }
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
-            response.setMessage("Error occurred during student creation: " + e.getMessage());
+            response.setMessage("Error occurred during mentor creation: " + e.getMessage());
         }
         return response;
     }

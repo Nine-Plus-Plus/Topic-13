@@ -81,7 +81,7 @@ public class AuthService {
         Response response = new Response();
         try {
             // Tìm người dùng dựa trên username
-            Users user = usersRepository.findByEmail(email)
+            Users user = usersRepository.findByEmailAndAvailableStatus(email, AvailableStatus.ACTIVE)
                     .orElseThrow(() -> new OurException("User not found"));
             // Kiểm tra mật khẩu hiện tại
             if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
@@ -110,7 +110,7 @@ public class AuthService {
     public Response processOAuthPostLogin(String email, String fullName) {
         Response response = new Response();
         try {
-            var user = usersRepository.findByEmail(email)
+            var user = usersRepository.findByEmailAndAvailableStatus(email, AvailableStatus.ACTIVE)
                     .orElseThrow(() -> new OurException("User not found"));
             var jwt = jWTUltis.generateToken(user);
             response.setStatusCode(200);

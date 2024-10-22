@@ -1,5 +1,6 @@
 package com.project.service;
 
+import com.project.dto.EmailRequest;
 import com.project.dto.NotificationsDTO;
 import com.project.dto.Response;
 import com.project.enums.AvailableStatus;
@@ -39,6 +40,9 @@ public class NotificationService {
 
     @Autowired
     BookingRepository bookingRepository;
+
+    @Autowired
+    EmailServiceImpl emailService;
 
     public Response createNotification(NotificationsDTO notificationsDTO) {
         Response response = new Response();
@@ -86,6 +90,13 @@ public class NotificationService {
                     notifications.setBooking(booking);
                 }
             }
+
+            // tạo mail
+            EmailRequest emailRequest = new EmailRequest();
+            emailRequest.setRecipient(reciver.getEmail());
+            emailRequest.setMsgBody(notificationsDTO.getMessage());
+            emailRequest.setSubject(String.valueOf(notificationsDTO.getType()));
+            emailService.sendHtmlMail(emailRequest);
 
             // Lưu notification
             notificationRepository.save(notifications);

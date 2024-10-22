@@ -32,4 +32,5 @@ public class UsersDTO {
     private MentorsDTO mentor;
     private CreateStudentRequest createStudentRequest;
     private AvailableStatus availableStatus;
+    private String otpCode;
 }

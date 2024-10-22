@@ -243,23 +243,9 @@ public class BookingService {
                     }
                 }
 
-                PointHistory pointHistory = new PointHistory();
-                pointHistory.setStatus(PointHistoryStatus.REDEEMED);
-                pointHistory.setAvailableStatus(AvailableStatus.ACTIVE);
-                pointHistory.setBooking(booking);
-                pointHistory.setDateCreated(LocalDateTime.now());
-                pointHistory.setDateUpdated(LocalDateTime.now());
-                pointHistory.setPoint(booking.getPointPay());
-                pointHistoryRepository.save(pointHistory);
+                PointHistory pointHistory;
 
                 List<PointHistory> pointHistoryList;
-                if (booking.getPointHistories() == null) {
-                    pointHistoryList = new ArrayList<>();
-                } else {
-                    pointHistoryList = booking.getPointHistories();
-                }
-                pointHistoryList.add(pointHistory);
-                booking.setPointHistories(pointHistoryList);
 
                 List<Students> groupMembers = booking.getGroup().getStudents();
 
@@ -270,7 +256,25 @@ public class BookingService {
                 int newPoint = group.getTotalPoint() / groupMembers.size();
 
                 for (Students member : groupMembers) {
+                    int adjustedPoint = member.getPoint() - newPoint;
                     member.setPoint(newPoint);
+                    pointHistory = new PointHistory();
+                    pointHistory.setStatus(PointHistoryStatus.REDEEMED);
+                    pointHistory.setAvailableStatus(AvailableStatus.ACTIVE);
+                    pointHistory.setStudent(member);
+                    pointHistory.setDateCreated(LocalDateTime.now());
+                    pointHistory.setDateUpdated(LocalDateTime.now());
+                    pointHistory.setPoint(adjustedPoint);
+                    pointHistory.setBooking(booking);
+                    pointHistoryRepository.save(pointHistory);
+
+                    if (member.getPointHistories() == null) {
+                        pointHistoryList = new ArrayList<>();
+                    } else {
+                        pointHistoryList = member.getPointHistories();
+                    }
+                    pointHistoryList.add(pointHistory);
+                    member.setPointHistories(pointHistoryList);
                 }
 
                 MentorSchedule schedule = mentorScheduleRepository.findByIdAndAvailableStatus(booking.getMentorSchedule().getId(), AvailableStatus.ACTIVE);
@@ -345,23 +349,9 @@ public class BookingService {
                     booking.setDateUpdated(LocalDateTime.now());
                     booking.setExpiredTime(null);
 
-                    PointHistory pointHistory = new PointHistory();
-                    pointHistory.setStatus(PointHistoryStatus.ADJUSTED);
-                    pointHistory.setAvailableStatus(AvailableStatus.ACTIVE);
-                    pointHistory.setBooking(booking);
-                    pointHistory.setDateCreated(LocalDateTime.now());
-                    pointHistory.setDateUpdated(LocalDateTime.now());
-                    pointHistory.setPoint(booking.getPointPay());
-                    pointHistoryRepository.save(pointHistory);
+                    PointHistory pointHistory;
 
                     List<PointHistory> pointHistoryList;
-                    if (booking.getPointHistories() == null) {
-                        pointHistoryList = new ArrayList<>();
-                    } else {
-                        pointHistoryList = booking.getPointHistories();
-                    }
-                    pointHistoryList.add(pointHistory);
-                    booking.setPointHistories(pointHistoryList);
 
                     List<Students> groupMembers = booking.getGroup().getStudents();
 
@@ -372,7 +362,25 @@ public class BookingService {
                     int newPoint = group.getTotalPoint() / groupMembers.size();
 
                     for (Students member : groupMembers) {
+                        int adjustedPoint = member.getPoint() - newPoint;
                         member.setPoint(newPoint);
+                        pointHistory = new PointHistory();
+                        pointHistory.setStatus(PointHistoryStatus.ADJUSTED);
+                        pointHistory.setAvailableStatus(AvailableStatus.ACTIVE);
+                        pointHistory.setStudent(member);
+                        pointHistory.setDateCreated(LocalDateTime.now());
+                        pointHistory.setDateUpdated(LocalDateTime.now());
+                        pointHistory.setPoint(adjustedPoint);
+                        pointHistory.setBooking(booking);
+                        pointHistoryRepository.save(pointHistory);
+
+                        if (member.getPointHistories() == null) {
+                            pointHistoryList = new ArrayList<>();
+                        } else {
+                            pointHistoryList = member.getPointHistories();
+                        }
+                        pointHistoryList.add(pointHistory);
+                        member.setPointHistories(pointHistoryList);
                     }
 
                     MentorSchedule schedule = mentorScheduleRepository.findByIdAndAvailableStatus(booking.getMentorSchedule().getId(), AvailableStatus.ACTIVE);
@@ -399,23 +407,39 @@ public class BookingService {
                     booking.setDateUpdated(LocalDateTime.now());
                     booking.setExpiredTime(null);
 
-                    PointHistory pointHistory = new PointHistory();
-                    pointHistory.setStatus(PointHistoryStatus.EXPIRED);
-                    pointHistory.setAvailableStatus(AvailableStatus.ACTIVE);
-                    pointHistory.setBooking(booking);
-                    pointHistory.setDateCreated(LocalDateTime.now());
-                    pointHistory.setDateUpdated(LocalDateTime.now());
-                    pointHistory.setPoint(booking.getPointPay());
-                    pointHistoryRepository.save(pointHistory);
+                    PointHistory pointHistory;
 
                     List<PointHistory> pointHistoryList;
-                    if (booking.getPointHistories() == null) {
-                        pointHistoryList = new ArrayList<>();
-                    } else {
-                        pointHistoryList = booking.getPointHistories();
+
+                    List<Students> groupMembers = booking.getGroup().getStudents();
+
+                    Group group = groupRepository.findByIdAndAvailableStatus(booking.getGroup().getId(), AvailableStatus.ACTIVE);
+                    group.setStudents(groupMembers);
+                    group.setTotalPoint(group.getTotalPoint() + booking.getPointPay());
+
+                    int newPoint = group.getTotalPoint() / groupMembers.size();
+
+                    for (Students member : groupMembers) {
+                        int adjustedPoint = member.getPoint() - newPoint;
+                        member.setPoint(newPoint);
+                        pointHistory = new PointHistory();
+                        pointHistory.setStatus(PointHistoryStatus.EXPIRED);
+                        pointHistory.setAvailableStatus(AvailableStatus.ACTIVE);
+                        pointHistory.setStudent(member);
+                        pointHistory.setDateCreated(LocalDateTime.now());
+                        pointHistory.setDateUpdated(LocalDateTime.now());
+                        pointHistory.setPoint(adjustedPoint);
+                        pointHistory.setBooking(booking);
+                        pointHistoryRepository.save(pointHistory);
+
+                        if (member.getPointHistories() == null) {
+                            pointHistoryList = new ArrayList<>();
+                        } else {
+                            pointHistoryList = member.getPointHistories();
+                        }
+                        pointHistoryList.add(pointHistory);
+                        member.setPointHistories(pointHistoryList);
                     }
-                    pointHistoryList.add(pointHistory);
-                    booking.setPointHistories(pointHistoryList);
 
                     MentorSchedule schedule = mentorScheduleRepository.findByIdAndAvailableStatus(booking.getMentorSchedule().getId(), AvailableStatus.ACTIVE);
                     schedule.setStatus(MentorScheduleStatus.AVAILABLE);
@@ -502,7 +526,7 @@ public class BookingService {
         }
         return response;
     }
-    
+
     public Response getAllByBookingStatus(BookingStatus status) {
         Response response = new Response();
         try {
@@ -531,9 +555,9 @@ public class BookingService {
         return response;
     }
 
-    public Response getBookingBySemesterId(Long semesterId){
+    public Response getBookingBySemesterId(Long semesterId) {
         Response response = new Response();
-        try{
+        try {
             List<com.project.model.Class> findClass = classRepository.findClassBySemesterId(semesterId, AvailableStatus.ACTIVE);
 
             if (findClass != null && !findClass.isEmpty()) {

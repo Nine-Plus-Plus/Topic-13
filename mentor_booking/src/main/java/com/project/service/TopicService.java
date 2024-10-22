@@ -7,6 +7,7 @@ import com.project.exception.OurException;
 import com.project.model.Mentors;
 import com.project.model.Semester;
 import com.project.model.Topic;
+import com.project.model.Class;
 import com.project.repository.ClassRepository;
 import com.project.repository.MentorsRepository;
 import com.project.repository.SemesterRepository;
@@ -249,8 +250,9 @@ public class TopicService {
         Response response = new Response();
         try {
             List<TopicDTO> topicListDTO = new ArrayList<>();
-            if (classRepository.findById(classId).isPresent()) {
-                List<Topic> topicList = topicRepository.findUnchosenTopicsInClass(classId);
+            if (classRepository.findByIdAndAvailableStatus(classId, AvailableStatus.ACTIVE) != null) {
+                Class findClass = classRepository.findById(classId).orElse(null);
+                List<Topic> topicList = topicRepository.findUnchosenTopicsInClass(classId, findClass.getSemester().getId());
                 if (topicList != null) {
                     topicListDTO = topicList.stream()
                             .map(Converter::convertTopicToTopicDTO)

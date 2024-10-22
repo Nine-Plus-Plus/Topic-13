@@ -25,7 +25,7 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
 
     Topic findByIdAndAvailableStatus(Long id, AvailableStatus availableStatus);
 
-    @Query("SELECT t FROM Topic t WHERE t.id NOT IN (SELECT g.project.topic.id FROM Group g WHERE g.aClass.id = :classId)")
-    List<Topic> findUnchosenTopicsInClass(@Param("classId") Long classId);
+    @Query("SELECT t FROM Topic t WHERE t.id NOT IN (SELECT g.project.topic.id FROM Group g WHERE g.aClass.id = :classId) AND t.semester.id = :semesterId")
+    List<Topic> findUnchosenTopicsInClass(@Param("classId") Long classId, @Param("semesterId") Long semesterId);
 }
 

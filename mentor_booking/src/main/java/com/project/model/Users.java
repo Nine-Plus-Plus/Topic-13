@@ -95,6 +95,8 @@ public class Users implements UserDetails{
     @Enumerated(EnumType.STRING)
     @Column(name = "available_status")
     private AvailableStatus availableStatus;
+
+    private String otpCode;
     
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

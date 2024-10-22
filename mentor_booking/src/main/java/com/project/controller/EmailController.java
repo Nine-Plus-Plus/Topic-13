@@ -20,7 +20,7 @@ public class EmailController {
 
     @PostMapping("/send")
     public ResponseEntity<Response> sendEmail(@RequestBody EmailRequest emailRequest) {
-        Response response = emailService.sendSimpleMail(emailRequest);
+        Response response = emailService.sendHtmlMail(emailRequest);
         return new ResponseEntity<>(response, HttpStatus.valueOf(response.getStatusCode()));
     }
 }

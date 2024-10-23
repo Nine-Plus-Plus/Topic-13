@@ -27,6 +27,10 @@ public class Reviews {
     @JoinColumn(name = "user_id", nullable = false) 
     private Users user;
 
+    @ManyToOne
+    @JoinColumn(name = "user_receive_id", nullable = false)
+    private Users userReceive;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "available_status")
     private AvailableStatus availableStatus;

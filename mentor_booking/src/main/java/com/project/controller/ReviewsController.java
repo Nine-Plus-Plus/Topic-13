@@ -49,4 +49,9 @@ public class ReviewsController {
         Response response = reviewsService.getReviewsByUserId(userId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
+    @GetMapping("/user/reviews/receive-user/{userReceiveId}")
+    public ResponseEntity<Response> getReviewsByUserReceiveId(@PathVariable Long userReceiveId) {
+        Response response = reviewsService.getReviewsByUserReceiveId(userReceiveId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
 }

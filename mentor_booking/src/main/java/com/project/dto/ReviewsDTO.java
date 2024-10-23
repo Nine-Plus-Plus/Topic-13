@@ -15,5 +15,6 @@ public class ReviewsDTO {
     private int rating;
     private LocalDateTime dateCreated;
     private UsersDTO user;
+    private UsersDTO userReceive;
     private AvailableStatus availableStatus;
 }

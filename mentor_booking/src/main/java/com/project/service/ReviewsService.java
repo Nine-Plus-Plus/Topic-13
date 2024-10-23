@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class ReviewsService {
-
     @Autowired
     private ReviewsRepository reviewsRepository;
 
@@ -35,7 +34,7 @@ public class ReviewsService {
             response.setStatusCode(500);
             response.setMessage("Error occurred during review creation: " + e.getMessage());
         }
-        return response;    
+        return response;
     }
 
     public Response getAllReviews() {
@@ -81,6 +80,9 @@ public class ReviewsService {
             review.setRating(updateRequest.getRating());
             review.setAvailableStatus(updateRequest.getAvailableStatus());
             review.setDateCreated(updateRequest.getDateCreated());
+            Users userReceive = new Users();
+            userReceive.setId(updateRequest.getUserReceive().getId());
+            review.setUserReceive(userReceive);
             reviewsRepository.save(review);
             response.setStatusCode(200);
             response.setMessage("Review updated successfully");
@@ -129,6 +131,22 @@ public class ReviewsService {
         return response;
     }
 
+    public Response getReviewsByUserReceiveId(Long userReceiveId) {
+        Response response = new Response();
+        try {
+            List<Reviews> reviews = reviewsRepository.findByUserReceiveId(userReceiveId);
+            List<ReviewsDTO> reviewsDTOs = reviews.stream()
+                    .map(this::mapToDTO)
+                    .collect(Collectors.toList());
+            response.setStatusCode(200);
+            response.setReviewsDTOList(reviewsDTOs);
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred during fetching reviews: " + e.getMessage());
+        }
+        return response;
+    }
+
     private ReviewsDTO mapToDTO(Reviews review) {
         ReviewsDTO dto = new ReviewsDTO();
         dto.setId(review.getId());
@@ -137,6 +155,7 @@ public class ReviewsService {
         dto.setDateCreated(review.getDateCreated());
         dto.setAvailableStatus(review.getAvailableStatus());
         dto.setUser(Converter.convertUserToUserDTO(review.getUser()));
+        dto.setUserReceive(Converter.convertUserToUserDTO(review.getUserReceive())); // Updated field
         return dto;
     }
 
@@ -149,29 +168,9 @@ public class ReviewsService {
         Users user = new Users();
         user.setId(dto.getUser().getId());
         review.setUser(user);
+        Users userReceive = new Users();
+        userReceive.setId(dto.getUserReceive().getId());
+        review.setUserReceive(userReceive); // Updated field
         return review;
-    }
-
-    private Users convertUserDTOToUser(UsersDTO userDTO) {
-        Users user = new Users();
-        user.setId(userDTO.getId());
-        user.setEmail(userDTO.getEmail());
-        user.setUsername(userDTO.getUsername());
-        user.setFullName(userDTO.getFullName());
-        user.setBirthDate(userDTO.getBirthDate());
-        user.setAvatar(userDTO.getAvatar());
-        user.setAddress(userDTO.getAddress());
-        user.setPhone(userDTO.getPhone());
-        user.setGender(userDTO.getGender());
-        user.setDateUpdated(userDTO.getDateUpdated());
-        user.setDateCreated(userDTO.getDateCreated());
-        
-        Role role = new Role();
-        role.setId(userDTO.getRole().getId());
-        role.setRoleName(userDTO.getRole().getRoleName());
-        user.setRole(role);
-
-        user.setAvailableStatus(userDTO.getAvailableStatus());
-        return user;
     }
 }

@@ -14,6 +14,7 @@ public class ReviewsDTO {
     private String comment;
     private int rating;
     private LocalDateTime dateCreated;
-    private UsersDTO user;
+    private UsersDTO user_id; // Updated field
+    private UsersDTO user_receive_id; // Updated field
     private AvailableStatus availableStatus;
 }

@@ -122,6 +122,10 @@ public class ProjectTasksService {
             task.setDateUpdated(LocalDateTime.now());
             projectTasksRepository.save(task);
 
+            // Recalculate the project percentage
+            Projects project = task.getProjects();
+            updateProjectPercentage(project);
+
             ProjectTasksDTO dto = mapToDTO(task);
             response.setProjectTasksDTOList(Arrays.asList(dto));
             response.setStatusCode(200);
@@ -179,6 +183,15 @@ public class ProjectTasksService {
             response.setMessage("Error occurred during retrieving project tasks: " + e.getMessage());
         }
         return response;
+    }
+
+    private void updateProjectPercentage(Projects project) {
+        List<ProjectTasks> tasks = projectTasksRepository.findByProjectsAndAvailableStatus(project, AvailableStatus.ACTIVE);
+        long totalTasks = tasks.size();
+        long completedTasks = tasks.stream().filter(task -> task.getStatus() == ProjectTaskStatus.DONE).count();
+        int percentage = (int) ((completedTasks * 100) / totalTasks);
+        project.setPercentage(percentage);
+        projectsRepository.save(project);
     }
 
     private ProjectTasksDTO mapToDTO(ProjectTasks task) {

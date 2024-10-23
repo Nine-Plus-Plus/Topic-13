@@ -88,4 +88,16 @@ public class BookingController {
         Response response = bookingService.getBookingsByGroupId(groupId, status);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
+
+    @GetMapping("/admin/get-booking-by-semesterId/{semesterId}")
+    public ResponseEntity<Response> getBookingsBySemesterId(@PathVariable Long semesterId) {
+        Response response = bookingService.getBookingBySemesterId(semesterId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @GetMapping("/admin/get-all-by-status/")
+    public ResponseEntity<Response> getAllByBookingStatus(@RequestParam(required = false) BookingStatus status) {
+        Response response = bookingService.getAllByBookingStatus(status);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
 }

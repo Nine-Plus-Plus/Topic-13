@@ -31,7 +31,7 @@ public class SkillsService {
             }
 
             Skills newSkill = new Skills();
-            newSkill.setSkillName(skillsDTO.getSkillName());
+            newSkill.setSkillName(skillsDTO.getSkillName().trim());
             newSkill.setSkillDescription(skillsDTO.getSkillDescription());
             newSkill.setAvailableStatus(AvailableStatus.ACTIVE);
 
@@ -144,7 +144,7 @@ public class SkillsService {
         Response response = new Response();
         try {
             Skills skill = skillsRepository.findById(id).orElseThrow(() -> new OurException("Skill not found"));
-            skill.setSkillName(skillsDTO.getSkillName());
+            skill.setSkillName(skillsDTO.getSkillName().trim());
             skill.setSkillDescription(skillsDTO.getSkillDescription());
             skillsRepository.save(skill);
 

@@ -17,13 +17,11 @@ import org.springframework.stereotype.Repository;
 public interface MentorsRepository extends JpaRepository<Mentors, Long>{
     Mentors findByUser_Id(Long userId);
 
-    Optional<Mentors> findByMentorCode(String mentorCode);
+    Optional<Mentors> findByMentorCodeAndAvailableStatus(String mentorCode, AvailableStatus availableStatus);
 
     List<Mentors> findByAvailableStatus(AvailableStatus availableStatus);
 
     Mentors findByIdAndAvailableStatus(Long id, AvailableStatus availableStatus);
-
-    Mentors findByMentorCodeAndAvailableStatus(String mentorCode, AvailableStatus availableStatus);
 
     @Query("SELECT m FROM Mentors m WHERE m.user.fullName LIKE %:name% AND m.availableStatus = :availableStatus")
     List<Mentors> findByName(

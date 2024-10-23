@@ -1,8 +1,10 @@
 package com.project.service;
 
+import com.project.dto.EmailRequest;
 import com.project.dto.NotificationsDTO;
 import com.project.dto.Response;
 import com.project.enums.AvailableStatus;
+import com.project.enums.NotificationAction;
 import com.project.exception.OurException;
 import com.project.model.Booking;
 import com.project.model.Group;
@@ -38,6 +40,9 @@ public class NotificationService {
 
     @Autowired
     BookingRepository bookingRepository;
+
+    @Autowired
+    EmailServiceImpl emailService;
 
     public Response createNotification(NotificationsDTO notificationsDTO) {
         Response response = new Response();
@@ -85,6 +90,13 @@ public class NotificationService {
                     notifications.setBooking(booking);
                 }
             }
+
+            // tạo mail
+            EmailRequest emailRequest = new EmailRequest();
+            emailRequest.setRecipient(reciver.getEmail());
+            emailRequest.setMsgBody(notificationsDTO.getMessage());
+            emailRequest.setSubject(String.valueOf(notificationsDTO.getType()));
+            emailService.sendHtmlMail(emailRequest);
 
             // Lưu notification
             notificationRepository.save(notifications);
@@ -176,10 +188,18 @@ public class NotificationService {
     }
 
     // Phương thức chỉnh sửa notifications bằng Id
-    public Response updateNotification(Long id, Notifications newNotification){
+    public Response updateNotification(Long id, NotificationsDTO newNotification){
         Response response = new Response();
         try {
+            Notifications updateNotification = notificationRepository.findById(id)
+                    .orElseThrow(() -> new OurException("notifications not found"));
 
+            updateNotification.setAction(newNotification.getAction());
+            notificationRepository.save(updateNotification);
+
+            response.setNotificationsDTO(Converter.convertNotificationToNotiDTO(updateNotification));
+            response.setStatusCode(200);
+            response.setMessage("Notifications updated successfully");
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -194,7 +214,7 @@ public class NotificationService {
         Response response = new Response();
         try {
             List<NotificationsDTO> notificationsDTOList = new ArrayList<>();
-            List<Notifications> notificationsList = notificationRepository.findByReceiverId(id);
+            List<Notifications> notificationsList = notificationRepository.findByReceiverIdOrderByDateTimeSentDesc(id);
             if(!notificationsList.isEmpty()){
                 notificationsDTOList = notificationsList.stream()
                         .map(Converter::convertNotificationToNotiDTO)

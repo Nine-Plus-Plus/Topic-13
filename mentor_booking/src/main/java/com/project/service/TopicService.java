@@ -7,6 +7,7 @@ import com.project.exception.OurException;
 import com.project.model.Mentors;
 import com.project.model.Semester;
 import com.project.model.Topic;
+import com.project.model.Class;
 import com.project.repository.ClassRepository;
 import com.project.repository.MentorsRepository;
 import com.project.repository.SemesterRepository;
@@ -57,7 +58,7 @@ public class TopicService {
             }
 
             Topic topic = new Topic();
-            topic.setTopicName(createRequest.getTopicName());
+            topic.setTopicName(createRequest.getTopicName().trim());
             topic.setContext(createRequest.getContext());
             topic.setProblems(createRequest.getProblems());
             topic.setActor(createRequest.getActor());
@@ -122,13 +123,8 @@ public class TopicService {
             Topic findTopic = topicRepository.findByIdAndAvailableStatus(id, AvailableStatus.ACTIVE);
             TopicDTO dto = Converter.convertTopicToTopicDTO(findTopic);
             response.setTopicDTO(dto);
-            if (findTopic != null) {
-                response.setStatusCode(200);
-                response.setMessage("Successfully");
-            } else {
-                response.setStatusCode(400);
-                response.setMessage("No data found");
-            }
+            response.setStatusCode(200);
+            response.setMessage("Successfully");
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -145,30 +141,26 @@ public class TopicService {
             Topic presentTopic = topicRepository.findById(id)
                     .orElseThrow(() -> new OurException("Cannot find topic with id: " + id));
             if (topicRepository.findByTopicName(newTopic.getTopicName()).isPresent()
-                    && newTopic.getTopicName().equals(presentTopic.getTopicName()) == false) {
-                throw new OurException("Semester has already existed");
+                    && !newTopic.getTopicName().equals(presentTopic.getTopicName())) {
+                throw new OurException("Topic has already existed");
             }
-            Mentors mentor = new Mentors();
-            Semester semester = new Semester();
-            if (newTopic.getMentor() != null) {
-                mentor = mentorsRepository.findById(newTopic.getMentor().getId())
+            if(newTopic.getTopicName()!=null) presentTopic.setTopicName(newTopic.getTopicName().trim());
+            if(newTopic.getContext()!=null) presentTopic.setContext(newTopic.getContext());
+            if(newTopic.getProblems()!=null) presentTopic.setProblems(newTopic.getProblems());
+            if(newTopic.getActor()!=null) presentTopic.setActor(newTopic.getActor());
+            if(newTopic.getRequirement()!=null) presentTopic.setRequirement(newTopic.getRequirement());
+            if(newTopic.getNonFunctionRequirement()!=null) presentTopic.setNonFunctionRequirement(newTopic.getNonFunctionRequirement());
+            presentTopic.setDateUpdated(LocalDateTime.now());
+            if(newTopic.getMentor()!=null) {
+                Mentors mentor = mentorsRepository.findById(newTopic.getMentor().getId())
                         .orElseThrow(() -> new OurException("Cannot find mentor id"));
+                presentTopic.setMentor(mentor);
             }
             if (newTopic.getSemester() != null) {
-                semester = semesterRepository.findById(newTopic.getSemester().getId())
+                Semester semester = semesterRepository.findById(newTopic.getSemester().getId())
                         .orElseThrow(() -> new OurException("Cannot find semester id"));
+                presentTopic.setSemester(semester);
             }
-
-            presentTopic.setTopicName(newTopic.getTopicName());
-            presentTopic.setContext(newTopic.getContext());
-            presentTopic.setProblems(newTopic.getProblems());
-            presentTopic.setActor(newTopic.getActor());
-            presentTopic.setRequirement(newTopic.getRequirement());
-            presentTopic.setNonFunctionRequirement(newTopic.getNonFunctionRequirement());
-            presentTopic.setDateUpdated(LocalDateTime.now());
-            presentTopic.setMentor(mentor);
-            presentTopic.setSemester(semester);
-
             topicRepository.save(presentTopic);
 
             TopicDTO dto = Converter.convertTopicToTopicDTO(presentTopic);
@@ -258,8 +250,9 @@ public class TopicService {
         Response response = new Response();
         try {
             List<TopicDTO> topicListDTO = new ArrayList<>();
-            if (classRepository.findById(classId).isPresent()) {
-                List<Topic> topicList = topicRepository.findUnchosenTopicsInClass(classId);
+            if (classRepository.findByIdAndAvailableStatus(classId, AvailableStatus.ACTIVE) != null) {
+                Class findClass = classRepository.findById(classId).orElse(null);
+                List<Topic> topicList = topicRepository.findUnchosenTopicsInClass(classId, findClass.getSemester().getId());
                 if (topicList != null) {
                     topicListDTO = topicList.stream()
                             .map(Converter::convertTopicToTopicDTO)

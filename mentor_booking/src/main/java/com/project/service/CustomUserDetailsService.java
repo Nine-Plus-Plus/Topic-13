@@ -4,6 +4,7 @@
  */
 package com.project.service;
 
+import com.project.enums.AvailableStatus;
 import com.project.exception.OurException;
 import com.project.model.Users;
 import com.project.repository.UsersRepository;
@@ -27,10 +28,10 @@ public class CustomUserDetailsService implements UserDetailsService{
    
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserDetails user = usersRepository.findByUsername(username).orElse(null);
+        UserDetails user = usersRepository.findByUsernameAndAvailableStatus(username, AvailableStatus.ACTIVE).orElse(null);
         
         if(user == null){
-            Users ourUser = usersRepository.findByUsername(username).orElse(null);
+            Users ourUser = usersRepository.findByUsernameAndAvailableStatus(username, AvailableStatus.ACTIVE).orElse(null);
             if(ourUser != null){
                 return ourUser;
             }

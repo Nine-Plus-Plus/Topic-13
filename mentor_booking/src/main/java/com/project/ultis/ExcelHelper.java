@@ -3,6 +3,7 @@ package com.project.ultis;
 import com.project.dto.CreateMentorRequest;
 import com.project.dto.CreateStudentRequest;
 import com.project.dto.SkillsDTO;
+import com.project.dto.TopicDTO;
 import com.project.enums.Gender;
 import com.project.exception.OurException;
 import org.apache.poi.ss.usermodel.CellType;
@@ -182,5 +183,68 @@ public class ExcelHelper {
         }
     }
 
+    public static List<TopicDTO> excelToTopics(MultipartFile file){
+        try (InputStream is = file.getInputStream();
+             Workbook workbook = new XSSFWorkbook(is);)
+        {
+
+            List<TopicDTO> topicRequests = new ArrayList<>();
+            Sheet sheet = workbook.getSheetAt(0);
+            int rowNumber = 0;
+
+            for (Row row : sheet) {
+                if (rowNumber == 0) {
+                    rowNumber++;
+                    continue; // Bỏ qua dòng tiêu đề
+                }
+
+                TopicDTO topicRequest = new TopicDTO();
+
+                if (row.getCell(0) != null && row.getCell(0).getCellType() == CellType.STRING) {
+                    topicRequest.setTopicName(row.getCell(0).getStringCellValue());
+                }
+
+                if (row.getCell(1) != null && row.getCell(1).getCellType() == CellType.STRING) {
+                    topicRequest.setContext(row.getCell(1).getStringCellValue());
+                }
+
+                if (row.getCell(2) != null && row.getCell(2).getCellType() == CellType.STRING) {
+                    topicRequest.setProblems(row.getCell(2).getStringCellValue());
+                }
+
+                if (row.getCell(3) != null && row.getCell(3).getCellType() == CellType.STRING) {
+                    String actorString = row.getCell(3).getStringCellValue();
+                    List<String> actorList = Arrays.asList(actorString.split(","));
+                    topicRequest.setActor(actorList);
+                }
+
+                if (row.getCell(4) != null && row.getCell(4).getCellType() == CellType.STRING) {
+                    String requirementString = row.getCell(4).getStringCellValue();
+                    List<String> requirementList = Arrays.asList(requirementString.split(","));
+                    topicRequest.setRequirement(requirementList);
+                }
+
+                if (row.getCell(5) != null && row.getCell(5).getCellType() == CellType.STRING) {
+                    String nonFuncRequirementString = row.getCell(5).getStringCellValue();
+                    List<String> nonFuncReqList = Arrays.asList(nonFuncRequirementString.split(","));
+                    topicRequest.setNonFunctionRequirement(nonFuncReqList);
+                }
+
+                if (row.getCell(6) != null && row.getCell(6).getCellType() == CellType.STRING) {
+                    topicRequest.setClassName(row.getCell(6).getStringCellValue());
+                }
+
+                if (row.getCell(7) != null && row.getCell(7).getCellType() == CellType.STRING) {
+                    topicRequest.setSemesterName(  row.getCell(7).getStringCellValue());
+                }
+
+                topicRequests.add(topicRequest);
+            }
+
+            return topicRequests;
+        } catch (Exception e) {
+            throw new OurException("Error reading Excel file: " + e.getMessage());
+        }
+    }
 
 }

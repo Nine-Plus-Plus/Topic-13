@@ -263,12 +263,36 @@ public class Converter {
         notificationsDTO.setType(notifications.getType());
         notificationsDTO.setAction(notifications.getAction());
 
-        if(notifications.getReceiver() != null){
-            notificationsDTO.setReciver(convertUserToUserDTO(notifications.getReceiver()));
+        // Kiểm tra và chuyển đổi sender
+        if (notifications.getSender() != null) {
+            UsersDTO senderDTO = convertUserToUserDTO(notifications.getSender());
+
+            // Kiểm tra xem sender có phải là Student hoặc Mentor không
+            if (notifications.getSender().getStudent() != null) {
+                StudentsDTO studentDTO = convertStudentToStudentDTO(notifications.getSender().getStudent());
+                senderDTO.setStudent(studentDTO);
+            } else if (notifications.getSender().getMentor() != null) {
+                MentorsDTO mentorDTO = convertMentorToMentorDTO(notifications.getSender().getMentor());
+                senderDTO.setMentor(mentorDTO);
+            }
+
+            notificationsDTO.setSender(senderDTO);
         }
 
-        if(notifications.getSender() != null){
-            notificationsDTO.setSender(convertUserToUserDTO(notifications.getSender()));
+        // Kiểm tra và chuyển đổi receiver
+        if (notifications.getReceiver() != null) {
+            UsersDTO receiverDTO = convertUserToUserDTO(notifications.getReceiver());
+
+            // Kiểm tra xem receiver có phải là Student hoặc Mentor không
+            if (notifications.getReceiver().getStudent() != null) {
+                StudentsDTO studentDTO = convertStudentToStudentDTO(notifications.getReceiver().getStudent());
+                receiverDTO.setStudent(studentDTO);
+            } else if (notifications.getReceiver().getMentor() != null) {
+                MentorsDTO mentorDTO = convertMentorToMentorDTO(notifications.getReceiver().getMentor());
+                receiverDTO.setMentor(mentorDTO);
+            }
+
+            notificationsDTO.setReciver(receiverDTO);
         }
 
         if(notifications.getBooking() != null){

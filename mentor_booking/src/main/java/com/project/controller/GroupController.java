@@ -76,4 +76,10 @@ public class GroupController {
         Response response = groupService.getGroupsInClass(classId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
+
+    @GetMapping("/admin/get-groups-in-semester/{semesterId}")
+    public ResponseEntity<Response> getGroupsBySemesterId(@PathVariable Long semesterId){
+        Response response = groupService.getGroupBySemesterId(semesterId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
 }

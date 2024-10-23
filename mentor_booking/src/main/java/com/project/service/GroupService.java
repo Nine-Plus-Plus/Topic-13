@@ -7,10 +7,12 @@ import com.project.enums.AvailableStatus;
 import com.project.enums.GroupRole;
 import com.project.exception.OurException;
 import com.project.model.Group;
+import com.project.model.Semester;
 import com.project.model.Students;
 import com.project.model.Class;
 import com.project.repository.ClassRepository;
 import com.project.repository.GroupRepository;
+import com.project.repository.SemesterRepository;
 import com.project.repository.StudentsRepository;
 import com.project.ultis.Converter;
 import java.time.LocalDate;
@@ -35,6 +37,9 @@ public class GroupService {
 
     @Autowired
     private ClassRepository classRepository;
+
+    @Autowired
+    private SemesterRepository semesterRepository;
 
     public Response createGroup(GroupDTO inputRequest) {
         Response response = new Response();
@@ -269,6 +274,40 @@ public class GroupService {
         } catch (Exception e) {
             response.setStatusCode(500);
             response.setMessage("Error occured during get group " + e.getMessage());
+        }
+        return response;
+    }
+
+    public Response getGroupBySemesterId(Long semesterId) {
+        Response response = new Response();
+        try {
+            List<Class> findClass = classRepository.findClassBySemesterId(semesterId, AvailableStatus.ACTIVE);
+
+            if (findClass != null && !findClass.isEmpty()) {
+                List<GroupDTO> allGroups = new ArrayList<>();
+                for (Class c : findClass) {
+                    List<Group> groups = groupRepository.findGroupsByClassId(c.getId(), AvailableStatus.ACTIVE);
+
+                    if (groups != null && !groups.isEmpty()) {
+                        for (Group group : groups) {
+                            GroupDTO groupDTO = Converter.convertGroupToGroupDTO(group); // Hàm chuyển đổi (nếu cần)
+                            allGroups.add(groupDTO);
+                        }
+                    }
+                }
+
+                response.setGroupDTOList(allGroups);
+                response.setStatusCode(200);
+                response.setMessage("Successfully");
+            } else {
+                throw new OurException("No classes found for this semester.");
+            }
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred during get group: " + e.getMessage());
         }
         return response;
     }

@@ -21,4 +21,6 @@ public class NotificationsDTO {
     private AvailableStatus availableStatus;
     private BookingDTO bookingDTO;
     private GroupDTO groupDTO;
+
+    private StudentsDTO studentsDTO;
 }

@@ -15,7 +15,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface StudentsRepository extends JpaRepository<Students, Long>{
-    Optional<Students> findByStudentCode(String studentCode);
+    Optional<Students> findByStudentCodeAndAvailableStatus(String studentCode, AvailableStatus availableStatus);
     Students findByUser_Id(Long userId);
 
     @Query("SELECT s FROM Students s WHERE s.user.fullName LIKE %:name% AND s.expertise LIKE %:expertise% AND s.availableStatus = :availableStatus AND s.aClass.id = :classId")

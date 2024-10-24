@@ -9,6 +9,7 @@ import com.project.repository.PointHistoryRepository;
 import com.project.repository.GroupRepository;
 import com.project.repository.StudentsRepository;
 import com.project.repository.BookingRepository;
+import com.project.ultis.Converter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -83,9 +84,8 @@ public class PointHistoryService {
         dto.setDateCreated(pointHistory.getDateCreated());
         dto.setAvailableStatus(pointHistory.getAvailableStatus());
 
-        // Set booking and student IDs instead of full DTOs
         if (pointHistory.getBooking() != null) {
-            dto.setBookingId(pointHistory.getBooking().getId());
+            dto.setBooking(Converter.convertBookingToBookingDTO(pointHistory.getBooking()));
         }
         if (pointHistory.getStudent() != null) {
             dto.setStudentId(pointHistory.getStudent().getId());

@@ -32,6 +32,9 @@ public class Converter {
             mentor.setStar(convertClass.getMentor().getStar());
             mentor.setTotalTimeRemain(convertClass.getMentor().getTotalTimeRemain());
             mentor.setAvailableStatus(convertClass.getMentor().getAvailableStatus());
+            if(convertClass.getMentor().getUser() != null){
+                mentor.setUser(convertClass.getMentor().getUser());
+            }
             classDTO.setMentor(convertMentorToMentorDTO(mentor));
         }
 
@@ -149,6 +152,10 @@ public class Converter {
 
         topicDTO.setSemesterDTO(convertSemesterToSemesterDTO(convertTopic.getSemester()));
         topicDTO.setMentorsDTO(convertMentorToMentorDTO(convertTopic.getMentor()));
+        if(convertTopic.getSubMentors()!=null){
+            topicDTO.setSubMentorDTO(convertMentorToMentorDTO(convertTopic.getSubMentors()));
+        }
+
 
         topicDTO.setAvailableStatus(convertTopic.getAvailableStatus());
         return topicDTO;

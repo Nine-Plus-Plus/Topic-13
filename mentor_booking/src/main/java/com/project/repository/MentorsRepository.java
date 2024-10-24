@@ -32,4 +32,7 @@ public interface MentorsRepository extends JpaRepository<Mentors, Long>{
     List<Mentors> findBySkills(
             List<Skills> skills,
             AvailableStatus availableStatus);
+
+    @Query("SELECT m FROM Mentors m WHERE m.user.fullName = :name AND m.availableStatus = :availableStatus")
+    Optional<Mentors> findByNameForTopic(String name, AvailableStatus availableStatus);
 }

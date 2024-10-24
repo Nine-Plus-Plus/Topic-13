@@ -23,6 +23,7 @@ public class MentorsDTO {
     private List<MentorScheduleDTO> mentorSchedules;
     private ClassDTO assignedClass;
     private List<TopicDTO> topicDTOS;
+    private List<TopicDTO> topicDTOSForSubMentor;
     private AvailableStatus availableStatus;
 
     private List<MentorScheduleDTO> mentorScheduleDTOList;

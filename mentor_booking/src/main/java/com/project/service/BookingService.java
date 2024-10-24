@@ -256,7 +256,7 @@ public class BookingService {
                 int newPoint = group.getTotalPoint() / groupMembers.size();
 
                 for (Students member : groupMembers) {
-                    int adjustedPoint = member.getPoint() - newPoint;
+                    int adjustedPoint = newPoint - member.getPoint();
                     member.setPoint(newPoint);
                     pointHistory = new PointHistory();
                     pointHistory.setStatus(PointHistoryStatus.REDEEMED);
@@ -362,7 +362,7 @@ public class BookingService {
                     int newPoint = group.getTotalPoint() / groupMembers.size();
 
                     for (Students member : groupMembers) {
-                        int adjustedPoint = member.getPoint() - newPoint;
+                        int adjustedPoint = newPoint - member.getPoint();
                         member.setPoint(newPoint);
                         pointHistory = new PointHistory();
                         pointHistory.setStatus(PointHistoryStatus.ADJUSTED);

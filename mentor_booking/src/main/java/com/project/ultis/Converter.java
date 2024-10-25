@@ -313,4 +313,17 @@ public class Converter {
         
         return notificationsDTO;
     }
+    
+    public static MeetingDTO convertMeetingToMeetingDTO(Meeting convertMeeting){
+        MeetingDTO meetingDTO = new MeetingDTO();
+        
+        meetingDTO.setId(convertMeeting.getId());
+        meetingDTO.setDateCreated(convertMeeting.getDateCreated());
+        meetingDTO.setLinkURL(convertMeeting.getLinkURL());
+        meetingDTO.setStatus(convertMeeting.getStatus());
+        meetingDTO.setAvailableStatus(convertMeeting.getAvailableStatus());
+        meetingDTO.setBooking(convertBookingToBookingDTO(convertMeeting.getBooking()));
+        
+        return meetingDTO;
+    }
 }

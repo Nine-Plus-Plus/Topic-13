@@ -32,6 +32,7 @@ public class Converter {
             mentor.setStar(convertClass.getMentor().getStar());
             mentor.setTotalTimeRemain(convertClass.getMentor().getTotalTimeRemain());
             mentor.setAvailableStatus(convertClass.getMentor().getAvailableStatus());
+            mentor.setSkills(convertClass.getMentor().getSkills());
             if(convertClass.getMentor().getUser() != null){
                 mentor.setUser(convertClass.getMentor().getUser());
             }

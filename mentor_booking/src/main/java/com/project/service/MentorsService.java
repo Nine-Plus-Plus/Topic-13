@@ -129,7 +129,31 @@ public class MentorsService {
                 updateUser.setAvatar(avatarUrl);
                 System.out.println("Avatar URL: " + avatarUrl); // Kiểm tra URL
             }
+            // Kiểm tra nếu username đã thay đổi và đã tồn tại trong hệ thống
+            if (!updateRequest.getUsername().equals(updateUser.getUsername())){
+                if(usersRepository.findByUsernameAndAvailableStatus(updateRequest.getUsername(), AvailableStatus.ACTIVE).isPresent()){
+                    throw new OurException("Username already exists");
+                }
+            }
+            // Kiểm tra nếu email đã thay đổi và đã tồn tại trong hệ thống
+            if (!updateRequest.getEmail().equals(updateUser.getEmail())){
+                if(usersRepository.findByEmailAndAvailableStatus(updateRequest.getEmail(), AvailableStatus.ACTIVE).isPresent()){
+                    throw new OurException("Email already exists");
+                }
+            }
+            // Kiểm tra nếu số điện thoại đã thay đổi và đã tồn tại trong hệ thống
+            if (!updateRequest.getPhone().equals(updateUser.getPhone())){
+                if(usersRepository.findByPhoneAndAvailableStatus(updateRequest.getPhone(), AvailableStatus.ACTIVE).isPresent()){
+                    throw new OurException("Phone already exists");
+                }
+            }
 
+            // Kiểm tra nếu mentorCode đã thay đổi và đã tồn tại trong hệ thống
+            if (!updateRequest.getMentorCode().equals(mentorUpdate.getMentorCode())){
+                if(mentorsRepository.findByMentorCodeAndAvailableStatus(updateRequest.getMentorCode(), AvailableStatus.ACTIVE).isPresent()){
+                    throw new OurException("MentorCode already exists");
+                }
+            }
             // Cập nhật thông tin người dùng hiện có
             updateUser.setUsername(updateRequest.getUsername().trim());
             updateUser.setEmail(updateRequest.getEmail().trim());

@@ -39,7 +39,7 @@ public class StudentsController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PutMapping(value = "/admin/update-student/{id}", consumes = { "multipart/form-data" })
+    @PutMapping(value = "/user/update-student/{id}", consumes = { "multipart/form-data" })
     public ResponseEntity<Response> updateStudent(
             @PathVariable Long id,
             @RequestPart("student") CreateStudentRequest updateStudent,

@@ -152,6 +152,8 @@ public class UsersService {
                 if (request.getAvatarFile() != null && !request.getAvatarFile().isEmpty()) {
                     String avatarUrl = awsS3Service.saveImageToS3(request.getAvatarFile());
                     newUser.setAvatar(avatarUrl);
+                }else{
+                    newUser.setAvatar("https://mentor-booking-images.s3.amazonaws.com/images.jpeg");
                 }
             } catch (Exception e) {
                 throw new OurException("Error uploading avatar: " + e.getMessage());
@@ -230,6 +232,8 @@ public class UsersService {
                 if (request.getAvatarFile() != null && !request.getAvatarFile().isEmpty()) {
                     String avatarUrl = awsS3Service.saveImageToS3(request.getAvatarFile());
                     newUser.setAvatar(avatarUrl);
+                }else{
+                    newUser.setAvatar("https://mentor-booking-images.s3.amazonaws.com/images.jpeg");
                 }
             } catch (Exception e) {
                 throw new OurException("Error uploading avatar: " + e.getMessage());

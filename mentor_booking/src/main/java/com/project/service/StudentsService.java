@@ -184,8 +184,6 @@ public class StudentsService {
                 String avatarUrl = awsS3Service.saveImageToS3(avatarFile);
                 updateUser.setAvatar(avatarUrl);
                 System.out.println("Avatar URL: " + avatarUrl); // Kiểm tra URL
-            }else{
-                updateUser.setAvatar("https://mentor-booking-images.s3.amazonaws.com/images.jpeg");
             }
 
             // Kiểm tra Class

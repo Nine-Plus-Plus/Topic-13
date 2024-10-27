@@ -31,7 +31,7 @@ public class PointHistoryService {
     private BookingRepository bookingRepository;
 
     public Response getStudentPointHistory(Long studentId) {
-        List<PointHistory> pointHistories = pointHistoryRepository.findByStudentId(studentId);
+        List<PointHistory> pointHistories = pointHistoryRepository.findByStudentIdOrderByDateCreatedDesc(studentId);
         List<PointHistoryDTO> pointHistoryDTOs = pointHistories.stream()
             .map(this::convertToDTO)
             .collect(Collectors.toList());

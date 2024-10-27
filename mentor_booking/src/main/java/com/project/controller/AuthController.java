@@ -28,6 +28,12 @@ public class AuthController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
+    @PostMapping("/change-password-user")
+    public ResponseEntity<Response> changePasswordInUser(@RequestBody Response changeRequest){
+        Response response = authService.changePasswordInUser(changeRequest);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
     @PostMapping("/email-existed")
     public ResponseEntity<Response> isEmailExisted(@RequestBody Response responseEmail) {
         Response response = authService.findByGmailChangePassword(responseEmail);

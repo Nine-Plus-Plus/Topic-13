@@ -111,6 +111,43 @@ public class AuthService {
         return response;
     }
 
+    public Response changePasswordInUser(Response changeResponse) {
+        Response response = new Response();
+        try {
+            // Tìm người dùng dựa trên username
+            Users user = usersRepository.findByEmailAndAvailableStatus(changeResponse.getEmail(), AvailableStatus.ACTIVE)
+                    .orElseThrow(() -> new OurException("Email not correct"));
+
+            // Kiểm tra xem mật khẩu hiện tại có đúng không
+            if (!passwordEncoder.matches(changeResponse.getPassword(), user.getPassword())) {
+                throw new OurException("Current password is incorrect");
+            }
+
+            // Kiểm tra mật khẩu mới không được trùng với mật khẩu hiện tại
+            if (passwordEncoder.matches(changeResponse.getNewPassword(), user.getPassword())) {
+                throw new OurException("New password cannot be the same as the current password");
+            }
+
+            // Mã hóa và lưu mật khẩu mới
+            user.setPassword(passwordEncoder.encode(changeResponse.getNewPassword()));
+            user.setOtpCode(null);
+            usersRepository.save(user);
+
+            // Trả về phản hồi thành công
+            response.setStatusCode(200);
+            response.setMessage("Password changed successfully");
+
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred during password change: " + e.getMessage());
+        }
+
+        return response;
+    }
+
     public Response processOAuthPostLogin(String email, String fullName) {
         Response response = new Response();
         try {

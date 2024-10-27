@@ -45,7 +45,7 @@ public class ClassService {
         try {
 
             // Kiểm tra nếu lớp đã tồn tại trong kỳ học
-            if (classRepository.existsByClassNameAndSemesterId(inputRequest.getClassName(), inputRequest.getSemester().getId())) {
+            if (classRepository.existsByClassNameAndSemesterIdAndAvailableStatus(inputRequest.getClassName(), inputRequest.getSemester().getId(), AvailableStatus.ACTIVE)) {
                 throw new OurException("Class already exists in this semester");
             }
             Semester semester = semesterRepository.findByIdAndAvailableStatus(inputRequest.getSemester().getId(), AvailableStatus.ACTIVE);

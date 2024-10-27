@@ -5,12 +5,14 @@ import com.project.dto.GroupDTO;
 import com.project.dto.Response;
 import com.project.enums.AvailableStatus;
 import com.project.enums.BookingStatus;
+import com.project.enums.MeetingStatus;
 import com.project.enums.MentorScheduleStatus;
 import com.project.enums.PointHistoryStatus;
 import com.project.exception.OurException;
 import com.project.model.Booking;
 import com.project.model.Class;
 import com.project.model.Group;
+import com.project.model.Meeting;
 import com.project.model.MentorSchedule;
 import com.project.model.Mentors;
 import com.project.model.PointHistory;
@@ -51,6 +53,9 @@ public class BookingService {
 
     @Autowired
     private ClassRepository classRepository;
+    
+    @Autowired
+    private MeetingRepository meetingRepository;
 
     public Response createBooking(BookingDTO createRequest) {
         Response response = new Response();
@@ -348,6 +353,13 @@ public class BookingService {
                     booking.setAvailableStatus(AvailableStatus.INACTIVE);
                     booking.setDateUpdated(LocalDateTime.now());
                     booking.setExpiredTime(null);
+                    
+                    Meeting meeting = meetingRepository.findByBookingIdAndAvailableStatus(bookingId, AvailableStatus.ACTIVE);
+                    if (meeting != null){
+                        meeting.setStatus(MeetingStatus.CANCELLED);
+                        meeting.setAvailableStatus(AvailableStatus.INACTIVE);
+                        meetingRepository.save(meeting);
+                    }
 
                     PointHistory pointHistory;
 
@@ -408,6 +420,12 @@ public class BookingService {
                     booking.setAvailableStatus(AvailableStatus.INACTIVE);
                     booking.setDateUpdated(LocalDateTime.now());
                     booking.setExpiredTime(null);
+                    Meeting meeting = meetingRepository.findByBookingIdAndAvailableStatus(bookingId, AvailableStatus.ACTIVE);
+                    if (meeting != null){
+                        meeting.setStatus(MeetingStatus.CANCELLED);
+                        meeting.setAvailableStatus(AvailableStatus.INACTIVE);
+                        meetingRepository.save(meeting);
+                    }
 
                     MentorSchedule schedule = mentorScheduleRepository.findByIdAndAvailableStatus(booking.getMentorSchedule().getId(), AvailableStatus.ACTIVE);
                     schedule.setStatus(MentorScheduleStatus.AVAILABLE);

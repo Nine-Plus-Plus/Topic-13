@@ -21,6 +21,7 @@ import com.project.repository.BookingRepository;
 import com.project.repository.MeetingRepository;
 import com.project.ultis.Converter;
 import com.project.ultis.GoogleOAuthUtil;
+import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -170,5 +172,23 @@ public class MeetingService {
             response.setMessage("Error occurred during get meetings by user ID: " + e.getMessage());
         }
         return response;
+    }
+    
+    @Scheduled(fixedRate = 60000)
+    @Transactional
+    public void setMeetingStatusAutomatically() {
+        try {
+            List<Meeting> meetingList = meetingRepository.findAllByStatusAndAvailableToBefore(MeetingStatus.SCHEDULED, LocalDateTime.now());
+
+            if (!meetingList.isEmpty()) {
+                for (Meeting meeting : meetingList) {
+                    meeting.setStatus(MeetingStatus.COMPLETED);
+                    meetingRepository.save(meeting);
+                }
+            }
+
+        } catch (Exception e) {
+            System.out.println("Error while setting meeting status automatically: " + e.getMessage());
+        }
     }
 }

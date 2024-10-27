@@ -323,7 +323,34 @@ public class Converter {
         meetingDTO.setStatus(convertMeeting.getStatus());
         meetingDTO.setAvailableStatus(convertMeeting.getAvailableStatus());
         meetingDTO.setBooking(convertBookingToBookingDTO(convertMeeting.getBooking()));
+        if (!convertMeeting.getReviews().isEmpty()){
+            List<ReviewsDTO> reviewListDTO = convertMeeting.getReviews().stream()
+                        .map(Converter::convertReviewToReviewDTO)
+                        .collect(Collectors.toList());
+            meetingDTO.setReviews(reviewListDTO);
+        }
         
         return meetingDTO;
+    }
+    
+    public static ReviewsDTO convertReviewToReviewDTO(Reviews review) {
+        ReviewsDTO reviewsDTO = new ReviewsDTO();
+        reviewsDTO.setId(review.getId());
+        reviewsDTO.setComment(review.getComment());
+        reviewsDTO.setRating(review.getRating());
+        reviewsDTO.setDateCreated(review.getDateCreated());
+        reviewsDTO.setAvailableStatus(review.getAvailableStatus());
+
+        if (review.getUser() != null) {
+            UsersDTO userDTO = Converter.convertUserToUserDTO(review.getUser());
+            reviewsDTO.setUser_id(userDTO);
+        }
+
+        if (review.getUserReceive() != null) {
+            UsersDTO userReceiveDTO = Converter.convertUserToUserDTO(review.getUserReceive());
+            reviewsDTO.setUser_receive_id(userReceiveDTO);
+        }
+
+        return reviewsDTO;
     }
 }

@@ -183,7 +183,7 @@ public class GroupService {
         return response;
     }
 
-    public Response addNewMember(Long id, StudentsDTO newMember) {
+    public Response addNewGroupMember(Long id, StudentsDTO newMember) {
         Response response = new Response();
         try {
             Group findGroup = groupRepository.findByIdAndAvailableStatus(id, AvailableStatus.ACTIVE);

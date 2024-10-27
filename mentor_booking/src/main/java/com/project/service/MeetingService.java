@@ -24,6 +24,9 @@ import com.project.ultis.GoogleOAuthUtil;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -137,6 +140,34 @@ public class MeetingService {
         } catch (Exception e) {
             response.setStatusCode(500);
             response.setMessage("Error occurred during get meeting by booking ID: " + e.getMessage());
+        }
+        return response;
+    }
+    
+    public Response getMeetingsByUserId(Long userId){
+        Response response = new Response();
+        try {
+            List<Meeting> meetingList = meetingRepository.findMeetingsByUserId(userId);
+            List<MeetingDTO> meetingListDTO = new ArrayList<>();
+            if (!meetingList.isEmpty()) {
+                meetingListDTO = meetingList.stream()
+                        .map(Converter::convertMeetingToMeetingDTO)
+                        .collect(Collectors.toList());
+
+                response.setMeetingDTOList(meetingListDTO);
+                response.setStatusCode(200);
+                response.setMessage("Meetings fetched successfully");
+            } else {
+                response.setMeetingDTOList(meetingListDTO);
+                response.setStatusCode(400);
+                response.setMessage("Cannot find any meeting");
+            }
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred during get meetings by user ID: " + e.getMessage());
         }
         return response;
     }

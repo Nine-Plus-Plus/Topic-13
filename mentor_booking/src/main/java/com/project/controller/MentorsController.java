@@ -62,4 +62,11 @@ public class MentorsController {
         return mentorsService.importMentorFromExcel(file);
     }
 
+    // Lấy top 3 mentors
+    @GetMapping("/user/get-top-mentors")
+    public ResponseEntity<Response> getTopMentors() {
+        Response response = mentorsService.getTopMentors();
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
 }

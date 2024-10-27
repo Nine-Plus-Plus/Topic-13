@@ -11,6 +11,8 @@ import com.project.security.AwsS3Service;
 import com.project.ultis.Converter;
 import com.project.ultis.ExcelHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -392,6 +395,11 @@ public class MentorsService {
                     m.setMentorSchedules(scheduleDTOList);
                 }
 
+                // Sắp xếp danh sách mentor theo starRating (giảm dần)
+                mentorsDTOList = mentorsDTOList.stream()
+                        .sorted(Comparator.comparing(MentorsDTO::getStar).reversed())
+                        .collect(Collectors.toList());
+
                 response.setStatusCode(200);
                 response.setMentorsDTOList(mentorsDTOList);
                 response.setMessage("Mentors found successfully.");
@@ -550,6 +558,29 @@ public class MentorsService {
         } catch (Exception e) {
             response.setStatusCode(500);
             response.setMessage("Error occurred during mentor creation: " + e.getMessage());
+        }
+        return response;
+    }
+
+    public Response getTopMentors(){
+        Response response = new Response();
+        List<MentorsDTO> mentorsDTOList = new ArrayList<>();
+        try{
+            Pageable topThree = PageRequest.of(0, 3);
+            List<Mentors> topMentors = mentorsRepository.findTopMentors(topThree, AvailableStatus.ACTIVE);
+            mentorsDTOList = topMentors
+                    .stream()
+                    .map(Converter::convertMentorToMentorDTO)
+                    .collect(Collectors.toList());
+            response.setStatusCode(200);
+            response.setMessage("fetch mentors successfully");
+            response.setMentorsDTOList(mentorsDTOList);
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred during get mentor: " + e.getMessage());
         }
         return response;
     }

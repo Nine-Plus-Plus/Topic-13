@@ -36,4 +36,10 @@ public class MeetingController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
     
+    @GetMapping("/user/get-meetings-by-user-id/{userId}")
+    public ResponseEntity<Response> getMeetingsByUserId(@PathVariable Long userId){
+        Response response = meetingService.getMeetingsByUserId(userId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+    
 }

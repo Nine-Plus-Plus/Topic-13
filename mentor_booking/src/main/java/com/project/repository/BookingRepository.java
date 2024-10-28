@@ -40,12 +40,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long>{
         @Param("classId") Long classId
     );
     
-    List<Booking> findByMentorIdAndStatusOrderByDateUpdatedDesc(
+    List<Booking> findByMentorIdAndStatusOrderByDateCreatedDesc(
             Long mentorId,
             BookingStatus status
     );
     
-    List<Booking> findByGroupIdAndStatusOrderByDateUpdatedDesc(
+    List<Booking> findByGroupIdAndStatusOrderByDateCreatedDesc(
             Long groupId,
             BookingStatus status
     );

@@ -460,7 +460,7 @@ public class BookingService {
     public Response getBookingsByMentorId(Long mentorId, BookingStatus status) {
         Response response = new Response();
         try {
-            List<Booking> bookingList = bookingRepository.findByMentorIdAndStatusOrderByDateUpdatedDesc(mentorId, status);
+            List<Booking> bookingList = bookingRepository.findByMentorIdAndStatusOrderByDateCreatedDesc(mentorId, status);
             List<BookingDTO> bookingListDTO = new ArrayList<>();
             if (!bookingList.isEmpty()) {
                 bookingListDTO = bookingList.stream()
@@ -488,7 +488,7 @@ public class BookingService {
     public Response getBookingsByGroupId(Long groupId, BookingStatus status) {
         Response response = new Response();
         try {
-            List<Booking> bookingList = bookingRepository.findByGroupIdAndStatusOrderByDateUpdatedDesc(groupId, status);
+            List<Booking> bookingList = bookingRepository.findByGroupIdAndStatusOrderByDateCreatedDesc(groupId, status);
             List<BookingDTO> bookingListDTO = new ArrayList<>();
             if (!bookingList.isEmpty()) {
                 bookingListDTO = bookingList.stream()

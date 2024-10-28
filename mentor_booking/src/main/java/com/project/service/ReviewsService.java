@@ -5,13 +5,16 @@ import com.project.dto.UsersDTO;
 import com.project.dto.Response;
 import com.project.enums.AvailableStatus;
 import com.project.exception.OurException;
+import com.project.model.Mentors;
 import com.project.model.Reviews;
 import com.project.model.Users;
+import com.project.repository.MentorsRepository;
 import com.project.repository.ReviewsRepository;
 import com.project.repository.UsersRepository;
 import com.project.ultis.Converter;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -25,6 +28,9 @@ public class ReviewsService {
 
     @Autowired
     private UsersRepository usersRepository;
+
+    @Autowired
+    private MentorsRepository mentorsRepository;
 
     public Response createReview(ReviewsDTO createRequest) {
         Response response = new Response();
@@ -41,6 +47,8 @@ public class ReviewsService {
             review.setDateCreated(LocalDateTime.now());
             reviewsRepository.save(review);
 
+            updateMentorStar(userReceive.getId());
+
             ReviewsDTO dto = convertReviewToReviewDTO(review);
             response.setReviewsDTO(dto);
             response.setStatusCode(200);
@@ -53,6 +61,22 @@ public class ReviewsService {
             response.setMessage("Error occurred during review creation: " + e.getMessage());
         }
         return response;
+    }
+
+    private void updateMentorStar(Long mentorId) {
+        List<Reviews> reviews = reviewsRepository.findByUserReceiveId(mentorId,  Sort.by(Sort.Direction.DESC, "dateCreated"));
+        double sumRatings = reviews.stream()
+                                   .mapToInt(Reviews::getRating)
+                                   .sum() + 5; // Add 5 to the sum of ratings
+    
+        double averageRating = sumRatings / (reviews.size() + 1); // Include the initial 5 in the count
+    
+        Mentors mentor = mentorsRepository.findByUser_Id(mentorId);
+        if (mentor == null) {
+            throw new OurException("Mentor not found");
+        }
+        mentor.setStar((float) averageRating);
+        mentorsRepository.save(mentor);
     }
 
     private Reviews mapToEntity(ReviewsDTO dto) {
@@ -109,7 +133,7 @@ public class ReviewsService {
     public Response getReviewsByUserId(Long userId) {
         Response response = new Response();
         try {
-            List<Reviews> reviews = reviewsRepository.findByUserId(userId);
+            List<Reviews> reviews = reviewsRepository.findByUserId(userId, Sort.by(Sort.Direction.DESC, "dateCreated"));
             List<ReviewsDTO> reviewsDTOs = reviews.stream()
                     .map(this::mapToDTO)
                     .collect(Collectors.toList());
@@ -125,7 +149,7 @@ public class ReviewsService {
     public Response getReviewsByUserReceiveId(Long userReceiveId) {
         Response response = new Response();
         try {
-            List<Reviews> reviews = reviewsRepository.findByUserReceiveId(userReceiveId);
+            List<Reviews> reviews = reviewsRepository.findByUserReceiveId(userReceiveId, Sort.by(Sort.Direction.DESC, "dateCreated"));
             List<ReviewsDTO> reviewsDTOs = reviews.stream()
                     .map(this::mapToDTO)
                     .collect(Collectors.toList());
@@ -203,7 +227,7 @@ public class ReviewsService {
     public Response getAllReviews() {
         Response response = new Response();
         try {
-            List<Reviews> reviews = reviewsRepository.findAll();
+            List<Reviews> reviews = reviewsRepository.findAll(Sort.by(Sort.Direction.DESC, "dateCreated"));
             List<ReviewsDTO> reviewsDTOs = reviews.stream()
                     .map(this::mapToDTO)
                     .collect(Collectors.toList());

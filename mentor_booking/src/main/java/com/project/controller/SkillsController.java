@@ -24,8 +24,10 @@ public class SkillsController {
 
     // lấy tất cả skills
     @GetMapping("/user/get-all-skills")
-    public ResponseEntity<Response> getAllSkills(){
-        Response response = skillsService.getAllSkills();
+    public ResponseEntity<Response> getAllSkills(
+            @RequestParam(required = false) String name
+    ){
+        Response response = skillsService.getAllSkills(name);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 

@@ -3,7 +3,6 @@ package com.project.repository;
 
 import com.project.enums.AvailableStatus;
 import com.project.model.Skills;
-import com.project.model.Students;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,6 +20,8 @@ public interface SkillsRepository extends JpaRepository<Skills, Long>{
             @Param("availableStatus") AvailableStatus status);
 
     List<Skills> findByAvailableStatus(AvailableStatus availableStatus);
+
+    List<Skills> findByskillNameAndAvailableStatus(String name, AvailableStatus availableStatus);
 
     @Query("SELECT s FROM Skills s WHERE s.skillName = :skillName AND s.availableStatus = :availableStatus")
     Optional<Skills> findBySkillNameExcel(

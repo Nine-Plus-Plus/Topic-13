@@ -52,11 +52,17 @@ public class MentorsService {
     private RoleRepository roleRepository;
 
     // Phương thức lấy tất cả mentors
-    public Response getAllMentors() {
+    public Response getAllMentors(String name) {
         Response response = new Response();
         List<MentorsDTO> mentorsDTOList = new ArrayList<>();
         try {
-            List<Mentors> mentorsList = mentorsRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
+            List<Mentors> mentorsList;
+            if(name == null || name.isEmpty()){
+                mentorsList = mentorsRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
+            }else{
+                mentorsList = mentorsRepository.findByName(name, AvailableStatus.ACTIVE);
+            }
+
             mentorsDTOList = mentorsList
                     .stream()
                     .map(Converter::convertMentorToMentorDTO)

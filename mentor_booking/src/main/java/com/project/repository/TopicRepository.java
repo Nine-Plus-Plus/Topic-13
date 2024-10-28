@@ -18,6 +18,15 @@ public interface TopicRepository extends JpaRepository<Topic, Long> {
     List<Topic> findTopicsBySemesterIdAndAvailableStatus(@Param("semesterId") Long semesterId,
             @Param("availableStatus") AvailableStatus availableStatus);
 
+    @Query("SELECT t FROM Topic t " +
+            "WHERE t.semester.id = :semesterId " +
+            "AND t.topicName LIKE %:topicName% " +
+            "AND t.availableStatus = :availableStatus")
+    List<Topic> findTopicsBySemesterIdAndTopicNameAvailableStatus(
+            @Param("semesterId") Long semesterId,
+            @Param("topicName") String name,
+            @Param("availableStatus") AvailableStatus availableStatus);
+
 //    @Query("SELECT t FROM Topic t WHERE t.topic_name LIKE %:topicName%")
     List<Topic> findByTopicNameContainingIgnoreCaseAndAvailableStatus(String topicName, AvailableStatus availableStatus);
 

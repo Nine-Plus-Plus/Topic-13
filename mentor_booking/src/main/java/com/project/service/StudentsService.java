@@ -279,18 +279,22 @@ public class StudentsService {
         return response;
     }
 
-    public Response getStudentBySemesterId(Long semesterId){
+    public Response getStudentBySemesterId(Long semesterId, String name){
         Response response = new Response();
         try{
             List<Class> findClass = classRepository.findClassBySemesterId(semesterId, AvailableStatus.ACTIVE);
             if (findClass != null && !findClass.isEmpty()) {
                 List<StudentsDTO> allStudent = new ArrayList<>();
                 for (Class c : findClass) {
-                    List<Students> studentsList = studentsRepository.findStudentByClassId(c.getId(), AvailableStatus.ACTIVE);
-
+                    List<Students> studentsList;
+                    if(name ==null || name.isEmpty()){
+                        studentsList = studentsRepository.findStudentByClassId(c.getId(), AvailableStatus.ACTIVE);
+                    }else{
+                        studentsList = studentsRepository.findStudentByClassIdAndFullName(c.getId(), name, AvailableStatus.ACTIVE);
+                    }
                     if (studentsList != null && !studentsList.isEmpty()) {
                         for (Students student : studentsList) {
-                            StudentsDTO studentsDTO = Converter.convertStudentToStudentDTO(student); // Hàm chuyển đổi (nếu cần)
+                            StudentsDTO studentsDTO = Converter.convertStudentToStudentDTO(student);
                             allStudent.add(studentsDTO);
                         }
                     }

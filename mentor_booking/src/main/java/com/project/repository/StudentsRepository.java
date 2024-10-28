@@ -42,6 +42,15 @@ public interface StudentsRepository extends JpaRepository<Students, Long>{
             @Param("classId") Long classId,
             @Param("availableStatus") AvailableStatus status);
 
+    @Query("SELECT s FROM Students s " +
+            "WHERE s.aClass.id = :classId " +
+            "AND s.user.fullName LIKE %:fullName% " +
+            "AND s.availableStatus = :availableStatus")
+    List<Students> findStudentByClassIdAndFullName(
+            @Param("classId") Long classId,
+            @Param("fullName") String name,
+            @Param("availableStatus") AvailableStatus status);
+
     List<Students> findByAvailableStatus(AvailableStatus status);
 
     @Query("SELECT s FROM Students s WHERE s.id = :id AND s.availableStatus = :availableStatus")

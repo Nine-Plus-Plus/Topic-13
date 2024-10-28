@@ -60,8 +60,11 @@ public class StudentsController {
     }
 
     @GetMapping("/admin/get-students-by-semester/{semesterId}")
-    public ResponseEntity<Response> getStudentsBySemester(@PathVariable Long semesterId) {
-        Response response = studentsService.getStudentBySemesterId(semesterId);
+    public ResponseEntity<Response> getStudentsBySemester(
+            @PathVariable Long semesterId,
+            @RequestParam(required = false) String name
+    ) {
+        Response response = studentsService.getStudentBySemesterId(semesterId, name);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }

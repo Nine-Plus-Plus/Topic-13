@@ -32,7 +32,8 @@ public interface MentorScheduleRepository extends JpaRepository<MentorSchedule, 
     @Query("SELECT m FROM MentorSchedule m " +
             "WHERE m.mentor.id = :mentorId " +
             "AND m.availableStatus = :availableStatus " +
-            "AND m.status = :status")
+            "AND m.status = :status " +
+            "ORDER BY m.availableFrom ASC")
     List<MentorSchedule> findByMentorIdAndAvailableStatusAndStatus(
             @Param("mentorId") Long mentorId,
             @Param("availableStatus") AvailableStatus availableStatus,

@@ -54,10 +54,15 @@ public class SkillsService {
     }
 
     // Phương thức lấy tất cả skills
-    public Response getAllSkills() {
+    public Response getAllSkills(String name) {
         Response response = new Response();
         try {
-            List<Skills> skillsList = skillsRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
+            List<Skills> skillsList;
+            if(name == null ||name.isEmpty()){
+                skillsList = skillsRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
+            }else{
+                skillsList = skillsRepository.findByskillNameAndAvailableStatus(name, AvailableStatus.ACTIVE);
+            }
             List<SkillsDTO> skillsDTOList = new ArrayList<>();
 
             skillsDTOList = skillsList

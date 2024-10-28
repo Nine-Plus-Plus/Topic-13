@@ -26,8 +26,8 @@ public class MentorsController {
 
     // Lấy tất cả mentors
     @GetMapping("/admin/get-all-mentors")
-    public ResponseEntity<Response> getAllMentors() {
-        Response response = mentorsService.getAllMentors();
+    public ResponseEntity<Response> getAllMentors(@RequestParam(required = false) String name) {
+        Response response = mentorsService.getAllMentors(name);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 

@@ -101,6 +101,7 @@ public class MeetingService {
             meeting.setDateCreated(LocalDateTime.now());
             meeting.setLinkURL(createGoogleMeetEvent(bookingId));
             meeting.setStatus(MeetingStatus.SCHEDULED);
+            meeting.setReviews(new ArrayList<>());
             
             meetingRepository.save(meeting);
             

@@ -30,9 +30,9 @@ public class ReviewsService {
         Response response = new Response();
         try {
             // Fetch the full UsersDTO objects based on the provided IDs
-            Users user = usersRepository.findById(createRequest.getUser_id().getId())
+            Users user = usersRepository.findById(createRequest.getUser().getId())
                     .orElseThrow(() -> new OurException("User not found"));
-            Users userReceive = usersRepository.findById(createRequest.getUser_receive_id().getId())
+            Users userReceive = usersRepository.findById(createRequest.getUserReceive().getId())
                     .orElseThrow(() -> new OurException("User Receive not found"));
 
             Reviews review = mapToEntity(createRequest);
@@ -74,12 +74,12 @@ public class ReviewsService {
 
         if (review.getUser() != null) {
             UsersDTO userDTO = Converter.convertUserToUserDTO(review.getUser());
-            reviewsDTO.setUser_id(userDTO);
+            reviewsDTO.setUser(userDTO);
         }
 
         if (review.getUserReceive() != null) {
             UsersDTO userReceiveDTO = Converter.convertUserToUserDTO(review.getUserReceive());
-            reviewsDTO.setUser_receive_id(userReceiveDTO);
+            reviewsDTO.setUserReceive(userReceiveDTO);
         }
 
         return reviewsDTO;
@@ -92,12 +92,17 @@ public class ReviewsService {
         dto.setRating(review.getRating());
         dto.setDateCreated(review.getDateCreated());
         dto.setAvailableStatus(review.getAvailableStatus());
-        UsersDTO userDTO = new UsersDTO();
-        userDTO.setId(review.getUser().getId());
-        dto.setUser_id(userDTO);
-        UsersDTO userReceiveDTO = new UsersDTO();
-        userReceiveDTO.setId(review.getUserReceive().getId());
-        dto.setUser_receive_id(userReceiveDTO);
+    
+        if (review.getUser() != null) {
+            UsersDTO userDTO = Converter.convertUserToUserDTO(review.getUser());
+            dto.setUser(userDTO);
+        }
+    
+        if (review.getUserReceive() != null) {
+            UsersDTO userReceiveDTO = Converter.convertUserToUserDTO(review.getUserReceive());
+            dto.setUserReceive(userReceiveDTO);
+        }
+    
         return dto;
     }
 
@@ -180,7 +185,7 @@ public class ReviewsService {
             review.setAvailableStatus(updateRequest.getAvailableStatus());
             review.setDateCreated(updateRequest.getDateCreated());
             Users userReceive = new Users();
-            userReceive.setId(updateRequest.getUser_receive_id().getId());
+            userReceive.setId(updateRequest.getUserReceive().getId());
             review.setUserReceive(userReceive);
             reviewsRepository.save(review);
             response.setStatusCode(200);

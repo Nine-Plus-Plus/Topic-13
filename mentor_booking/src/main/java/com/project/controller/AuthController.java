@@ -24,11 +24,19 @@ public class AuthController {
     
     @PostMapping("/change-password")
     public ResponseEntity<Response> changePassword(@RequestBody Response changeRequest){
-        Response response = authService.changePassword(
-                changeRequest.getEmail(), 
-                changeRequest.getPassword(), 
-                changeRequest.getNewPassword());
+        Response response = authService.changePassword(changeRequest);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
-    
+
+    @PostMapping("/email-existed")
+    public ResponseEntity<Response> isEmailExisted(@RequestBody Response responseEmail) {
+        Response response = authService.findByGmailChangePassword(responseEmail);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @PostMapping("/otp-existed")
+    public ResponseEntity<Response> isCorrectOTP(@RequestBody Response responseEmail) {
+        Response response = authService.findByOTPChangePassword(responseEmail);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
 }

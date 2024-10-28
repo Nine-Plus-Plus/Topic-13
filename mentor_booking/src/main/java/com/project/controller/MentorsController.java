@@ -38,7 +38,7 @@ public class MentorsController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PutMapping(value = "/admin/update-mentor/{id}", consumes = {"multipart/form-data"})
+    @PutMapping(value = "/user/update-mentor/{id}", consumes = {"multipart/form-data"})
     public ResponseEntity<Response> updateMentor(
             @PathVariable Long id,
             @RequestPart("mentor") CreateMentorRequest updateMentor,
@@ -56,4 +56,17 @@ public class MentorsController {
         Response response = mentorsService.findMentorWithNameAndSkillsAndAvaibility(name.trim(), skillIds, availableFrom, availableTo);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
+
+    @PostMapping("/admin/import-mentor")
+    public Response importStudents(@RequestParam("file") MultipartFile file) {
+        return mentorsService.importMentorFromExcel(file);
+    }
+
+    // Lấy top 3 mentors
+    @GetMapping("/user/get-top-mentors")
+    public ResponseEntity<Response> getTopMentors() {
+        Response response = mentorsService.getTopMentors();
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
 }

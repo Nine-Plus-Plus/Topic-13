@@ -2,13 +2,9 @@ package com.project.controller;
 
 import com.project.dto.CreateStudentRequest;
 import com.project.dto.Response;
-import com.project.dto.StudentsDTO;
-import com.project.model.Users;
 import com.project.service.StudentsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -43,12 +39,29 @@ public class StudentsController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PutMapping(value = "/admin/update-student/{id}", consumes = { "multipart/form-data" })
+    @PutMapping(value = "/user/update-student/{id}", consumes = { "multipart/form-data" })
     public ResponseEntity<Response> updateStudent(
             @PathVariable Long id,
             @RequestPart("student") CreateStudentRequest updateStudent,
             @RequestPart(value = "avatarFile", required = false) MultipartFile avatarFile) {
         Response response = studentsService.updateStudent(id, updateStudent, avatarFile);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+    
+    @GetMapping("/user/get-students-not-in-group/{classId}")
+    public ResponseEntity<Response> getStudentsNotInGroup(@PathVariable Long classId) {
+        Response response = studentsService.findStudentsNotInGroup(classId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @PostMapping("/admin/import-student")
+    public Response importStudents(@RequestParam("file") MultipartFile file) {
+        return studentsService.importStudentsFromExcel(file);
+    }
+
+    @GetMapping("/admin/get-students-by-semester/{semesterId}")
+    public ResponseEntity<Response> getStudentsBySemester(@PathVariable Long semesterId) {
+        Response response = studentsService.getStudentBySemesterId(semesterId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }

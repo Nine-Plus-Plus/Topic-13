@@ -80,7 +80,7 @@ public class Users implements UserDetails{
     @Column(name = "date_created")
     private LocalDateTime dateCreated;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Notifications> notifications;
     
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -95,6 +95,8 @@ public class Users implements UserDetails{
     @Enumerated(EnumType.STRING)
     @Column(name = "available_status")
     private AvailableStatus availableStatus;
+
+    private String otpCode;
     
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

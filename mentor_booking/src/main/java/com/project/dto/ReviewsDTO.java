@@ -2,7 +2,7 @@
 package com.project.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.project.enums.AvailableStatus;
 import lombok.Data;
@@ -13,7 +13,9 @@ public class ReviewsDTO {
     private Long id;
     private String comment;
     private int rating;
-    private LocalDate dateCreated;
-    private UsersDTO user;
+    private LocalDateTime dateCreated;
+    private UsersDTO user_id; // Updated field
+    private UsersDTO user_receive_id; // Updated field
     private AvailableStatus availableStatus;
+    private MeetingDTO meeting;
 }

@@ -32,6 +32,10 @@ public class Converter {
             mentor.setStar(convertClass.getMentor().getStar());
             mentor.setTotalTimeRemain(convertClass.getMentor().getTotalTimeRemain());
             mentor.setAvailableStatus(convertClass.getMentor().getAvailableStatus());
+            mentor.setSkills(convertClass.getMentor().getSkills());
+            if(convertClass.getMentor().getUser() != null){
+                mentor.setUser(convertClass.getMentor().getUser());
+            }
             classDTO.setMentor(convertMentorToMentorDTO(mentor));
         }
 
@@ -44,6 +48,8 @@ public class Converter {
         semesterDTO.setSemesterName(convertSemester.getSemesterName());
         semesterDTO.setDateCreated(convertSemester.getDateCreated());
         semesterDTO.setAvailableStatus(convertSemester.getAvailableStatus());
+        semesterDTO.setDateStart(convertSemester.getDateStart());
+        semesterDTO.setDateEnd(convertSemester.getDateEnd());
         return semesterDTO;
     }
 
@@ -147,6 +153,10 @@ public class Converter {
 
         topicDTO.setSemesterDTO(convertSemesterToSemesterDTO(convertTopic.getSemester()));
         topicDTO.setMentorsDTO(convertMentorToMentorDTO(convertTopic.getMentor()));
+        if(convertTopic.getSubMentors()!=null){
+            topicDTO.setSubMentorDTO(convertMentorToMentorDTO(convertTopic.getSubMentors()));
+        }
+
 
         topicDTO.setAvailableStatus(convertTopic.getAvailableStatus());
         return topicDTO;
@@ -156,13 +166,13 @@ public class Converter {
         GroupDTO groupDTO = new GroupDTO();
         StudentsDTO studentsDTO = new StudentsDTO();
         List<StudentsDTO> studentsListDTO = new ArrayList<>();
-        ProjectsDTO projectsDTO = new ProjectsDTO();
         groupDTO.setId(convertGroup.getId());
         groupDTO.setGroupName(convertGroup.getGroupName());
         groupDTO.setTotalPoint(convertGroup.getTotalPoint());
         groupDTO.setDateCreated(convertGroup.getDateCreated());
 
         for (Students student : convertGroup.getStudents()) {
+            studentsDTO = new StudentsDTO();
             studentsDTO.setId(student.getId());
             studentsDTO.setStudentCode(student.getStudentCode());
             studentsDTO.setExpertise(student.getExpertise());
@@ -170,6 +180,9 @@ public class Converter {
             studentsDTO.setDateCreated(student.getDateCreated());
             studentsDTO.setPoint(student.getPoint());
             studentsDTO.setGroupRole(student.getGroupRole());
+            if (student.getUser() != null) {
+                studentsDTO.setUser(convertUserToUserDTO(student.getUser()));
+            }
             studentsListDTO.add(studentsDTO);
         }
 
@@ -217,7 +230,7 @@ public class Converter {
         projectsDTO.setProjectName(convertProject.getProjectName());
         projectsDTO.setPercentage(convertProject.getPercentage());
         projectsDTO.setAvailableStatus(convertProject.getAvailableStatus());
-        if (convertProject.getProjectTasks() != null){
+        if (convertProject.getProjectTasks() != null) {
             List<ProjectTasksDTO> projectTasksDTOList = new ArrayList<>();
             ProjectTasksDTO tasksDTO = new ProjectTasksDTO();
             for (ProjectTasks task : convertProject.getProjectTasks()) {
@@ -233,19 +246,111 @@ public class Converter {
         projectsDTO.setTopic(convertTopicToTopicDTO(convertProject.getTopic()));
         return projectsDTO;
     }
-    
-    public static BookingDTO convertBookingToBookingDTO(Booking convertBooking){
+
+    public static BookingDTO convertBookingToBookingDTO(Booking convertBooking) {
         BookingDTO bookingDTO = new BookingDTO();
-        
+
+        bookingDTO.setId(convertBooking.getId());
         bookingDTO.setDateCreated(convertBooking.getDateCreated());
         bookingDTO.setDateUpdated(convertBooking.getDateUpdated());
         bookingDTO.setPointPay(convertBooking.getPointPay());
         bookingDTO.setGroup(convertGroupToGroupDTO(convertBooking.getGroup()));
         bookingDTO.setStatus(convertBooking.getStatus());
         bookingDTO.setMentorSchedule(convertMentorScheduleToMentorScheduleDTO(convertBooking.getMentorSchedule()));
+        bookingDTO.setMentor(convertMentorToMentorDTO(convertBooking.getMentor()));
         bookingDTO.setAvailableStatus(convertBooking.getAvailableStatus());
-        
+
         return bookingDTO;
     }
-}
 
+    public static NotificationsDTO convertNotificationToNotiDTO(Notifications notifications){
+        NotificationsDTO notificationsDTO = new NotificationsDTO();
+        notificationsDTO.setId(notifications.getId());
+        notificationsDTO.setMessage(notifications.getMessage());  // Sửa lại chỗ này
+        notificationsDTO.setDateTimeSent(notifications.getDateTimeSent());  // Sửa lại chỗ này
+        notificationsDTO.setType(notifications.getType());
+        notificationsDTO.setAction(notifications.getAction());
+
+        // Kiểm tra và chuyển đổi sender
+        if (notifications.getSender() != null) {
+            UsersDTO senderDTO = convertUserToUserDTO(notifications.getSender());
+
+            // Kiểm tra xem sender có phải là Student hoặc Mentor không
+            if (notifications.getSender().getStudent() != null) {
+                StudentsDTO studentDTO = convertStudentToStudentDTO(notifications.getSender().getStudent());
+                senderDTO.setStudent(studentDTO);
+            } else if (notifications.getSender().getMentor() != null) {
+                MentorsDTO mentorDTO = convertMentorToMentorDTO(notifications.getSender().getMentor());
+                senderDTO.setMentor(mentorDTO);
+            }
+
+            notificationsDTO.setSender(senderDTO);
+        }
+
+        // Kiểm tra và chuyển đổi receiver
+        if (notifications.getReceiver() != null) {
+            UsersDTO receiverDTO = convertUserToUserDTO(notifications.getReceiver());
+
+            // Kiểm tra xem receiver có phải là Student hoặc Mentor không
+            if (notifications.getReceiver().getStudent() != null) {
+                StudentsDTO studentDTO = convertStudentToStudentDTO(notifications.getReceiver().getStudent());
+                receiverDTO.setStudent(studentDTO);
+            } else if (notifications.getReceiver().getMentor() != null) {
+                MentorsDTO mentorDTO = convertMentorToMentorDTO(notifications.getReceiver().getMentor());
+                receiverDTO.setMentor(mentorDTO);
+            }
+
+            notificationsDTO.setReciver(receiverDTO);
+        }
+
+        if(notifications.getBooking() != null){
+            notificationsDTO.setBookingDTO(convertBookingToBookingDTO(notifications.getBooking()));
+        }
+
+        if(notifications.getGroup() != null){
+            notificationsDTO.setGroupDTO(convertGroupToGroupDTO(notifications.getGroup()));
+        }
+        
+        return notificationsDTO;
+    }
+    
+    public static MeetingDTO convertMeetingToMeetingDTO(Meeting convertMeeting){
+        MeetingDTO meetingDTO = new MeetingDTO();
+        
+        meetingDTO.setId(convertMeeting.getId());
+        meetingDTO.setDateCreated(convertMeeting.getDateCreated());
+        meetingDTO.setLinkURL(convertMeeting.getLinkURL());
+        meetingDTO.setStatus(convertMeeting.getStatus());
+        meetingDTO.setAvailableStatus(convertMeeting.getAvailableStatus());
+        meetingDTO.setBooking(convertBookingToBookingDTO(convertMeeting.getBooking()));
+        if (!convertMeeting.getReviews().isEmpty()){
+            List<ReviewsDTO> reviewListDTO = convertMeeting.getReviews().stream()
+                        .map(Converter::convertReviewToReviewDTO)
+                        .collect(Collectors.toList());
+            meetingDTO.setReviews(reviewListDTO);
+        }
+        
+        return meetingDTO;
+    }
+    
+    public static ReviewsDTO convertReviewToReviewDTO(Reviews review) {
+        ReviewsDTO reviewsDTO = new ReviewsDTO();
+        reviewsDTO.setId(review.getId());
+        reviewsDTO.setComment(review.getComment());
+        reviewsDTO.setRating(review.getRating());
+        reviewsDTO.setDateCreated(review.getDateCreated());
+        reviewsDTO.setAvailableStatus(review.getAvailableStatus());
+
+        if (review.getUser() != null) {
+            UsersDTO userDTO = Converter.convertUserToUserDTO(review.getUser());
+            reviewsDTO.setUser_id(userDTO);
+        }
+
+        if (review.getUserReceive() != null) {
+            UsersDTO userReceiveDTO = Converter.convertUserToUserDTO(review.getUserReceive());
+            reviewsDTO.setUser_receive_id(userReceiveDTO);
+        }
+
+        return reviewsDTO;
+    }
+}

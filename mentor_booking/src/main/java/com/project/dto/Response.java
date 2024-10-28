@@ -54,4 +54,5 @@ public class Response {
     private UsersDTO usersDTO;
     private List<UsersDTO> usersDTOList;
     private AvailableStatus availableStatus;
+    private String otpCode;
 }

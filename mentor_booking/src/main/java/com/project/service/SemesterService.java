@@ -31,9 +31,17 @@ public class SemesterService {
             if (semesterRepository.findBySemesterName(createRequest.getSemesterName(), AvailableStatus.ACTIVE).isPresent()) {
                 throw new OurException("Semester has already existed");
             }
+            List<Semester> overlappingSemesters = semesterRepository.findOverlappingSemesters(
+                    createRequest.getDateStart(), createRequest.getDateEnd(), AvailableStatus.ACTIVE);
+
+            if (!overlappingSemesters.isEmpty()) {
+                throw new OurException("Semester date range conflicts with an existing semester.");
+            }
             Semester semester = new Semester();
             semester.setDateCreated(LocalDateTime.now());
-            semester.setSemesterName(createRequest.getSemesterName());
+            semester.setSemesterName(createRequest.getSemesterName().trim());
+            semester.setDateStart(createRequest.getDateStart());
+            semester.setDateEnd(createRequest.getDateEnd());
             semester.setAvailableStatus(AvailableStatus.ACTIVE);
             semesterRepository.save(semester);
             if (semester.getId() > 0) {
@@ -57,7 +65,7 @@ public class SemesterService {
     public Response getAllSemesters(){
         Response response = new Response();
         try {
-            List<Semester> semesterList = semesterRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
+            List<Semester> semesterList = semesterRepository.findByAvailableStatusOrderByDateCreatedDesc(AvailableStatus.ACTIVE);
             List<SemesterDTO> semesterListDTO = new ArrayList<>();
             if (!semesterList.isEmpty()) {
                 semesterListDTO = semesterList
@@ -109,15 +117,20 @@ public class SemesterService {
     }
 
     // phương thức cập nhập mới Semester
-    public Response updateSemester(Long id, Semester newSemester){
+    public Response updateSemester(Long id, SemesterDTO newSemester){
         Response response = new Response();
         try {
             Semester presentSemester = semesterRepository.findById(id)
                     .orElseThrow(() -> new OurException("Cannot find semester with id: "+id));
-            if (semesterRepository.findBySemesterName(newSemester.getSemesterName(), AvailableStatus.ACTIVE).isPresent()) {
-                throw new OurException("Semester has already existed");
+            List<Semester> overlappingSemesters = semesterRepository.findOverlappingSemesters(
+                    newSemester.getDateStart(), newSemester.getDateEnd(), AvailableStatus.ACTIVE);
+
+            if (!overlappingSemesters.isEmpty()) {
+                throw new OurException("Semester date range conflicts with an existing semester.");
             }
-            presentSemester.setSemesterName(newSemester.getSemesterName());
+            presentSemester.setSemesterName(newSemester.getSemesterName().trim());
+            presentSemester.setDateStart(newSemester.getDateStart());
+            presentSemester.setDateEnd(newSemester.getDateEnd());
             semesterRepository.save(presentSemester);
 
             SemesterDTO dto = Converter.convertSemesterToSemesterDTO(presentSemester);

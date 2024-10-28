@@ -23,4 +23,5 @@ public class BookingDTO {
     private MentorScheduleDTO mentorSchedule;
     private List<PointHistoryDTO> pointHistories;
     private AvailableStatus availableStatus;
+    private List<NotificationsDTO> notificationsDTOList;
 }

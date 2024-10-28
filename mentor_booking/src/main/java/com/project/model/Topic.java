@@ -52,12 +52,16 @@ public class Topic {
     @Column(name = "date_updated")
     private LocalDateTime dateUpdated;
 
-    @OneToOne(mappedBy = "topic", cascade = CascadeType.ALL)
-    private Projects project;
+    @OneToMany(mappedBy = "topic", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Projects> project;
 
     @ManyToOne
     @JoinColumn(name = "mentor_id")
     private Mentors mentor;
+
+    @ManyToOne
+    @JoinColumn(name = "sub_mentor_id")
+    private Mentors subMentors;
 
     @ManyToOne
     @JoinColumn(name = "semester_id")

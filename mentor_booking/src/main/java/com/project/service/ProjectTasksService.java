@@ -122,6 +122,10 @@ public class ProjectTasksService {
             task.setDateUpdated(LocalDateTime.now());
             projectTasksRepository.save(task);
 
+            // Recalculate the project percentage
+            Projects project = task.getProjects();
+            updateProjectPercentage(project);
+
             ProjectTasksDTO dto = mapToDTO(task);
             response.setProjectTasksDTOList(Arrays.asList(dto));
             response.setStatusCode(200);
@@ -150,9 +154,44 @@ public class ProjectTasksService {
             response.setMessage(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
-            response.setMessage("Error occurred during task deletion: " + e.getMessage());
+            response.setMessage("Error occurred during task deletion: " + e.getMessage()); 
         }
         return response;
+    }
+
+    public Response getProjectTasksByGroupId(Long groupId) {
+        Response response = new Response();
+        try {
+            List<Projects> projects = projectsRepository.findByGroupIdAndAvailableStatus(groupId, AvailableStatus.ACTIVE);
+            if (projects.isEmpty()) {
+                throw new OurException("No projects found for the given group ID");
+            }
+
+            List<ProjectTasks> tasks = projects.stream()
+                    .flatMap(project -> projectTasksRepository.findByProjectsAndAvailableStatus(project, AvailableStatus.ACTIVE).stream())
+                    .collect(Collectors.toList());
+
+            List<ProjectTasksDTO> tasksDTO = tasks.stream().map(this::mapToDTO).collect(Collectors.toList());
+            response.setProjectTasksDTOList(tasksDTO);
+            response.setStatusCode(200);
+            response.setMessage("Project tasks retrieved successfully");
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred during retrieving project tasks: " + e.getMessage());
+        }
+        return response;
+    }
+
+    private void updateProjectPercentage(Projects project) {
+        List<ProjectTasks> tasks = projectTasksRepository.findByProjectsAndAvailableStatus(project, AvailableStatus.ACTIVE);
+        long totalTasks = tasks.size();
+        long completedTasks = tasks.stream().filter(task -> task.getStatus() == ProjectTaskStatus.DONE).count();
+        int percentage = (int) ((completedTasks * 100) / totalTasks);
+        project.setPercentage(percentage);
+        projectsRepository.save(project);
     }
 
     private ProjectTasksDTO mapToDTO(ProjectTasks task) {
@@ -167,7 +206,7 @@ public class ProjectTasksService {
         dto.setProjects(mapToProjectsDTO(task.getProjects()));
         return dto;
     }
-
+    
     private ProjectsDTO mapToProjectsDTO(Projects project) {
         ProjectsDTO dto = new ProjectsDTO();
         dto.setId(project.getId());

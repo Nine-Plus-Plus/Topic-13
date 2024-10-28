@@ -14,7 +14,7 @@ public class MentorsDTO {
     private Long id;
     private float star;
     private String mentorCode;
-    private int totalTimeRemain;
+    private float totalTimeRemain;
     private LocalDate dateCreated;
     private LocalDate dateUpdated;
     private UsersDTO user;
@@ -23,6 +23,7 @@ public class MentorsDTO {
     private List<MentorScheduleDTO> mentorSchedules;
     private ClassDTO assignedClass;
     private List<TopicDTO> topicDTOS;
+    private List<TopicDTO> topicDTOSForSubMentor;
     private AvailableStatus availableStatus;
 
     private List<MentorScheduleDTO> mentorScheduleDTOList;

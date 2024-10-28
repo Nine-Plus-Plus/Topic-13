@@ -15,7 +15,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface StudentsRepository extends JpaRepository<Students, Long>{
-    Optional<Students> findByStudentCode(String studentCode);
+    Optional<Students> findByStudentCodeAndAvailableStatus(String studentCode, AvailableStatus availableStatus);
     Students findByUser_Id(Long userId);
 
     @Query("SELECT s FROM Students s WHERE s.user.fullName LIKE %:name% AND s.expertise LIKE %:expertise% AND s.availableStatus = :availableStatus AND s.aClass.id = :classId")
@@ -46,4 +46,7 @@ public interface StudentsRepository extends JpaRepository<Students, Long>{
 
     @Query("SELECT s FROM Students s WHERE s.id = :id AND s.availableStatus = :availableStatus")
     Students findByIdAndAvailableStatus(@Param("id") Long id, @Param("availableStatus") AvailableStatus status);
+    
+    @Query("SELECT s FROM Students s WHERE s.aClass.id = :classId AND s.availableStatus = :availableStatus AND s.group IS NULL")
+    List<Students> findStudentsThatAreNotInGroup(@Param("classId") Long classId, @Param("availableStatus") AvailableStatus availableStatus);
 }

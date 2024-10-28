@@ -35,8 +35,8 @@ public class Projects {
     @OneToMany(mappedBy = "projects", cascade = CascadeType.ALL, fetch = FetchType.LAZY)  // Thiết lập mối quan hệ OneToMany
     private List<ProjectTasks> projectTasks;
     
-    @OneToOne
-    @JoinColumn(name = "topic_id", unique = true) // Khóa ngoại trỏ tới bảng Topic
+    @ManyToOne
+    @JoinColumn(name = "topic_id")
     private Topic topic;
     
     @OneToOne

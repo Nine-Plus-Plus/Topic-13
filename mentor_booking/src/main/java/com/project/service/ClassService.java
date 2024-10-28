@@ -4,14 +4,11 @@ import com.project.dto.ClassDTO;
 import com.project.dto.MentorsDTO;
 import com.project.dto.Response;
 import com.project.enums.AvailableStatus;
-import com.project.model.Class;
+import com.project.model.*;
 import com.project.exception.OurException;
-import com.project.model.Mentors;
-import com.project.model.Semester;
-import com.project.repository.ClassRepository;
-import com.project.repository.MentorsRepository;
-import com.project.repository.SemesterRepository;
-import com.project.repository.StudentsRepository;
+import com.project.model.Class;
+import com.project.repository.*;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,12 +37,15 @@ public class ClassService {
     @Autowired
     private StudentsRepository studentsRepository;
 
+    @Autowired
+    private GroupRepository groupRepository;
+
     public Response createClass(ClassDTO inputRequest) {
         Response response = new Response();
         try {
 
             // Kiểm tra nếu lớp đã tồn tại trong kỳ học
-            if (classRepository.existsByClassNameAndSemesterId(inputRequest.getClassName(), inputRequest.getSemester().getId())) {
+            if (classRepository.existsByClassNameAndSemesterIdAndAvailableStatus(inputRequest.getClassName(), inputRequest.getSemester().getId(), AvailableStatus.ACTIVE)) {
                 throw new OurException("Class already exists in this semester");
             }
             Semester semester = semesterRepository.findByIdAndAvailableStatus(inputRequest.getSemester().getId(), AvailableStatus.ACTIVE);
@@ -63,7 +63,7 @@ public class ClassService {
             }
 
             Class newClass = new Class();
-            newClass.setClassName(inputRequest.getClassName());
+            newClass.setClassName(inputRequest.getClassName().trim());
             newClass.setDateCreated(LocalDateTime.now());
             newClass.setSemester(semester);
             newClass.setMentor(mentor);
@@ -177,7 +177,24 @@ public class ClassService {
             Class deletedClass = classRepository.findById(id)
                     .orElseThrow(() -> new OurException("Cannot find class with id: " + id));
             deletedClass.setAvailableStatus(AvailableStatus.DELETED);
-            deletedClass.setMentor(null);
+            // Unset the mentor (and update mentor status if necessary)
+            Mentors mentor = deletedClass.getMentor();
+            if (mentor != null) {
+                mentor.setAvailableStatus(AvailableStatus.DELETED);
+                mentorsRepository.save(mentor);
+            }
+
+            // Update status of related students to INACTIVE or DELETED
+            for (Students student : deletedClass.getStudents()) {
+                student.setAvailableStatus(AvailableStatus.DELETED);
+                studentsRepository.save(student);
+            }
+
+            // Update status of related groups to DELETED
+            for (Group group : deletedClass.getGroups()) {
+                group.setAvailableStatus(AvailableStatus.DELETED);
+                groupRepository.save(group);
+            }
             classRepository.save(deletedClass);
             response.setStatusCode(200);
             response.setMessage("Class deleted successfully");
@@ -217,7 +234,7 @@ public class ClassService {
             }
 
             // Cập nhật các thông tin khác của class ngoại trừ students
-            if(newClass.getClassName() != null) presentClass.setClassName(newClass.getClassName());
+            if(newClass.getClassName() != null) presentClass.setClassName(newClass.getClassName().trim());
             if(newClass.getSemester() != null) presentClass.setSemester(semester);
             if(newClass.getMentor() != null) presentClass.setMentor(mentor);
 

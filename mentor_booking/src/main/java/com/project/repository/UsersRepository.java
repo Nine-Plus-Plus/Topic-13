@@ -20,13 +20,20 @@ public interface UsersRepository extends JpaRepository<Users, Long>{
 
     boolean existsByEmail(String email);
 
-    Optional<Users> findByEmail(String email);
+    Optional<Users> findByEmailAndAvailableStatus(String email, AvailableStatus availableStatus);
 
-    Optional<Users> findByUsername(String username);
+    Optional<Users> findByOtpCodeAndEmail(String otp, String email);
+
+    Optional<Users> findByUsernameAndAvailableStatus(String username, AvailableStatus availableStatus);
+
+    @Query("SELECT u FROM Users u " +
+            "WHERE u.username = :username " +
+            "AND u.availableStatus = :availableStatus")
+    Optional<Users> findByUsernameLogin(String username, AvailableStatus availableStatus);
 
     Optional<Users> findByFullName(String fullName);
 
-    Optional<Users> findByPhone(String phone);
+    Optional<Users> findByPhoneAndAvailableStatus(String phone, AvailableStatus availableStatus);
 
     // Lấy danh sách User có role là 'STUDENT'
     @Query("SELECT u FROM Users u WHERE u.role.roleName = 'STUDENT'")

@@ -21,7 +21,7 @@ public class Mentors {
     @Column(name = "mentor_code")
     private String mentorCode;
     @Column(name = "total_time_remain")
-    private int totalTimeRemain;
+    private float totalTimeRemain;
     @Column(name = "date_created")
     private LocalDate dateCreated;
     @Column(name = "date_updated")
@@ -50,6 +50,9 @@ public class Mentors {
 
     @OneToMany(mappedBy = "mentor", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Topic> topics;
+
+    @OneToMany(mappedBy = "subMentors", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Topic> topicsWithSubMentors;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "available_status")

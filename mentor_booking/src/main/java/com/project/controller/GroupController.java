@@ -59,9 +59,9 @@ public class GroupController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
     
-    @PostMapping("/student/add-new-group-member/{id}")
+    @PostMapping("/user/add-new-group-member/{id}")
     public ResponseEntity<Response> addNewGroupMember(@PathVariable Long id, @RequestBody StudentsDTO newMember){
-        Response response = groupService.addNewMember(id, newMember);
+        Response response = groupService.addNewGroupMember(id, newMember);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
     
@@ -74,6 +74,12 @@ public class GroupController {
     @GetMapping("/user/get-groups-in-class/{classId}")
     public ResponseEntity<Response> getGroupsByClassId(@PathVariable Long classId){
         Response response = groupService.getGroupsInClass(classId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @GetMapping("/admin/get-groups-in-semester/{semesterId}")
+    public ResponseEntity<Response> getGroupsBySemesterId(@PathVariable Long semesterId){
+        Response response = groupService.getGroupBySemesterId(semesterId);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }

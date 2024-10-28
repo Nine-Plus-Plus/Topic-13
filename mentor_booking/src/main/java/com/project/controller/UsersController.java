@@ -6,6 +6,7 @@ import com.project.dto.CreateStudentRequest;
 import com.project.dto.Response;
 import com.project.dto.UsersDTO;
 import com.project.model.Users;
+import com.project.service.AuthService;
 import com.project.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +20,11 @@ import org.springframework.web.multipart.MultipartFile;
 public class UsersController {
     @Autowired
     private UsersService userService;
+
+    @Autowired
+    private AuthService authService;
     
-    @PostMapping("/admin/create-user")
+    @PostMapping("/auth/create-user")
     public ResponseEntity<Response> createUser(@RequestBody UsersDTO createRes){
         Response response = userService.createUser(createRes);
         return ResponseEntity.status(response.getStatusCode()).body(response);
@@ -80,6 +84,12 @@ public class UsersController {
     @GetMapping("/user/view-user-detail-by-id/{id}")
     public ResponseEntity<Response> getUserDetail(@PathVariable Long id){
         Response response = userService.viewDetailUser(id);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+    @PostMapping("/user/change-password-user")
+    public ResponseEntity<Response> changePasswordInUser(@RequestBody Response changeRequest){
+        Response response = authService.changePasswordInUser(changeRequest);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }

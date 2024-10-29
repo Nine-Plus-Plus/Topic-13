@@ -37,6 +37,7 @@ public class ReviewsService {
     @Autowired
     private MentorsRepository mentorsRepository;
 
+    @Autowired
     private MeetingRepository meetingRepository;
 
     public Response createReview(ReviewsDTO createRequest) {

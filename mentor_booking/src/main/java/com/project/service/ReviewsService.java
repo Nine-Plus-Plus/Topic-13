@@ -67,14 +67,15 @@ public class ReviewsService {
         List<Reviews> reviews = reviewsRepository.findByUserReceiveId(mentorId,  Sort.by(Sort.Direction.DESC, "dateCreated"));
         double sumRatings = reviews.stream()
                                    .mapToInt(Reviews::getRating)
-                                   .sum() + 5; // Add 5 to the sum of ratings
-    
-        double averageRating = sumRatings / (reviews.size() + 1); // Include the initial 5 in the count
-    
+                                   .sum(); 
         Mentors mentor = mentorsRepository.findByUser_Id(mentorId);
         if (mentor == null) {
             throw new OurException("Mentor not found");
         }
+        double currentAverageRating = mentor.getStar();
+        double totalRatings = sumRatings + currentAverageRating;
+        double averageRating = totalRatings / (reviews.size() + 1);  //Rule of average for this project
+
         mentor.setStar((float) averageRating);
         mentorsRepository.save(mentor);
     }

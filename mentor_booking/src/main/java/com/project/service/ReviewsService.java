@@ -1,13 +1,17 @@
 package com.project.service;
 
+import com.project.dto.MeetingDTO;
 import com.project.dto.ReviewsDTO;
 import com.project.dto.UsersDTO;
 import com.project.dto.Response;
 import com.project.enums.AvailableStatus;
 import com.project.exception.OurException;
+
+import com.project.model.Meeting;
 import com.project.model.Mentors;
 import com.project.model.Reviews;
 import com.project.model.Users;
+import com.project.repository.MeetingRepository;
 import com.project.repository.MentorsRepository;
 import com.project.repository.ReviewsRepository;
 import com.project.repository.UsersRepository;
@@ -23,6 +27,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class ReviewsService {
+
     @Autowired
     private ReviewsRepository reviewsRepository;
 
@@ -31,6 +36,8 @@ public class ReviewsService {
 
     @Autowired
     private MentorsRepository mentorsRepository;
+
+    private MeetingRepository meetingRepository;
 
     public Response createReview(ReviewsDTO createRequest) {
         Response response = new Response();
@@ -41,10 +48,18 @@ public class ReviewsService {
             Users userReceive = usersRepository.findById(createRequest.getUserReceive().getId())
                     .orElseThrow(() -> new OurException("User Receive not found"));
 
+            if (createRequest.getMeeting() == null) {
+                throw new OurException("Cannot get meeting");
+            }
+            Meeting meeting = meetingRepository.findByIdAndAvailableStatus(createRequest.getMeeting().getId(), AvailableStatus.ACTIVE);
+            if (meeting == null) {
+                throw new OurException("Cannot find meeting by id: " + createRequest.getMeeting().getId());
+            }
             Reviews review = mapToEntity(createRequest);
             review.setUser(user);
             review.setUserReceive(userReceive);
             review.setDateCreated(LocalDateTime.now());
+            review.setMeeting(meeting);
             reviewsRepository.save(review);
 
             updateMentorStar(userReceive.getId());
@@ -96,7 +111,7 @@ public class ReviewsService {
         reviewsDTO.setRating(review.getRating());
         reviewsDTO.setDateCreated(review.getDateCreated());
         reviewsDTO.setAvailableStatus(review.getAvailableStatus());
-
+       
         if (review.getUser() != null) {
             UsersDTO userDTO = Converter.convertUserToUserDTO(review.getUser());
             reviewsDTO.setUser(userDTO);
@@ -105,6 +120,11 @@ public class ReviewsService {
         if (review.getUserReceive() != null) {
             UsersDTO userReceiveDTO = Converter.convertUserToUserDTO(review.getUserReceive());
             reviewsDTO.setUserReceive(userReceiveDTO);
+        }
+        
+        if (review.getMeeting() != null){
+            MeetingDTO meetingDTO = new MeetingDTO();
+            meetingDTO.setId(review.getMeeting().getId());
         }
 
         return reviewsDTO;

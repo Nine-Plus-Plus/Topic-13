@@ -9,6 +9,7 @@ import com.project.repository.PointHistoryRepository;
 import com.project.repository.GroupRepository;
 import com.project.repository.StudentsRepository;
 import com.project.repository.BookingRepository;
+import com.project.ultis.Converter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +31,7 @@ public class PointHistoryService {
     private BookingRepository bookingRepository;
 
     public Response getStudentPointHistory(Long studentId) {
-        List<PointHistory> pointHistories = pointHistoryRepository.findByStudentId(studentId);
+        List<PointHistory> pointHistories = pointHistoryRepository.findByStudentIdOrderByDateCreatedDesc(studentId);
         List<PointHistoryDTO> pointHistoryDTOs = pointHistories.stream()
             .map(this::convertToDTO)
             .collect(Collectors.toList());
@@ -83,9 +84,8 @@ public class PointHistoryService {
         dto.setDateCreated(pointHistory.getDateCreated());
         dto.setAvailableStatus(pointHistory.getAvailableStatus());
 
-        // Set booking and student IDs instead of full DTOs
         if (pointHistory.getBooking() != null) {
-            dto.setBookingId(pointHistory.getBooking().getId());
+            dto.setBooking(Converter.convertBookingToBookingDTO(pointHistory.getBooking()));
         }
         if (pointHistory.getStudent() != null) {
             dto.setStudentId(pointHistory.getStudent().getId());

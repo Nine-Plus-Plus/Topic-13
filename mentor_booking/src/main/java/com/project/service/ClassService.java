@@ -45,7 +45,7 @@ public class ClassService {
         try {
 
             // Kiểm tra nếu lớp đã tồn tại trong kỳ học
-            if (classRepository.existsByClassNameAndSemesterId(inputRequest.getClassName(), inputRequest.getSemester().getId())) {
+            if (classRepository.existsByClassNameAndSemesterIdAndAvailableStatus(inputRequest.getClassName(), inputRequest.getSemester().getId(), AvailableStatus.ACTIVE)) {
                 throw new OurException("Class already exists in this semester");
             }
             Semester semester = semesterRepository.findByIdAndAvailableStatus(inputRequest.getSemester().getId(), AvailableStatus.ACTIVE);
@@ -114,13 +114,18 @@ public class ClassService {
         return response;
     }
 
-    public Response getClassesSemesterId(Long semesterId) {
+    public Response getClassesSemesterId(Long semesterId, String name) {
         Response response = new Response();
         try {
             if(semesterId == null){
                 throw new OurException("Null semesterId");
             }
-            List<Class> classList = classRepository.findClassBySemesterId(semesterId, AvailableStatus.ACTIVE);
+            List<Class> classList;
+            if(name == null || name.isEmpty()){
+                classList = classRepository.findClassBySemesterId(semesterId, AvailableStatus.ACTIVE);
+            }else{
+                classList = classRepository.findClassByClassNameAndSemesterId(semesterId, name, AvailableStatus.ACTIVE);
+            }
             List<ClassDTO> classListDTO = new ArrayList<>();
 
             if (!classList.isEmpty()) {

@@ -51,6 +51,9 @@ public class Mentors {
     @OneToMany(mappedBy = "mentor", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Topic> topics;
 
+    @OneToMany(mappedBy = "subMentors", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Topic> topicsWithSubMentors;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "available_status")
     private AvailableStatus availableStatus;

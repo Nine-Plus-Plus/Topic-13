@@ -39,7 +39,7 @@ public class StudentsController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
-    @PutMapping(value = "/admin/update-student/{id}", consumes = { "multipart/form-data" })
+    @PutMapping(value = "/user/update-student/{id}", consumes = { "multipart/form-data" })
     public ResponseEntity<Response> updateStudent(
             @PathVariable Long id,
             @RequestPart("student") CreateStudentRequest updateStudent,
@@ -60,8 +60,11 @@ public class StudentsController {
     }
 
     @GetMapping("/admin/get-students-by-semester/{semesterId}")
-    public ResponseEntity<Response> getStudentsBySemester(@PathVariable Long semesterId) {
-        Response response = studentsService.getStudentBySemesterId(semesterId);
+    public ResponseEntity<Response> getStudentsBySemester(
+            @PathVariable Long semesterId,
+            @RequestParam(required = false) String name
+    ) {
+        Response response = studentsService.getStudentBySemesterId(semesterId, name);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 }

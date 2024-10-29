@@ -23,8 +23,11 @@ public class TopicDTO {
     private ProjectsDTO projectDTO;
     private SemesterDTO semesterDTO;
     private MentorsDTO mentorsDTO;
+    private MentorsDTO subMentorDTO;
     private AvailableStatus availableStatus;
 
     private String className;
     private String semesterName;
+    private String mentorName;
+    private String subMentorName;
 }

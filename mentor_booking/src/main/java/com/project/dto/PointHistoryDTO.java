@@ -15,7 +15,7 @@ public class PointHistoryDTO {
     private PointHistoryStatus status;
     private LocalDateTime dateUpdated;
     private LocalDateTime dateCreated;
-    private Long bookingId; // Store booking ID instead of full DTO
+    private BookingDTO booking; // Store booking ID instead of full DTO
     private AvailableStatus availableStatus;
     private Long studentId; // Store student ID instead of full DTO
 }

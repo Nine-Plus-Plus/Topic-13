@@ -11,6 +11,8 @@ import com.project.security.AwsS3Service;
 import com.project.ultis.Converter;
 import com.project.ultis.ExcelHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,11 +52,17 @@ public class MentorsService {
     private RoleRepository roleRepository;
 
     // Phương thức lấy tất cả mentors
-    public Response getAllMentors() {
+    public Response getAllMentors(String name) {
         Response response = new Response();
         List<MentorsDTO> mentorsDTOList = new ArrayList<>();
         try {
-            List<Mentors> mentorsList = mentorsRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
+            List<Mentors> mentorsList;
+            if(name == null || name.isEmpty()){
+                mentorsList = mentorsRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
+            }else{
+                mentorsList = mentorsRepository.findByName(name, AvailableStatus.ACTIVE);
+            }
+
             mentorsDTOList = mentorsList
                     .stream()
                     .map(Converter::convertMentorToMentorDTO)
@@ -128,10 +137,32 @@ public class MentorsService {
                 String avatarUrl = awsS3Service.saveImageToS3(avatarFile);
                 updateUser.setAvatar(avatarUrl);
                 System.out.println("Avatar URL: " + avatarUrl); // Kiểm tra URL
-            }else{
-                updateUser.setAvatar("https://mentor-booking-images.s3.amazonaws.com/images.jpeg");
+            }
+            // Kiểm tra nếu username đã thay đổi và đã tồn tại trong hệ thống
+            if (!updateRequest.getUsername().equals(updateUser.getUsername())){
+                if(usersRepository.findByUsernameAndAvailableStatus(updateRequest.getUsername(), AvailableStatus.ACTIVE).isPresent()){
+                    throw new OurException("Username already exists");
+                }
+            }
+            // Kiểm tra nếu email đã thay đổi và đã tồn tại trong hệ thống
+            if (!updateRequest.getEmail().equals(updateUser.getEmail())){
+                if(usersRepository.findByEmailAndAvailableStatus(updateRequest.getEmail(), AvailableStatus.ACTIVE).isPresent()){
+                    throw new OurException("Email already exists");
+                }
+            }
+            // Kiểm tra nếu số điện thoại đã thay đổi và đã tồn tại trong hệ thống
+            if (!updateRequest.getPhone().equals(updateUser.getPhone())){
+                if(usersRepository.findByPhoneAndAvailableStatus(updateRequest.getPhone(), AvailableStatus.ACTIVE).isPresent()){
+                    throw new OurException("Phone already exists");
+                }
             }
 
+            // Kiểm tra nếu mentorCode đã thay đổi và đã tồn tại trong hệ thống
+            if (!updateRequest.getMentorCode().equals(mentorUpdate.getMentorCode())){
+                if(mentorsRepository.findByMentorCodeAndAvailableStatus(updateRequest.getMentorCode(), AvailableStatus.ACTIVE).isPresent()){
+                    throw new OurException("MentorCode already exists");
+                }
+            }
             // Cập nhật thông tin người dùng hiện có
             updateUser.setUsername(updateRequest.getUsername().trim());
             updateUser.setEmail(updateRequest.getEmail().trim());
@@ -370,6 +401,11 @@ public class MentorsService {
                     m.setMentorSchedules(scheduleDTOList);
                 }
 
+                // Sắp xếp danh sách mentor theo starRating (giảm dần)
+                mentorsDTOList = mentorsDTOList.stream()
+                        .sorted(Comparator.comparing(MentorsDTO::getStar).reversed())
+                        .collect(Collectors.toList());
+
                 response.setStatusCode(200);
                 response.setMentorsDTOList(mentorsDTOList);
                 response.setMessage("Mentors found successfully.");
@@ -528,6 +564,29 @@ public class MentorsService {
         } catch (Exception e) {
             response.setStatusCode(500);
             response.setMessage("Error occurred during mentor creation: " + e.getMessage());
+        }
+        return response;
+    }
+
+    public Response getTopMentors(){
+        Response response = new Response();
+        List<MentorsDTO> mentorsDTOList = new ArrayList<>();
+        try{
+            Pageable topThree = PageRequest.of(0, 3);
+            List<Mentors> topMentors = mentorsRepository.findTopMentors(topThree, AvailableStatus.ACTIVE);
+            mentorsDTOList = topMentors
+                    .stream()
+                    .map(Converter::convertMentorToMentorDTO)
+                    .collect(Collectors.toList());
+            response.setStatusCode(200);
+            response.setMessage("fetch mentors successfully");
+            response.setMentorsDTOList(mentorsDTOList);
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred during get mentor: " + e.getMessage());
         }
         return response;
     }

@@ -231,11 +231,15 @@ public class ExcelHelper {
                 }
 
                 if (row.getCell(6) != null && row.getCell(6).getCellType() == CellType.STRING) {
-                    topicRequest.setClassName(row.getCell(6).getStringCellValue());
+                    topicRequest.setMentorName(row.getCell(6).getStringCellValue());
                 }
 
                 if (row.getCell(7) != null && row.getCell(7).getCellType() == CellType.STRING) {
-                    topicRequest.setSemesterName(  row.getCell(7).getStringCellValue());
+                    topicRequest.setSubMentorName(row.getCell(7).getStringCellValue());
+                }
+
+                if (row.getCell(8) != null && row.getCell(8).getCellType() == CellType.STRING) {
+                    topicRequest.setSemesterName(  row.getCell(8).getStringCellValue());
                 }
 
                 topicRequests.add(topicRequest);

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.project.model.Skills;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -32,4 +33,15 @@ public interface MentorsRepository extends JpaRepository<Mentors, Long>{
     List<Mentors> findBySkills(
             List<Skills> skills,
             AvailableStatus availableStatus);
+
+    @Query("SELECT m FROM Mentors m WHERE m.user.fullName = :name AND m.availableStatus = :availableStatus")
+    Optional<Mentors> findByNameForTopic(String name, AvailableStatus availableStatus);
+
+    @Query("SELECT m FROM Mentors m " +
+            "LEFT JOIN m.bookings b " +
+            "LEFT JOIN b.meeting mt " +
+            "WHERE m.availableStatus = :availableStatus " +
+            "GROUP BY m " +
+            "ORDER BY m.star DESC, COUNT(b.id) DESC, COUNT(mt.id) DESC")
+    List<Mentors> findTopMentors(Pageable pageable, @Param("availableStatus") AvailableStatus availableStatus);
 }

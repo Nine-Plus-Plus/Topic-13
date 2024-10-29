@@ -152,6 +152,8 @@ public class UsersService {
                 if (request.getAvatarFile() != null && !request.getAvatarFile().isEmpty()) {
                     String avatarUrl = awsS3Service.saveImageToS3(request.getAvatarFile());
                     newUser.setAvatar(avatarUrl);
+                }else{
+                    newUser.setAvatar("https://mentor-booking-images.s3.amazonaws.com/images.jpeg");
                 }
             } catch (Exception e) {
                 throw new OurException("Error uploading avatar: " + e.getMessage());
@@ -230,6 +232,8 @@ public class UsersService {
                 if (request.getAvatarFile() != null && !request.getAvatarFile().isEmpty()) {
                     String avatarUrl = awsS3Service.saveImageToS3(request.getAvatarFile());
                     newUser.setAvatar(avatarUrl);
+                }else{
+                    newUser.setAvatar("https://mentor-booking-images.s3.amazonaws.com/images.jpeg");
                 }
             } catch (Exception e) {
                 throw new OurException("Error uploading avatar: " + e.getMessage());
@@ -424,6 +428,13 @@ public class UsersService {
 
             if (userProfile.getRole().getRoleName().equalsIgnoreCase("STUDENT")) {
                 Students student = studentsRepository.findByUser_Id(userProfile.getId());
+
+                // Kiểm tra nếu sinh viên có group và group ID không null
+                if (student.getGroup() != null && student.getGroup().getId() != null) {
+                    Group group = groupRepository.findByIdAndAvailableStatus(student.getGroup().getId(), AvailableStatus.ACTIVE);
+                    GroupDTO groupDTO = Converter.convertGroupToGroupDTO(group);
+                    response.setGroupDTO(groupDTO);
+                }
                 studentsDTO = Converter.convertStudentToStudentDTO(student);
                 response.setStudentsDTO(studentsDTO);
                 response.setStatusCode(200);

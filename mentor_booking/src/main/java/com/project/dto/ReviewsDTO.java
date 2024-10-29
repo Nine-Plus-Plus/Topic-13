@@ -17,4 +17,5 @@ public class ReviewsDTO {
     private UsersDTO user; // Updated field
     private UsersDTO userReceive; // Updated field
     private AvailableStatus availableStatus;
+    private MeetingDTO meeting;
 }

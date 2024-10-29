@@ -171,7 +171,6 @@ public class StudentsService {
     public Response updateStudent(Long userId, CreateStudentRequest updateRequest, MultipartFile avatarFile) {
         Response response = new Response();
         try {
-
             // Tìm kiếm user với userId và trạng thái ACTIVE
             Users updateUser = usersRepository.findByIdAndAvailableStatus(userId, AvailableStatus.ACTIVE);
             if (updateUser == null) {
@@ -179,15 +178,44 @@ public class StudentsService {
                 response.setMessage("User not found");
                 return response; // Trả về phản hồi nếu không tìm thấy user
             }
-
+            // Tìm kiếm và cập nhật Students
+            Students updateStudent = studentsRepository.findByUser_Id(updateUser.getId());
+            if (updateStudent == null) {
+                response.setStatusCode(400);
+                response.setMessage("Student not found");
+                return response; // Trả về phản hồi nếu không tìm thấy student
+            }
             if (avatarFile != null && !avatarFile.isEmpty()) {
                 String avatarUrl = awsS3Service.saveImageToS3(avatarFile);
                 updateUser.setAvatar(avatarUrl);
                 System.out.println("Avatar URL: " + avatarUrl); // Kiểm tra URL
-            }else{
-                updateUser.setAvatar("https://mentor-booking-images.s3.amazonaws.com/images.jpeg");
+            }
+            // Kiểm tra nếu username đã thay đổi và đã tồn tại trong hệ thống
+            if (!updateRequest.getUsername().equals(updateUser.getUsername())) {
+                if (usersRepository.findByUsernameAndAvailableStatus(updateRequest.getUsername(), AvailableStatus.ACTIVE).isPresent()) {
+                    throw new OurException("Username already exists");
+                }
             }
 
+            // Kiểm tra nếu email đã thay đổi và đã tồn tại trong hệ thống
+            if (!updateRequest.getEmail().equals(updateUser.getEmail())) {
+                if (usersRepository.findByEmailAndAvailableStatus(updateRequest.getEmail(), AvailableStatus.ACTIVE).isPresent()) {
+                    throw new OurException("Email already exists");
+                }
+            }
+
+            // Kiểm tra nếu số điện thoại đã thay đổi và đã tồn tại trong hệ thống
+            if (!updateRequest.getPhone().equals(updateUser.getPhone())) {
+                if (usersRepository.findByPhoneAndAvailableStatus(updateRequest.getPhone(), AvailableStatus.ACTIVE).isPresent()) {
+                    throw new OurException("Phone already exists");
+                }
+            }
+            // Kiểm tra nếu studentCode đã thay đổi và đã tồn tại trong hệ thống
+            if (!updateRequest.getStudentCode().equals(updateStudent.getStudentCode())) {
+                if (studentsRepository.findByStudentCodeAndAvailableStatus(updateRequest.getStudentCode(), AvailableStatus.ACTIVE).isPresent()) {
+                    throw new OurException("StudentCode already exists");
+                }
+            }
             // Kiểm tra Class
             Class aClass = classRepository.findById(updateRequest.getAClass().getId())
                     .orElseThrow(() -> new OurException("Class not found"));
@@ -202,14 +230,8 @@ public class StudentsService {
             updateUser.setDateUpdated(LocalDateTime.now());
             updateUser.setAvailableStatus(AvailableStatus.ACTIVE);
             usersRepository.save(updateUser);
+
             // Tạo đối tượng Student mới
-            // Tìm kiếm và cập nhật Students
-            Students updateStudent = studentsRepository.findByUser_Id(updateUser.getId());
-            if (updateStudent == null) {
-                response.setStatusCode(400);
-                response.setMessage("Student not found");
-                return response; // Trả về phản hồi nếu không tìm thấy student
-            }
             updateStudent.setUser(updateUser);
             updateStudent.setExpertise(updateRequest.getExpertise().trim());
             updateStudent.setStudentCode(updateRequest.getStudentCode().trim());
@@ -257,18 +279,22 @@ public class StudentsService {
         return response;
     }
 
-    public Response getStudentBySemesterId(Long semesterId){
+    public Response getStudentBySemesterId(Long semesterId, String name){
         Response response = new Response();
         try{
             List<Class> findClass = classRepository.findClassBySemesterId(semesterId, AvailableStatus.ACTIVE);
             if (findClass != null && !findClass.isEmpty()) {
                 List<StudentsDTO> allStudent = new ArrayList<>();
                 for (Class c : findClass) {
-                    List<Students> studentsList = studentsRepository.findStudentByClassId(c.getId(), AvailableStatus.ACTIVE);
-
+                    List<Students> studentsList;
+                    if(name ==null || name.isEmpty()){
+                        studentsList = studentsRepository.findStudentByClassId(c.getId(), AvailableStatus.ACTIVE);
+                    }else{
+                        studentsList = studentsRepository.findStudentByClassIdAndFullName(c.getId(), name, AvailableStatus.ACTIVE);
+                    }
                     if (studentsList != null && !studentsList.isEmpty()) {
                         for (Students student : studentsList) {
-                            StudentsDTO studentsDTO = Converter.convertStudentToStudentDTO(student); // Hàm chuyển đổi (nếu cần)
+                            StudentsDTO studentsDTO = Converter.convertStudentToStudentDTO(student);
                             allStudent.add(studentsDTO);
                         }
                     }

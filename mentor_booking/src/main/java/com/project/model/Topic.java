@@ -60,6 +60,10 @@ public class Topic {
     private Mentors mentor;
 
     @ManyToOne
+    @JoinColumn(name = "sub_mentor_id")
+    private Mentors subMentors;
+
+    @ManyToOne
     @JoinColumn(name = "semester_id")
     private Semester semester;
 

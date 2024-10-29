@@ -32,6 +32,10 @@ public class Converter {
             mentor.setStar(convertClass.getMentor().getStar());
             mentor.setTotalTimeRemain(convertClass.getMentor().getTotalTimeRemain());
             mentor.setAvailableStatus(convertClass.getMentor().getAvailableStatus());
+            mentor.setSkills(convertClass.getMentor().getSkills());
+            if(convertClass.getMentor().getUser() != null){
+                mentor.setUser(convertClass.getMentor().getUser());
+            }
             classDTO.setMentor(convertMentorToMentorDTO(mentor));
         }
 
@@ -149,6 +153,10 @@ public class Converter {
 
         topicDTO.setSemesterDTO(convertSemesterToSemesterDTO(convertTopic.getSemester()));
         topicDTO.setMentorsDTO(convertMentorToMentorDTO(convertTopic.getMentor()));
+        if(convertTopic.getSubMentors()!=null){
+            topicDTO.setSubMentorDTO(convertMentorToMentorDTO(convertTopic.getSubMentors()));
+        }
+
 
         topicDTO.setAvailableStatus(convertTopic.getAvailableStatus());
         return topicDTO;
@@ -304,5 +312,45 @@ public class Converter {
         }
         
         return notificationsDTO;
+    }
+    
+    public static MeetingDTO convertMeetingToMeetingDTO(Meeting convertMeeting){
+        MeetingDTO meetingDTO = new MeetingDTO();
+        
+        meetingDTO.setId(convertMeeting.getId());
+        meetingDTO.setDateCreated(convertMeeting.getDateCreated());
+        meetingDTO.setLinkURL(convertMeeting.getLinkURL());
+        meetingDTO.setStatus(convertMeeting.getStatus());
+        meetingDTO.setAvailableStatus(convertMeeting.getAvailableStatus());
+        meetingDTO.setBooking(convertBookingToBookingDTO(convertMeeting.getBooking()));
+        if (!convertMeeting.getReviews().isEmpty()){
+            List<ReviewsDTO> reviewListDTO = convertMeeting.getReviews().stream()
+                        .map(Converter::convertReviewToReviewDTO)
+                        .collect(Collectors.toList());
+            meetingDTO.setReviews(reviewListDTO);
+        }
+        
+        return meetingDTO;
+    }
+    
+    public static ReviewsDTO convertReviewToReviewDTO(Reviews review) {
+        ReviewsDTO reviewsDTO = new ReviewsDTO();
+        reviewsDTO.setId(review.getId());
+        reviewsDTO.setComment(review.getComment());
+        reviewsDTO.setRating(review.getRating());
+        reviewsDTO.setDateCreated(review.getDateCreated());
+        reviewsDTO.setAvailableStatus(review.getAvailableStatus());
+
+        if (review.getUser() != null) {
+            UsersDTO userDTO = Converter.convertUserToUserDTO(review.getUser());
+            reviewsDTO.setUser_id(userDTO);
+        }
+
+        if (review.getUserReceive() != null) {
+            UsersDTO userReceiveDTO = Converter.convertUserToUserDTO(review.getUserReceive());
+            reviewsDTO.setUser_receive_id(userReceiveDTO);
+        }
+
+        return reviewsDTO;
     }
 }

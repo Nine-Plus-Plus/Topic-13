@@ -343,12 +343,12 @@ public class Converter {
 
         if (review.getUser() != null) {
             UsersDTO userDTO = Converter.convertUserToUserDTO(review.getUser());
-            reviewsDTO.setUser_id(userDTO);
+            reviewsDTO.setUser(userDTO);
         }
 
         if (review.getUserReceive() != null) {
             UsersDTO userReceiveDTO = Converter.convertUserToUserDTO(review.getUserReceive());
-            reviewsDTO.setUser_receive_id(userReceiveDTO);
+            reviewsDTO.setUserReceive(userReceiveDTO);
         }
 
         return reviewsDTO;

@@ -324,7 +324,7 @@ public class StudentsService {
             for (CreateStudentRequest request : studentRequests) {
                 try {
                     Response createResponse = createStudentFormExcel(request);
-                    if (createResponse.getStatusCode() != 200) {
+                    if (createResponse == null) {
                         errors.add("Error creating student: " + request.getUsername() +
                                 " [Username: " + request.getUsername() +
                                 ", Email: " + request.getEmail() +

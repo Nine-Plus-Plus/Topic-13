@@ -40,7 +40,17 @@ public interface BookingRepository extends JpaRepository<Booking, Long>{
         @Param("classId") Long classId
     );
     
-    List<Booking> findByMentorIdAndStatusOrderByDateCreatedDesc(
+    @Query("SELECT b FROM Booking b " +
+       "WHERE b.mentor.id = :mentorId AND b.status = :status " +
+       "ORDER BY CASE " +
+       "  WHEN b.status = 'PENDING' AND EXISTS (" +
+       "    SELECT 1 FROM Booking pb WHERE pb.group.id = b.group.id " +
+       "    AND pb.mentor.id = b.mentor.id AND pb.status = 'CANCELLED' AND pb.availableStatus = 'ACTIVE'" +
+       "  ) THEN 0 " +
+       "  WHEN b.status = 'PENDING' AND b.group.aClass.id = b.mentor.assignedClass.id THEN 1 " +
+       "  ELSE 2 " +
+       "END, b.dateCreated DESC")
+    List<Booking> findBookingsByMentorIdAndStatusHasPriority(
             Long mentorId,
             BookingStatus status
     );

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TopicRepository extends JpaRepository<Topic, Long> {
 
-    Optional<Topic> findByTopicName(String topicName);
+    Optional<Topic> findByTopicNameAndAvailableStatus(String topicName, AvailableStatus availableStatus);
 
     @Query("SELECT t FROM Topic t WHERE t.semester.id = :semesterId and t.availableStatus = :availableStatus")
     List<Topic> findTopicsBySemesterIdAndAvailableStatus(@Param("semesterId") Long semesterId,

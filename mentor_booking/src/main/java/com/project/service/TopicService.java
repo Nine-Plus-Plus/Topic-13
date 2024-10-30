@@ -47,7 +47,7 @@ public class TopicService {
 
         try {
             // Kiểm tra xem topic đã tồn tại chưa
-            if (topicRepository.findByTopicName(createRequest.getTopicName()).isPresent()) {
+            if (topicRepository.findByTopicNameAndAvailableStatus(createRequest.getTopicName(), AvailableStatus.ACTIVE).isPresent()) {
                 throw new OurException("Topic has already existed");
             }
 
@@ -166,7 +166,7 @@ public class TopicService {
         try {
             Topic presentTopic = topicRepository.findById(id)
                     .orElseThrow(() -> new OurException("Cannot find topic with id: " + id));
-            if (topicRepository.findByTopicName(newTopic.getTopicName()).isPresent()
+            if (topicRepository.findByTopicNameAndAvailableStatus(newTopic.getTopicName(), AvailableStatus.ACTIVE).isPresent()
                     && !newTopic.getTopicName().equals(presentTopic.getTopicName())) {
                 throw new OurException("Topic has already existed");
             }
@@ -366,7 +366,7 @@ public class TopicService {
         try{
 
             // Kiểm tra xem topic đã tồn tại chưa
-            if (topicRepository.findByTopicName(topicDTO.getTopicName()).isPresent()) {
+            if (topicRepository.findByTopicNameAndAvailableStatus(topicDTO.getTopicName(), AvailableStatus.ACTIVE).isPresent()) {
                 throw new OurException("Topic has already existed");
             }
 

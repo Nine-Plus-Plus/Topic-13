@@ -32,7 +32,7 @@ public class Notifications {
     @Enumerated(EnumType.STRING)
     private NotificationAction action;
     
-    @Column(name = "message")
+    @Column(name = "message", columnDefinition = "LONGTEXT")
     private String message;
     
     @Column(name = "date_Time_sent")

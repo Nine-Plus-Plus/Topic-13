@@ -238,10 +238,16 @@ public class TopicService {
         return response;
     }
 
-    public Response getTopicBySemesterId(Long semesterId) {
+    public Response getTopicBySemesterId(Long semesterId, String name) {
         Response response = new Response();
         try {
-            List<Topic> topicList = topicRepository.findTopicsBySemesterIdAndAvailableStatus(semesterId, AvailableStatus.ACTIVE);
+            List<Topic> topicList;
+            if(name == null || name.isEmpty()){
+                topicList = topicRepository.findTopicsBySemesterIdAndAvailableStatus(semesterId, AvailableStatus.ACTIVE);
+            }else{
+                topicList = topicRepository.findTopicsBySemesterIdAndTopicNameAvailableStatus(semesterId, name, AvailableStatus.ACTIVE);
+            }
+
             if (topicList != null) {
                 List<TopicDTO> topicListDTO = topicList.stream()
                         .map(Converter::convertTopicToTopicDTO)

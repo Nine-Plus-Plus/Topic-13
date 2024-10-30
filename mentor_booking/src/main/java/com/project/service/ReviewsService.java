@@ -6,15 +6,19 @@ import com.project.dto.UsersDTO;
 import com.project.dto.Response;
 import com.project.enums.AvailableStatus;
 import com.project.exception.OurException;
+
 import com.project.model.Meeting;
+import com.project.model.Mentors;
 import com.project.model.Reviews;
 import com.project.model.Users;
 import com.project.repository.MeetingRepository;
+import com.project.repository.MentorsRepository;
 import com.project.repository.ReviewsRepository;
 import com.project.repository.UsersRepository;
 import com.project.ultis.Converter;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -31,15 +35,18 @@ public class ReviewsService {
     private UsersRepository usersRepository;
 
     @Autowired
+    private MentorsRepository mentorsRepository;
+
+    @Autowired
     private MeetingRepository meetingRepository;
 
     public Response createReview(ReviewsDTO createRequest) {
         Response response = new Response();
         try {
             // Fetch the full UsersDTO objects based on the provided IDs
-            Users user = usersRepository.findById(createRequest.getUser_id().getId())
+            Users user = usersRepository.findById(createRequest.getUser().getId())
                     .orElseThrow(() -> new OurException("User not found"));
-            Users userReceive = usersRepository.findById(createRequest.getUser_receive_id().getId())
+            Users userReceive = usersRepository.findById(createRequest.getUserReceive().getId())
                     .orElseThrow(() -> new OurException("User Receive not found"));
 
             if (createRequest.getMeeting() == null) {
@@ -56,6 +63,8 @@ public class ReviewsService {
             review.setMeeting(meeting);
             reviewsRepository.save(review);
 
+            updateMentorStar(userReceive.getId());
+
             ReviewsDTO dto = convertReviewToReviewDTO(review);
             response.setReviewsDTO(dto);
             response.setStatusCode(200);
@@ -68,6 +77,23 @@ public class ReviewsService {
             response.setMessage("Error occurred during review creation: " + e.getMessage());
         }
         return response;
+    }
+
+    private void updateMentorStar(Long mentorId) {
+        List<Reviews> reviews = reviewsRepository.findByUserReceiveId(mentorId,  Sort.by(Sort.Direction.DESC, "dateCreated"));
+        double sumRatings = reviews.stream()
+                                   .mapToInt(Reviews::getRating)
+                                   .sum(); 
+        Mentors mentor = mentorsRepository.findByUser_Id(mentorId);
+        if (mentor == null) {
+            throw new OurException("Mentor not found");
+        }
+        double currentAverageRating = mentor.getStar();
+        double totalRatings = sumRatings + currentAverageRating;
+        double averageRating = totalRatings / (reviews.size() + 1);  //Rule of average for this project
+
+        mentor.setStar((float) averageRating);
+        mentorsRepository.save(mentor);
     }
 
     private Reviews mapToEntity(ReviewsDTO dto) {
@@ -89,12 +115,12 @@ public class ReviewsService {
        
         if (review.getUser() != null) {
             UsersDTO userDTO = Converter.convertUserToUserDTO(review.getUser());
-            reviewsDTO.setUser_id(userDTO);
+            reviewsDTO.setUser(userDTO);
         }
 
         if (review.getUserReceive() != null) {
             UsersDTO userReceiveDTO = Converter.convertUserToUserDTO(review.getUserReceive());
-            reviewsDTO.setUser_receive_id(userReceiveDTO);
+            reviewsDTO.setUserReceive(userReceiveDTO);
         }
         
         if (review.getMeeting() != null){
@@ -112,19 +138,24 @@ public class ReviewsService {
         dto.setRating(review.getRating());
         dto.setDateCreated(review.getDateCreated());
         dto.setAvailableStatus(review.getAvailableStatus());
-        UsersDTO userDTO = new UsersDTO();
-        userDTO.setId(review.getUser().getId());
-        dto.setUser_id(userDTO);
-        UsersDTO userReceiveDTO = new UsersDTO();
-        userReceiveDTO.setId(review.getUserReceive().getId());
-        dto.setUser_receive_id(userReceiveDTO);
+    
+        if (review.getUser() != null) {
+            UsersDTO userDTO = Converter.convertUserToUserDTO(review.getUser());
+            dto.setUser(userDTO);
+        }
+    
+        if (review.getUserReceive() != null) {
+            UsersDTO userReceiveDTO = Converter.convertUserToUserDTO(review.getUserReceive());
+            dto.setUserReceive(userReceiveDTO);
+        }
+    
         return dto;
     }
 
     public Response getReviewsByUserId(Long userId) {
         Response response = new Response();
         try {
-            List<Reviews> reviews = reviewsRepository.findByUserId(userId);
+            List<Reviews> reviews = reviewsRepository.findByUserId(userId, Sort.by(Sort.Direction.DESC, "dateCreated"));
             List<ReviewsDTO> reviewsDTOs = reviews.stream()
                     .map(this::mapToDTO)
                     .collect(Collectors.toList());
@@ -140,7 +171,7 @@ public class ReviewsService {
     public Response getReviewsByUserReceiveId(Long userReceiveId) {
         Response response = new Response();
         try {
-            List<Reviews> reviews = reviewsRepository.findByUserReceiveId(userReceiveId);
+            List<Reviews> reviews = reviewsRepository.findByUserReceiveId(userReceiveId, Sort.by(Sort.Direction.DESC, "dateCreated"));
             List<ReviewsDTO> reviewsDTOs = reviews.stream()
                     .map(this::mapToDTO)
                     .collect(Collectors.toList());
@@ -200,7 +231,7 @@ public class ReviewsService {
             review.setAvailableStatus(updateRequest.getAvailableStatus());
             review.setDateCreated(updateRequest.getDateCreated());
             Users userReceive = new Users();
-            userReceive.setId(updateRequest.getUser_receive_id().getId());
+            userReceive.setId(updateRequest.getUserReceive().getId());
             review.setUserReceive(userReceive);
             reviewsRepository.save(review);
             response.setStatusCode(200);
@@ -218,7 +249,7 @@ public class ReviewsService {
     public Response getAllReviews() {
         Response response = new Response();
         try {
-            List<Reviews> reviews = reviewsRepository.findAll();
+            List<Reviews> reviews = reviewsRepository.findAll(Sort.by(Sort.Direction.DESC, "dateCreated"));
             List<ReviewsDTO> reviewsDTOs = reviews.stream()
                     .map(this::mapToDTO)
                     .collect(Collectors.toList());

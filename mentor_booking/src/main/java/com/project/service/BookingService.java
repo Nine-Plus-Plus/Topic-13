@@ -131,7 +131,7 @@ public class BookingService {
     }
 
     /**
-     * Get all ACTIVE bookings (usually PENDING and not started CONFIRMED
+     * Get all ACTIVE bookings (usually PENDING, CANCELLED by mentor and not started CONFIRMED
      * bookings)
      *
      * @return all bookings have ACTIVE available status
@@ -165,7 +165,7 @@ public class BookingService {
     }
 
     /**
-     * Get all INACTIVE bookings (Usually done CONFIRMED, REJECTED or CANCELED
+     * Get all INACTIVE bookings (Usually done CONFIRMED, REJECTED or CANCELED my students
      * bookings)
      *
      * @return all INACTIVE bookings (or in another way, all CONFIRMED bookings
@@ -236,6 +236,16 @@ public class BookingService {
                 booking.setDateUpdated(LocalDateTime.now());
                 booking.setExpiredTime(null);
                 bookingRepository.save(booking);
+                
+                List<Booking> previousCancelledBooking = bookingRepository.findByGroupIdAndAvailableStatusAndStatus
+                                                    (booking.getGroup().getId(), AvailableStatus.ACTIVE, BookingStatus.CANCELLED);
+                for (Booking b: previousCancelledBooking){
+                    if (b.getMentor().getId() == booking.getMentor().getId()){
+                        b.setAvailableStatus(AvailableStatus.INACTIVE);
+                        b.setDateUpdated(LocalDateTime.now());
+                        bookingRepository.save(b);
+                    }
+                }
 
                 List<Booking> pendingBookingList = bookingRepository.findByStatusAndMentorScheduleId(BookingStatus.PENDING, booking.getMentorSchedule().getId());
                 if (!pendingBookingList.isEmpty()) {
@@ -350,7 +360,7 @@ public class BookingService {
             if (booking != null) {
                 if (type.equalsIgnoreCase("MENTOR")) {
                     booking.setStatus(BookingStatus.CANCELLED);
-                    booking.setAvailableStatus(AvailableStatus.INACTIVE);
+                    booking.setAvailableStatus(AvailableStatus.ACTIVE);
                     booking.setDateUpdated(LocalDateTime.now());
                     booking.setExpiredTime(null);
                     
@@ -460,7 +470,7 @@ public class BookingService {
     public Response getBookingsByMentorId(Long mentorId, BookingStatus status) {
         Response response = new Response();
         try {
-            List<Booking> bookingList = bookingRepository.findByMentorIdAndStatusOrderByDateCreatedDesc(mentorId, status);
+            List<Booking> bookingList = bookingRepository.findBookingsByMentorIdAndStatusHasPriority(mentorId, status);
             List<BookingDTO> bookingListDTO = new ArrayList<>();
             if (!bookingList.isEmpty()) {
                 bookingListDTO = bookingList.stream()

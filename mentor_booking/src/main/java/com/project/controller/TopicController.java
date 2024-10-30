@@ -52,8 +52,11 @@ public class TopicController {
     }
     
     @GetMapping("/user/get-topic-by-semester-id/{semesterId}")
-    public ResponseEntity<Response> getTopicsBySemesterId(@PathVariable Long semesterId){
-        Response response = topicService.getTopicBySemesterId(semesterId);
+    public ResponseEntity<Response> getTopicsBySemesterId(
+            @PathVariable Long semesterId,
+            @RequestParam(required = false) String name
+    ){
+        Response response = topicService.getTopicBySemesterId(semesterId, name);
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
     

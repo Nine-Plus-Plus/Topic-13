@@ -6,6 +6,7 @@ import com.project.exception.OurException;
 import com.project.repository.GroupRepository;
 import com.project.repository.UsersRepository;
 import com.project.ultis.JWTUtils;
+import com.project.ultis.Ultis;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,5 +111,18 @@ public class EmailServiceImpl {
             response.setStatusCode(500);
             response.setMessage("Đã xảy ra lỗi khi gửi email: " + e.getMessage());
         }
+    }
+
+    public String sendPasswordCreateUser(String email){
+        String password = Ultis.generateRandomString();
+        // tạo mail
+
+        EmailRequest emailRequest = new EmailRequest();
+        emailRequest.setRecipient(email);
+        emailRequest.setMsgBody(password);
+        emailRequest.setSubject("PASSWORD");
+        sendHtmlMail(emailRequest);
+
+        return password;
     }
 }

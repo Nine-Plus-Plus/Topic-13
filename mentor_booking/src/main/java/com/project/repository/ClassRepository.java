@@ -45,7 +45,7 @@ public interface ClassRepository extends JpaRepository<Class, Long>{
 //    @Query("SELECT c FROM Class c WHERE c.class_name LIKE %:className%")
     List<Class> findByClassNameContainingIgnoreCase(String className);
 
-    Class findByClassNameContainingIgnoreCaseAndAvailableStatus(String className, AvailableStatus availableStatus);
+    Class findByClassNameContainingIgnoreCaseAndSemesterIdAndAvailableStatus(String className,Long semesterId, AvailableStatus availableStatus);
 
     Class findByMentorAndAvailableStatus(Mentors mentor, AvailableStatus availableStatus);
 

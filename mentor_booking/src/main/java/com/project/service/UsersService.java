@@ -14,6 +14,7 @@ import java.util.Optional;
 
 import com.project.security.AwsS3Service;
 import com.project.ultis.Converter;
+import com.project.ultis.Ultis;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -56,6 +57,11 @@ public class UsersService {
     @Autowired
     private AwsS3Service awsS3Service;
 
+    @Autowired
+    private EmailServiceImpl emailService;
+
+    private static final String DEFAULT_AVATAR_URL = "https://mentor-booking-images.s3.amazonaws.com/images.jpeg";
+
     // Phương thức tạo user
     public Response createUser(UsersDTO registerRequest) {
         Response response = new Response();
@@ -75,14 +81,14 @@ public class UsersService {
 
             // Tạo đối tượng User mới
             Users newUser = new Users();
-            newUser.setUsername(registerRequest.getUsername().trim());
-            newUser.setEmail(registerRequest.getEmail().trim());
+            newUser.setUsername(registerRequest.getUsername());
+            newUser.setEmail(registerRequest.getEmail());
             newUser.setPassword(encodedPassword);
-            newUser.setFullName(registerRequest.getFullName().trim());
+            newUser.setFullName(registerRequest.getFullName());
             newUser.setBirthDate(registerRequest.getBirthDate());
-            newUser.setAvatar(registerRequest.getAvatar());
-            newUser.setAddress(registerRequest.getAddress().trim());
-            newUser.setPhone(registerRequest.getPhone().trim());
+            newUser.setAvatar(DEFAULT_AVATAR_URL);
+            newUser.setAddress(registerRequest.getAddress());
+            newUser.setPhone(registerRequest.getPhone());
             newUser.setGender(registerRequest.getGender());
             newUser.setDateCreated(LocalDateTime.now());
             newUser.setAvailableStatus(AvailableStatus.ACTIVE);
@@ -106,13 +112,13 @@ public class UsersService {
             response.setMessage("Error occurred during user creation: " + e.getMessage());
         }
         return response;
-    } // done
+    }
 
     // Phương thức tạo học sinh
     public Response createStudents(CreateStudentRequest request) {
         Response response = new Response();
         try {
-            // Kiểm tra nếu username hoặc email đã tồn tại
+            // Kiểm tra nếu username
             if (usersRepository.findByUsernameAndAvailableStatus(request.getUsername(), AvailableStatus.ACTIVE).isPresent()) {
                 throw new OurException("Username already exists");
             }
@@ -132,8 +138,8 @@ public class UsersService {
             // Kiểm tra Role
             Role role = roleRepository.findByRoleName("STUDENT")
                     .orElseThrow(() -> new OurException("No role name"));
-            // Mã hóa mật khẩu
-            String encodedPassword = passwordEncoder.encode(request.getPassword().trim());
+            // Mã hóa mật khẩu và gửi cho học sinh
+            String encodedPassword = passwordEncoder.encode(emailService.sendPasswordCreateUser(request.getEmail().trim()));
 
             // Tạo đối tượng User mới
             Users newUser = new Users();
@@ -153,7 +159,7 @@ public class UsersService {
                     String avatarUrl = awsS3Service.saveImageToS3(request.getAvatarFile());
                     newUser.setAvatar(avatarUrl);
                 }else{
-                    newUser.setAvatar("https://mentor-booking-images.s3.amazonaws.com/images.jpeg");
+                    newUser.setAvatar(DEFAULT_AVATAR_URL);
                 }
             } catch (Exception e) {
                 throw new OurException("Error uploading avatar: " + e.getMessage());
@@ -171,7 +177,7 @@ public class UsersService {
                 student.setAClass(aClass);
                 student.setGroupRole(null);
                 student.setAvailableStatus(AvailableStatus.ACTIVE);
-                student.setGroup(null); // Để group_id null
+                student.setGroup(null);
                 studentsRepository.save(student);
                 newUser.setStudent(student);
                 usersRepository.save(newUser);
@@ -190,7 +196,7 @@ public class UsersService {
             response.setMessage("Error occurred during student creation: " + e.getMessage());
         }
         return response;
-    } // done
+    }
 
     // Phương thức tạo mentor
     public Response createMentors(CreateMentorRequest request) {
@@ -214,7 +220,8 @@ public class UsersService {
             Role role = roleRepository.findByRoleName("MENTOR")
                     .orElseThrow(() -> new OurException("No role name"));
             // Mã hóa mật khẩu
-            String encodedPassword = passwordEncoder.encode(request.getPassword().trim());
+            String encodedPassword = passwordEncoder.encode(emailService.sendPasswordCreateUser(request.getEmail().trim()));
+
             // Tạo đối tượng User mới
             Users newUser = new Users();
             newUser.setUsername(request.getUsername().trim());
@@ -233,7 +240,7 @@ public class UsersService {
                     String avatarUrl = awsS3Service.saveImageToS3(request.getAvatarFile());
                     newUser.setAvatar(avatarUrl);
                 }else{
-                    newUser.setAvatar("https://mentor-booking-images.s3.amazonaws.com/images.jpeg");
+                    newUser.setAvatar(DEFAULT_AVATAR_URL);
                 }
             } catch (Exception e) {
                 throw new OurException("Error uploading avatar: " + e.getMessage());
@@ -363,7 +370,7 @@ public class UsersService {
             response.setMessage("Error occurred while deleting user: " + id);
         }
         return response;
-    } // done
+    }
 
     // Phương thức lấy thông tin profile của người dùng dựa trên email
     public Response getMyProfile(String username) {

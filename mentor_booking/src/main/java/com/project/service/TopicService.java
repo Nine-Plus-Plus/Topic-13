@@ -321,7 +321,7 @@ public class TopicService {
         return response;
     }
 
-    public Response importTopicFromExcel(MultipartFile file) {
+    public Response importTopicFromExcel(MultipartFile file, Long semester) {
         Response response = new Response();
         List<String> errors = new ArrayList<>();
 
@@ -329,19 +329,12 @@ public class TopicService {
             List<TopicDTO> excelToTopics = ExcelHelper.excelToTopics(file);
 
             for (TopicDTO topicDTO : excelToTopics) {
-                try {
-                    Response createResponse = createTopicFromExcel(topicDTO);
-                    if (createResponse.getStatusCode() != 200) {
-                        errors.add("Error creating topic: " + topicDTO.getTopicName()
-                                + " mentor: " + topicDTO.getMentorName()
-                                + " submentor: " + topicDTO.getSubMentorName()
-                                + " semestername: " + topicDTO.getSemesterName());
-                    }
-                } catch (OurException e) {
-                    errors.add("Error creating topic: " + topicDTO.getTopicName() + " - " + e.getMessage());
-                }
-            }
 
+                    Response createResponse = createTopicFromExcel(topicDTO, semester);
+                    if (createResponse.getStatusCode() != 200 && topicDTO.getTopicName() != null) {
+                        errors.add("[" + topicDTO.getTopicName() + "] ");
+                    }
+            }
             if (!errors.isEmpty()) {
                 response.setStatusCode(400);
                 response.setMessage("Import completed with errors: " + String.join(", ", errors));
@@ -361,7 +354,7 @@ public class TopicService {
         return response;
     }
 
-    public Response createTopicFromExcel(TopicDTO topicDTO){
+    public Response createTopicFromExcel(TopicDTO topicDTO, Long semesterId){
         Response response = new Response();
         try{
 
@@ -392,9 +385,11 @@ public class TopicService {
             }
 
             // Lấy Semester
-            if (topicDTO.getSemesterName() != null) {
-                semester = semesterRepository.findBySemesterName(topicDTO.getSemesterName(), AvailableStatus.ACTIVE)
-                        .orElseThrow(() -> new OurException("Cannot find semester id"));
+
+            if(semesterId == null){
+                throw  new OurException("Semester cannot be null");
+            }else{
+                semester = semesterRepository.findByIdAndAvailableStatus(semesterId, AvailableStatus.ACTIVE);
             }
 
             // Tạo Topic
@@ -419,8 +414,6 @@ public class TopicService {
 
             // Tạo phản hồi
             if (topic.getId() != null && topic.getId() > 0) {
-                TopicDTO dto = Converter.convertTopicToTopicDTO(topic);
-                response.setTopicDTO(dto);
                 response.setStatusCode(200);
                 response.setMessage("Topic added successfully");
             }

@@ -51,6 +51,11 @@ public class MentorsService {
     @Autowired
     private RoleRepository roleRepository;
 
+    @Autowired
+    private EmailServiceImpl emailService;
+
+    private static final String DEFAULT_AVATAR_URL = "https://mentor-booking-images.s3.amazonaws.com/images.jpeg";
+
     // Phương thức lấy tất cả mentors
     public Response getAllMentors(String name) {
         Response response = new Response();
@@ -454,32 +459,16 @@ public class MentorsService {
         Response response = new Response();
         try {
             List<CreateMentorRequest> createMentorRequests = ExcelHelper.excelToMentors(file);
-
             List<String> errors = new ArrayList<>();
             for (CreateMentorRequest request : createMentorRequests) {
-                try {
-                    Response createResponse = createMentorFormExcel(request);
-                    if (createResponse == null) {
-                        errors.add("Error creating mentor: " + request.getUsername() +
-                                " [Username: " + request.getUsername() +
-                                ", Email: " + request.getEmail() +
-                                ", Password: " + request.getPassword() +
-                                ", FullName: " + request.getFullName() +
-                                ", BirthDate: " + request.getBirthDate() +
-                                ", Address: " + request.getAddress() +
-                                ", Phone: " + request.getPhone() +
-                                ", Gender: " + request.getGender() +
-                                ", MentorCode: " + request.getMentorCode() +
-                                ", Skills: " + request.getSkilllNamesList() +
-                                "]");
-                    }
-                } catch (OurException e) {
-                    errors.add("Error creating mentor: " + request.getUsername() + " - " + e.getMessage());
+                Response createResponse = createMentorFormExcel(request);
+                if (createResponse.getStatusCode() != 200 && request.getFullName() != null) {
+                        errors.add(" [" + request.getFullName() + "] ");
                 }
             }
             if (!errors.isEmpty()) {
                 response.setStatusCode(400);
-                response.setMessage(String.join(", ", errors));
+                response.setMessage("Failed to import some mentors: " + String.join(", ", errors));
             } else {
                 response.setStatusCode(200);
                 response.setMessage("All mentors created successfully");
@@ -517,7 +506,7 @@ public class MentorsService {
                     .orElseThrow(() -> new OurException("No role name"));
 
             // Mã hóa mật khẩu
-            String encodedPassword = passwordEncoder.encode(request.getPassword());
+            String encodedPassword = passwordEncoder.encode(emailService.sendPasswordCreateUser(request.getEmail().trim()));
 
             // Tạo đối tượng User mới
             Users newUser = new Users();
@@ -532,7 +521,7 @@ public class MentorsService {
             newUser.setDateCreated(LocalDateTime.now());
             newUser.setRole(role);
             newUser.setAvailableStatus(AvailableStatus.ACTIVE);
-            newUser.setAvatar("https://mentor-booking-images.s3.amazonaws.com/images.jpeg");
+            newUser.setAvatar(DEFAULT_AVATAR_URL);
 
             usersRepository.save(newUser);
 
@@ -557,6 +546,9 @@ public class MentorsService {
 
                 newUser.setMentor(mentor);
                 usersRepository.save(newUser);
+
+                response.setStatusCode(200);
+                response.setMessage("Student created successfully");
             }
         } catch (OurException e) {
             response.setStatusCode(400);

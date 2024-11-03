@@ -15,6 +15,7 @@ import com.project.repository.UsersRepository;
 import com.project.security.AwsS3Service;
 import com.project.ultis.Converter;
 import com.project.ultis.ExcelHelper;
+import com.project.ultis.Ultis;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -49,6 +50,11 @@ public class StudentsService {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private EmailServiceImpl emailService;
+
+    private static final String DEFAULT_AVATAR_URL = "https://mentor-booking-images.s3.amazonaws.com/images.jpeg";
     // Phương thức lấy tất cả sinh viên
     public Response getAllStudents() {
         Response response = new Response();
@@ -315,40 +321,26 @@ public class StudentsService {
         return response;
     }
 
-    public Response importStudentsFromExcel(MultipartFile file){
+    public Response importStudentsFromExcel(MultipartFile file, Long semesterId){
         Response response = new Response();
         try{
             List<CreateStudentRequest> studentRequests = ExcelHelper.excelToStudents(file);
-
             List<String> errors = new ArrayList<>();
+
             for (CreateStudentRequest request : studentRequests) {
-                try {
-                    Response createResponse = createStudentFormExcel(request);
-                    if (createResponse == null) {
-                        errors.add("Error creating student: " + request.getUsername() +
-                                " [Username: " + request.getUsername() +
-                                ", Email: " + request.getEmail() +
-                                ", Password: " + request.getPassword() +
-                                ", FullName: " + request.getFullName() +
-                                ", BirthDate: " + request.getBirthDate() +
-                                ", Address: " + request.getAddress() +
-                                ", Phone: " + request.getPhone() +
-                                ", Gender: " + request.getGender() +
-                                ", Class Name: " + request.getClassName() +
-                                ", Expertise: " + request.getExpertise() +
-                                ", StudentCode: " + request.getStudentCode() + "]");
-                    }
-                } catch (OurException e) {
-                    errors.add("Error creating student: " + request.getUsername() + " - " + e.getMessage());
+                Response createResponse = createStudentFormExcel(request, semesterId);
+                if (createResponse.getStatusCode() != 200 && request.getFullName() != null) {
+                        errors.add(" [" + request.getFullName() + "] ");
                 }
             }
             if (!errors.isEmpty()) {
                 response.setStatusCode(400);
-                response.setMessage(String.join(", ", errors));
+                response.setMessage("Failed to import some students: " + String.join(", ", errors));
             } else {
                 response.setStatusCode(200);
-                response.setMessage("All students created successfully");
+                response.setMessage("All students imported successfully");
             }
+
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -359,7 +351,7 @@ public class StudentsService {
         return response;
     }
 
-    public Response createStudentFormExcel(CreateStudentRequest request){
+    public Response createStudentFormExcel(CreateStudentRequest request, Long semesterId){
         Response response = new Response();
         try{
             // Kiểm tra nếu username hoặc email đã tồn tại
@@ -377,7 +369,7 @@ public class StudentsService {
                 throw new OurException("StudentCode already exists");
             }
             // Kiểm tra Class
-            Class aClass = classRepository.findByClassNameContainingIgnoreCaseAndAvailableStatus(request.getClassName(), AvailableStatus.ACTIVE);
+            Class aClass = classRepository.findByClassNameContainingIgnoreCaseAndSemesterIdAndAvailableStatus(request.getClassName(),semesterId, AvailableStatus.ACTIVE);
             if (aClass == null) {
                 throw new OurException("Class not found");
             }
@@ -387,7 +379,7 @@ public class StudentsService {
                     .orElseThrow(() -> new OurException("No role name"));
 
             // Mã hóa mật khẩu
-            String encodedPassword = passwordEncoder.encode(request.getPassword());
+            String encodedPassword = passwordEncoder.encode(emailService.sendPasswordCreateUser(request.getEmail().trim()));
 
             // Tạo đối tượng User mới
             Users newUser = new Users();
@@ -402,7 +394,7 @@ public class StudentsService {
             newUser.setDateCreated(LocalDateTime.now());
             newUser.setRole(role);
             newUser.setAvailableStatus(AvailableStatus.ACTIVE);
-            newUser.setAvatar("https://mentor-booking-images.s3.amazonaws.com/images.jpeg");
+            newUser.setAvatar(DEFAULT_AVATAR_URL);
 
             usersRepository.save(newUser);
 

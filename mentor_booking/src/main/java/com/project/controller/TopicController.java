@@ -67,7 +67,10 @@ public class TopicController {
     }
 
     @PostMapping("/admin/import-topics")
-    public Response importTopics(@RequestParam("file") MultipartFile file) {
-        return topicService.importTopicFromExcel(file);
+    public Response importTopics(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("semester") Long semester
+    ) {
+        return topicService.importTopicFromExcel(file, semester);
     }
 }

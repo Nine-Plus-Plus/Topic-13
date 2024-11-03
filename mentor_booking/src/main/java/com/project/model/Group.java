@@ -22,6 +22,9 @@ public class Group {
     @Column(name = "total_point")
     private int totalPoint;
 
+    @Column(name = "file_URL")
+    private String fileURL;
+
     @Column(name = "date_created")
     private LocalDate dateCreated;
 

@@ -278,15 +278,20 @@ public class GroupService {
         return response;
     }
 
-    public Response getGroupBySemesterId(Long semesterId) {
+    public Response getGroupBySemesterId(Long semesterId, String name) {
         Response response = new Response();
         try {
-            List<Class> findClass = classRepository.findClassBySemesterId(semesterId, AvailableStatus.ACTIVE);
+            List<Class> findClass = classRepository.findClassBySemesterIdExcludingDeleted(semesterId, AvailableStatus.DELETED);
 
             if (findClass != null && !findClass.isEmpty()) {
                 List<GroupDTO> allGroups = new ArrayList<>();
                 for (Class c : findClass) {
-                    List<Group> groups = groupRepository.findGroupsByClassId(c.getId(), AvailableStatus.ACTIVE);
+                    List<Group> groups;
+                    if(name ==null || name.isEmpty()){
+                        groups = groupRepository.findGroupsByClassIdAndExcludeDeleted(c.getId(), AvailableStatus.DELETED);
+                    }else{
+                        groups = groupRepository.findGroupsByClassAndGroupName(c.getId(), name, AvailableStatus.DELETED);
+                    }
 
                     if (groups != null && !groups.isEmpty()) {
                         for (Group group : groups) {

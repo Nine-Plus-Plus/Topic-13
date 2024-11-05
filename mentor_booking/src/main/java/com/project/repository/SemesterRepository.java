@@ -22,7 +22,9 @@ public interface SemesterRepository extends JpaRepository<Semester, Long>{
 
     List<Semester> findByAvailableStatus(AvailableStatus availableStatus);
 
-    List<Semester> findByAvailableStatusOrderByDateCreatedDesc(AvailableStatus availableStatus);
+    //ADMIN
+    @Query("SELECT s FROM Semester s WHERE s.availableStatus <> :deletedStatus ORDER BY s.dateCreated DESC")
+    List<Semester> findByAvailableStatusNotDeletedOrderByDateCreatedDesc(@Param("deletedStatus") AvailableStatus deletedStatus);
 
     @Query("SELECT s FROM Semester s WHERE s.id = :id AND s.availableStatus = :availableStatus")
     Semester findByIdAndAvailableStatus(@Param("id") Long id, @Param("availableStatus") AvailableStatus status);
@@ -32,4 +34,16 @@ public interface SemesterRepository extends JpaRepository<Semester, Long>{
     List<Semester> findOverlappingSemesters(@Param("dateStart") LocalDate dateStart,
                                             @Param("dateEnd") LocalDate dateEnd,
                                             @Param("status") AvailableStatus status);
+
+    @Query("SELECT s FROM Semester s WHERE s.availableStatus = :status AND "
+            + "(s.dateStart <= :dateEnd AND s.dateEnd >= :dateStart) "
+            + "AND s.id <> :excludeId")
+    List<Semester> findOverlappingSemestersUpdate(@Param("dateStart") LocalDate dateStart,
+                                            @Param("dateEnd") LocalDate dateEnd,
+                                            @Param("status") AvailableStatus status,
+                                            @Param("excludeId") Long excludeId);
+
+    @Query("SELECT s FROM Semester s WHERE s.dateEnd < :now AND s.availableStatus = :status")
+    List<Semester> findExpiredSemester(@Param("now") LocalDate now,
+                                       @Param("status") AvailableStatus availableStatus);
 }

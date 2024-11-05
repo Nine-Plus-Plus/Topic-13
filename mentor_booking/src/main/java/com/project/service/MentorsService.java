@@ -54,6 +54,9 @@ public class MentorsService {
     @Autowired
     private EmailServiceImpl emailService;
 
+    @Autowired
+    private MentorReportRepository mentorReportRepository;
+
     private static final String DEFAULT_AVATAR_URL = "https://mentor-booking-images.s3.amazonaws.com/images.jpeg";
 
     // Phương thức lấy tất cả mentors
@@ -581,5 +584,21 @@ public class MentorsService {
             response.setMessage("Error occurred during get mentor: " + e.getMessage());
         }
         return response;
+    }
+
+    public void generateMentorReportRating(Semester semester){
+        List<Mentors> mentorsList = mentorsRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
+
+        for(Mentors m : mentorsList){
+            MentorReport report = new MentorReport();
+            report.setMentor(m);
+            report.setSemester(semester);
+            report.setStarRating(m.getStar());
+            report.setDateCreated(LocalDate.now());
+            mentorReportRepository.save(report);
+
+            m.setStar(5.0f);
+            mentorsRepository.save(m);
+        }
     }
 }

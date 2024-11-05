@@ -86,7 +86,7 @@ public class SemesterService {
     public Response getAllSemesters(){
         Response response = new Response();
         try {
-            List<Semester> semesterList = semesterRepository.findByAvailableStatusNotDeletedOrderByDateCreatedDesc(AvailableStatus.DELETED);
+            List<Semester> semesterList = semesterRepository.findByAvailableStatusNotDeletedOrderByDateStartDesc(AvailableStatus.DELETED);
             List<SemesterDTO> semesterListDTO = new ArrayList<>();
             if (!semesterList.isEmpty()) {
                 semesterListDTO = semesterList

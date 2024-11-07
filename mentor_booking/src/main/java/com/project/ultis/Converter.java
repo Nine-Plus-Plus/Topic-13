@@ -170,6 +170,7 @@ public class Converter {
         groupDTO.setGroupName(convertGroup.getGroupName());
         groupDTO.setTotalPoint(convertGroup.getTotalPoint());
         groupDTO.setDateCreated(convertGroup.getDateCreated());
+        groupDTO.setFileURL(convertGroup.getFileURL());
 
         for (Students student : convertGroup.getStudents()) {
             studentsDTO = new StudentsDTO();

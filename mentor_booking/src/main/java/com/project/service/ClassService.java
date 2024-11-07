@@ -122,9 +122,9 @@ public class ClassService {
             }
             List<Class> classList;
             if(name == null || name.isEmpty()){
-                classList = classRepository.findClassBySemesterId(semesterId, AvailableStatus.ACTIVE);
+                classList = classRepository.findClassBySemesterIdNotDeleted(semesterId, AvailableStatus.DELETED);
             }else{
-                classList = classRepository.findClassByClassNameAndSemesterId(semesterId, name, AvailableStatus.ACTIVE);
+                classList = classRepository.findClassByClassNameAndSemesterId(semesterId, name, AvailableStatus.DELETED);
             }
             List<ClassDTO> classListDTO = new ArrayList<>();
 

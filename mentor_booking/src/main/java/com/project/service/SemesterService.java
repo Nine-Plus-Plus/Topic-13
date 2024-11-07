@@ -8,15 +8,24 @@ import com.project.dto.SemesterDTO;
 import com.project.enums.AvailableStatus;
 import com.project.exception.OurException;
 import com.project.model.Semester;
+import com.project.model.Students;
+import com.project.model.Topic;
 import com.project.repository.ClassRepository;
 import com.project.repository.SemesterRepository;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.project.repository.StudentsRepository;
+import com.project.repository.TopicRepository;
 import com.project.ultis.Converter;
+import jakarta.transaction.Transactional;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,6 +33,18 @@ public class SemesterService {
 
     @Autowired
     private SemesterRepository semesterRepository;
+
+    @Autowired
+    private ClassRepository classRepository;
+
+    @Autowired
+    private StudentsRepository studentsRepository;
+
+    @Autowired
+    private TopicRepository topicRepository;
+
+    @Autowired
+    private MentorsService mentorsService;
 
     public Response createSemester(SemesterDTO createRequest) {
         Response response = new Response();
@@ -65,7 +86,7 @@ public class SemesterService {
     public Response getAllSemesters(){
         Response response = new Response();
         try {
-            List<Semester> semesterList = semesterRepository.findByAvailableStatusOrderByDateCreatedDesc(AvailableStatus.ACTIVE);
+            List<Semester> semesterList = semesterRepository.findByAvailableStatusNotDeletedOrderByDateStartDesc(AvailableStatus.DELETED);
             List<SemesterDTO> semesterListDTO = new ArrayList<>();
             if (!semesterList.isEmpty()) {
                 semesterListDTO = semesterList
@@ -122,8 +143,8 @@ public class SemesterService {
         try {
             Semester presentSemester = semesterRepository.findById(id)
                     .orElseThrow(() -> new OurException("Cannot find semester with id: "+id));
-            List<Semester> overlappingSemesters = semesterRepository.findOverlappingSemesters(
-                    newSemester.getDateStart(), newSemester.getDateEnd(), AvailableStatus.ACTIVE);
+            List<Semester> overlappingSemesters = semesterRepository.findOverlappingSemestersUpdate(
+                    newSemester.getDateStart(), newSemester.getDateEnd(), AvailableStatus.ACTIVE, id);
 
             if (!overlappingSemesters.isEmpty()) {
                 throw new OurException("Semester date range conflicts with an existing semester.");
@@ -167,4 +188,39 @@ public class SemesterService {
         }
         return response;
     }
+
+    @Scheduled(fixedRate = 60000)  // Chạy mỗi 60 giây (1 phút)
+    @Transactional
+    public void inactiveSemesterAutomatically(){
+        try {
+            List<Semester> inactiveSemester = semesterRepository.findExpiredSemester(LocalDate.now(), AvailableStatus.ACTIVE);
+            for(Semester s : inactiveSemester){
+                s.setAvailableStatus(AvailableStatus.INACTIVE);
+
+                List<Class> classList = classRepository.findClassBySemesterId(s.getId(), AvailableStatus.ACTIVE);
+                for(Class c : classList){
+                    c.setAvailableStatus(AvailableStatus.INACTIVE);
+                    c.setMentor(null);
+                    List<Students> studentsList = studentsRepository.findStudentByClassId(c.getId(), AvailableStatus.ACTIVE);
+                    for(Students std : studentsList){
+                        std.setAvailableStatus(AvailableStatus.INACTIVE);
+                        std.getUser().setAvailableStatus(AvailableStatus.INACTIVE);
+                    }
+                }
+
+                List<Topic> topicList = topicRepository.findTopicsBySemesterIdAndNotDeleted(s.getId(), AvailableStatus.DELETED);
+                for(Topic t : topicList){
+                    t.setAvailableStatus(AvailableStatus.INACTIVE);
+                }
+
+                mentorsService.generateMentorReportRating(s);
+
+                semesterRepository.save(s);
+            }
+            System.out.println("Semester inactive successfully.");
+        } catch (Exception e) {
+            System.err.println("Error while inactive semester: " + e.getMessage());
+        }
+    }
+
 }

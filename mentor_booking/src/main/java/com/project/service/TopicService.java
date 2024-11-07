@@ -243,9 +243,9 @@ public class TopicService {
         try {
             List<Topic> topicList;
             if(name == null || name.isEmpty()){
-                topicList = topicRepository.findTopicsBySemesterIdAndAvailableStatus(semesterId, AvailableStatus.ACTIVE);
+                topicList = topicRepository.findTopicsBySemesterIdAndNotDeleted(semesterId, AvailableStatus.DELETED);
             }else{
-                topicList = topicRepository.findTopicsBySemesterIdAndTopicNameAvailableStatus(semesterId, name, AvailableStatus.ACTIVE);
+                topicList = topicRepository.findTopicsBySemesterIdAndTopicNameNotDeleted(semesterId, name, AvailableStatus.DELETED);
             }
 
             if (topicList != null) {

@@ -25,14 +25,28 @@ public interface ClassRepository extends JpaRepository<Class, Long>{
             @Param("semesterId") Long semesterId,
             @Param("availableStatus") AvailableStatus status );
 
+    //ADMIN
+    @Query("SELECT c FROM Class c " +
+            "WHERE c.semester.id = :semesterId " +
+            "AND c.availableStatus <> :deletedStatus")
+    List<Class> findClassBySemesterIdNotDeleted(
+            @Param("semesterId") Long semesterId,
+            @Param("deletedStatus") AvailableStatus deletedStatus);
+
+    //ADMIN
+    @Query("SELECT c FROM Class c WHERE c.semester.id = :semesterId AND c.availableStatus <> :deletedStatus")
+    List<Class> findClassBySemesterIdExcludingDeleted(
+            @Param("semesterId") Long semesterId,
+            @Param("deletedStatus") AvailableStatus deletedStatus);
+    //ADMIN
     @Query("SELECT c FROM Class c " +
             "WHERE c.className LIKE %:className% " +
             "AND c.semester.id = :semesterId " +
-            "AND c.availableStatus = :availableStatus")
+            "AND c.availableStatus <> :deletedStatus")
     List<Class> findClassByClassNameAndSemesterId(
             @Param("semesterId") Long semesterId,
             @Param("className") String name,
-            @Param("availableStatus") AvailableStatus status );
+            @Param("deletedStatus") AvailableStatus deletedStatus);
 
     List<Class> findByAvailableStatus(AvailableStatus availableStatus);
 

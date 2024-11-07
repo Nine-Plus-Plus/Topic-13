@@ -288,15 +288,15 @@ public class StudentsService {
     public Response getStudentBySemesterId(Long semesterId, String name){
         Response response = new Response();
         try{
-            List<Class> findClass = classRepository.findClassBySemesterId(semesterId, AvailableStatus.ACTIVE);
+            List<Class> findClass = classRepository.findClassBySemesterIdExcludingDeleted(semesterId, AvailableStatus.DELETED);
             if (findClass != null && !findClass.isEmpty()) {
                 List<StudentsDTO> allStudent = new ArrayList<>();
                 for (Class c : findClass) {
                     List<Students> studentsList;
                     if(name ==null || name.isEmpty()){
-                        studentsList = studentsRepository.findStudentByClassId(c.getId(), AvailableStatus.ACTIVE);
+                        studentsList = studentsRepository.findStudentByClassIdExcludingDeleted(c.getId(), AvailableStatus.DELETED);
                     }else{
-                        studentsList = studentsRepository.findStudentByClassIdAndFullName(c.getId(), name, AvailableStatus.ACTIVE);
+                        studentsList = studentsRepository.findStudentByClassIdAndFullName(c.getId(), name, AvailableStatus.DELETED);
                     }
                     if (studentsList != null && !studentsList.isEmpty()) {
                         for (Students student : studentsList) {
@@ -426,4 +426,6 @@ public class StudentsService {
         }
         return response;
     }
+
+
 }

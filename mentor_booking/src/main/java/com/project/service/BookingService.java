@@ -247,9 +247,10 @@ public class BookingService {
                     }
                 }
 
-                List<Booking> pendingBookingList = bookingRepository.findByStatusAndMentorScheduleId(BookingStatus.PENDING, booking.getMentorSchedule().getId());
-                if (!pendingBookingList.isEmpty()) {
-                    for (Booking pendingBookings : pendingBookingList) {
+                //Reject all mentor's pending bookings base on mentor's booked schedule
+                List<Booking> remainMentorPendingBookingList = bookingRepository.findByStatusAndMentorScheduleId(BookingStatus.PENDING, booking.getMentorSchedule().getId());
+                if (!remainMentorPendingBookingList.isEmpty()) {
+                    for (Booking pendingBookings : remainMentorPendingBookingList) {
                         pendingBookings.setStatus(BookingStatus.REJECTED);
                         pendingBookings.setAvailableStatus(AvailableStatus.INACTIVE);
                         pendingBookings.setDateUpdated(LocalDateTime.now());
@@ -257,7 +258,18 @@ public class BookingService {
                         bookingRepository.save(pendingBookings);
                     }
                 }
-
+                
+                //Delete all group's other remain bookings
+                List<Booking> remainGroupPendingBookingList = bookingRepository.findByGroupIdAndAvailableStatusAndStatus(booking.getGroup().getId(), AvailableStatus.ACTIVE, BookingStatus.PENDING);
+                if (!remainGroupPendingBookingList.isEmpty()) {
+                    for (Booking pendingBookings : remainGroupPendingBookingList) {
+                        pendingBookings.setAvailableStatus(AvailableStatus.DELETED);
+                        pendingBookings.setDateUpdated(LocalDateTime.now());
+                        booking.setExpiredTime(null);
+                        bookingRepository.save(pendingBookings);
+                    }
+                }
+                
                 PointHistory pointHistory;
 
                 List<PointHistory> pointHistoryList;

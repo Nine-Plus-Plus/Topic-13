@@ -65,7 +65,10 @@ public class Converter {
         mentorsDTO.setAvailableStatus(convertMentor.getAvailableStatus());
 
         if (convertMentor.getAssignedClass() != null) {
-            mentorsDTO.setAssignedClass(convertClassToClassDTO(convertMentor.getAssignedClass()));
+            List<ClassDTO> classesDTOList = convertMentor.getAssignedClass().stream()
+                    .map(Converter::convertClassToClassDTO)
+                    .collect(Collectors.toList());
+            mentorsDTO.setAssignedClass(classesDTOList);
         }
 
         if (convertMentor.getUser() != null) {

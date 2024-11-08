@@ -35,7 +35,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long>{
     
     List<Booking> findByAvailableStatus(AvailableStatus availableStatus);
     
-    @Query("SELECT b FROM Booking b WHERE b.group.aClass.id = :classId")
+    @Query("SELECT b FROM Booking b WHERE b.group.aClass.id = :classId AND b.availableStatus <> 'DELETED'")
     List<Booking> findBookingsByClassId(
         @Param("classId") Long classId
     );
@@ -63,13 +63,13 @@ public interface BookingRepository extends JpaRepository<Booking, Long>{
     
     List<Booking> findByStatusAndMentorScheduleId(BookingStatus status, Long mentorScheduleId);
     
-    @Query("SELECT b FROM Booking b WHERE b.status = :bookingStatus AND b.expiredTime < :currentDateTime")
+    @Query("SELECT b FROM Booking b WHERE b.status = :bookingStatus AND b.expiredTime < :currentDateTime AND b.availableStatus <> 'DELETED'")
     List<Booking> findAllByStatusAndExpiredTimeBefore(
         @Param("bookingStatus") BookingStatus bookingStatus, 
         @Param("currentDateTime") LocalDateTime currentDateTime
     );
     
-    @Query("SELECT b FROM Booking b WHERE b.status = :bookingStatus AND b.mentorSchedule.availableFrom < :currentDateTime")
+    @Query("SELECT b FROM Booking b WHERE b.status = :bookingStatus AND b.mentorSchedule.availableFrom < :currentDateTime AND b.availableStatus <> 'DELETED'")
     List<Booking> findAllByStatusAndAvailableFromBefore(
         @Param("bookingStatus") BookingStatus bookingStatus, 
         @Param("currentDateTime") LocalDateTime currentDateTime

@@ -59,7 +59,9 @@ public class MentorsService {
 
     private static final String DEFAULT_AVATAR_URL = "https://mentor-booking-images.s3.amazonaws.com/images.jpeg";
 
-    // Phương thức lấy tất cả mentors
+    /**
+     *  Phương thức lấy toàn bộ danh sách mentor
+     */
     public Response getAllMentors(String name) {
         Response response = new Response();
         List<MentorsDTO> mentorsDTOList = new ArrayList<>();
@@ -94,7 +96,9 @@ public class MentorsService {
         return response;
     }
 
-    // Phương thức lấy mentor theo ID
+    /**
+     *  Phương thức lấy toàn bộ danh sách theo mentorID
+     */
     public Response getMentorById(Long id) {
         Response response = new Response();
         MentorsDTO mentorsDTO = new MentorsDTO();
@@ -121,7 +125,9 @@ public class MentorsService {
         return response;
     }
 
-
+    /**
+     *  Phương thức cập nhập thông tin của mentor
+     */
     public Response updateMentor(Long userId, CreateMentorRequest updateRequest, MultipartFile avatarFile) {
         Response response = new Response();
         try {
@@ -172,20 +178,19 @@ public class MentorsService {
                 }
             }
             // Cập nhật thông tin người dùng hiện có
-            updateUser.setUsername(updateRequest.getUsername().trim());
-            updateUser.setEmail(updateRequest.getEmail().trim());
-            updateUser.setFullName(updateRequest.getFullName().trim());
-            updateUser.setBirthDate(updateRequest.getBirthDate());
-            updateUser.setAddress(updateRequest.getAddress().trim());
-            updateUser.setPhone(updateRequest.getPhone().trim());
+            if(updateRequest.getUsername()!= null) updateUser.setUsername(updateRequest.getUsername().trim());
+            if(updateRequest.getEmail()!= null) updateUser.setEmail(updateRequest.getEmail().trim());
+            if(updateRequest.getFullName()!= null) updateUser.setFullName(updateRequest.getFullName().trim());
+            if(updateRequest.getBirthDate()!= null) updateUser.setBirthDate(updateRequest.getBirthDate());
+            if(updateRequest.getAddress()!= null) updateUser.setAddress(updateRequest.getAddress().trim());
+            if(updateRequest.getPhone()!= null) updateUser.setPhone(updateRequest.getPhone().trim());
             updateUser.setGender(updateRequest.getGender());
             updateUser.setDateUpdated(LocalDateTime.now());
             usersRepository.save(updateUser);
 
             // Cập nhật thông tin mentor
-            mentorUpdate.setMentorCode(updateRequest.getMentorCode().trim());
+            if(updateRequest.getMentorCode()!= null) mentorUpdate.setMentorCode(updateRequest.getMentorCode().trim());
             mentorUpdate.setDateUpdated(LocalDate.now());
-            mentorUpdate.setStar(updateRequest.getStar());
             mentorUpdate.setTotalTimeRemain(updateRequest.getTotalTimeRemain());
 
             // Cập nhật danh sách kỹ năng (skills)
@@ -212,6 +217,9 @@ public class MentorsService {
         return str == null || str.trim().isEmpty();
     }
 
+    /**
+     *  Phương thức tìm metor theo avaibility schedule và skills
+     */
     public Response findMentorWithNameAndSkillsAndAvaibility(String name, List<Long> skillIds, LocalDateTime availableFrom, LocalDateTime availableTo) {
         Response response = new Response();
         try {
@@ -428,6 +436,9 @@ public class MentorsService {
         return response;
     }
 
+    /**
+     *  Phương thức lấy thông tin của mentor
+     */
     public UsersDTO getMentorInformation(Long mentorId) {
         Response response = new Response();
 
@@ -448,6 +459,9 @@ public class MentorsService {
         return usersDTO;
     }
 
+    /**
+     *  Phương thức lấy danh sách kĩ năng của mentor
+     */
     public List<SkillsDTO> getSkillsByMentor(Long mentorId) {
         List<SkillsDTO> skillsDTOList = new ArrayList<>();
         List<Skills> skillsList = mentorsRepository.findByIdAndAvailableStatus(mentorId, AvailableStatus.ACTIVE).getSkills();
@@ -458,6 +472,9 @@ public class MentorsService {
         return skillsDTOList;
     }
 
+    /**
+     *  Phương thức nhập mentor từ Excel
+     */
     public Response importMentorFromExcel(MultipartFile file) {
         Response response = new Response();
         try {
@@ -486,6 +503,9 @@ public class MentorsService {
         return response;
     }
 
+    /**
+     *  Phương thức tạo mentor từ Excel
+     */
     public Response createMentorFormExcel(CreateMentorRequest request) {
         Response response = new Response();
         try{
@@ -563,6 +583,9 @@ public class MentorsService {
         return response;
     }
 
+    /**
+     *  Phương thức lấy top 3 mentor có số số sao và thời lượng booking cao nhất
+     */
     public Response getTopMentors(){
         Response response = new Response();
         List<MentorsDTO> mentorsDTOList = new ArrayList<>();
@@ -586,6 +609,9 @@ public class MentorsService {
         return response;
     }
 
+    /**
+     *  Phương thức tạo report rating cho mentor theo kì
+     */
     public void generateMentorReportRating(Semester semester){
         List<Mentors> mentorsList = mentorsRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
 

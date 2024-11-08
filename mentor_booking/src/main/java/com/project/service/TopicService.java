@@ -42,6 +42,9 @@ public class TopicService {
     @Autowired
     private ClassRepository classRepository;
 
+    /**
+     *  Phương thức tạo mới một topic
+     */
     public Response createTopic(TopicDTO createRequest) {
         Response response = new Response();
 
@@ -117,6 +120,9 @@ public class TopicService {
         return response;
     }
 
+    /**
+     *  Phương thức lấy tất cả danh sách topic
+     */
     public Response getAllTopics() {
         Response response = new Response();
         try {
@@ -138,11 +144,14 @@ public class TopicService {
             response.setMessage(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
-            response.setMessage("Error occured during get all topics " + e.getMessage());
+            response.setMessage("Error occurred during get all topics " + e.getMessage());
         }
         return response;
     }
 
+    /**
+     *  Phương thức lấy topic theo ID
+     */
     public Response getTopicById(Long id) {
         Response response = new Response();
         try {
@@ -156,20 +165,26 @@ public class TopicService {
             response.setMessage(e.getMessage());
         } catch (Exception e) {
             response.setStatusCode(500);
-            response.setMessage("Error occured during get topic " + e.getMessage());
+            response.setMessage("Error occurred during get topic " + e.getMessage());
         }
         return response;
     }
 
+    /**
+     *  Phương thức cập nhập Topic
+     */
     public Response updateTopic(Long id, Topic newTopic) {
         Response response = new Response();
         try {
+            // Kiểm tra xem topic đã tồn tại hay chưa
             Topic presentTopic = topicRepository.findById(id)
                     .orElseThrow(() -> new OurException("Cannot find topic with id: " + id));
             if (topicRepository.findByTopicNameAndAvailableStatus(newTopic.getTopicName(), AvailableStatus.ACTIVE).isPresent()
                     && !newTopic.getTopicName().equals(presentTopic.getTopicName())) {
                 throw new OurException("Topic has already existed");
             }
+
+            // Cập nhập topic
             if(newTopic.getTopicName()!=null) presentTopic.setTopicName(newTopic.getTopicName().trim());
             if(newTopic.getContext()!=null) presentTopic.setContext(newTopic.getContext());
             if(newTopic.getProblems()!=null) presentTopic.setProblems(newTopic.getProblems());
@@ -177,6 +192,7 @@ public class TopicService {
             if(newTopic.getRequirement()!=null) presentTopic.setRequirement(newTopic.getRequirement());
             if(newTopic.getNonFunctionRequirement()!=null) presentTopic.setNonFunctionRequirement(newTopic.getNonFunctionRequirement());
             presentTopic.setDateUpdated(LocalDateTime.now());
+            // Kiểm tra mentor khi update
             if(newTopic.getMentor()!=null && newTopic.getMentor().getId()!=null) {
                 Mentors mentor = mentorsRepository.findById(newTopic.getMentor().getId())
                         .orElseThrow(() -> new OurException("Cannot find mentor id"));
@@ -186,6 +202,7 @@ public class TopicService {
 
                 presentTopic.setMentor(mentor);
             }
+            // Kiểm tra sub-mentor khi update
             if(newTopic.getSubMentors()!=null && newTopic.getSubMentors().getId()!= null) {
                 Mentors subMentor = mentorsRepository.findById(newTopic.getSubMentors().getId())
                         .orElseThrow(() -> new OurException("Cannot find sub mentor id"));
@@ -195,7 +212,7 @@ public class TopicService {
 
                 presentTopic.setSubMentors(subMentor);
             } else {
-            presentTopic.setSubMentors(null);
+                presentTopic.setSubMentors(null);
             }
             if (newTopic.getSemester() != null && newTopic.getSemester().getId() != null) {
                 Semester semester = semesterRepository.findById(newTopic.getSemester().getId())
@@ -218,6 +235,9 @@ public class TopicService {
         return response;
     }
 
+    /**
+     *  Phương thức xóa Topic
+     */
     public Response deleteTopic(Long id) {
         Response response = new Response();
         try {
@@ -238,6 +258,9 @@ public class TopicService {
         return response;
     }
 
+    /**
+     *  Phương thức lấy tất cả danh sách topic theo semesterID
+     */
     public Response getTopicBySemesterId(Long semesterId, String name) {
         Response response = new Response();
         try {
@@ -268,6 +291,9 @@ public class TopicService {
         return response;
     }
 
+    /**
+     *  Phương thức lấy tất cả danh sách topic theo topicName
+     */
     public Response getTopicByName(String topicName) {
         Response response = new Response();
         try {
@@ -293,6 +319,9 @@ public class TopicService {
         return response;
     }
 
+    /**
+     *  Phương thức lấy tất cả danh sách topic mà chưa được chọn
+     */
     public Response getUnchosenTopicsInClass(Long classId) {
         Response response = new Response();
         try {
@@ -321,6 +350,9 @@ public class TopicService {
         return response;
     }
 
+    /**
+     *  Phương thức xuất topic từ file Excel
+     */
     public Response importTopicFromExcel(MultipartFile file, Long semester) {
         Response response = new Response();
         List<String> errors = new ArrayList<>();
@@ -329,7 +361,6 @@ public class TopicService {
             List<TopicDTO> excelToTopics = ExcelHelper.excelToTopics(file);
 
             for (TopicDTO topicDTO : excelToTopics) {
-
                     Response createResponse = createTopicFromExcel(topicDTO, semester);
                     if (createResponse.getStatusCode() != 200 && topicDTO.getTopicName() != null) {
                         errors.add("[" + topicDTO.getTopicName() + "] ");

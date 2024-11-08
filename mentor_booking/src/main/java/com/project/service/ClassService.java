@@ -40,6 +40,9 @@ public class ClassService {
     @Autowired
     private GroupRepository groupRepository;
 
+    /**
+     *  Phương thức tạo lớp học mới
+     */
     public Response createClass(ClassDTO inputRequest) {
         Response response = new Response();
         try {
@@ -48,13 +51,14 @@ public class ClassService {
             if (classRepository.existsByClassNameAndSemesterIdAndAvailableStatus(inputRequest.getClassName(), inputRequest.getSemester().getId(), AvailableStatus.ACTIVE)) {
                 throw new OurException("Class already exists in this semester");
             }
+            // Kiểm tra kì học đã tồn tại
             Semester semester = semesterRepository.findByIdAndAvailableStatus(inputRequest.getSemester().getId(), AvailableStatus.ACTIVE);
             if (semester == null) {
                 response.setStatusCode(400);
                 response.setMessage("No semester in the database: " + inputRequest.getSemester().getId());
                 return response;
             }
-
+            // Kiểm tra Mentor đã tồn tại
             Mentors mentor = mentorsRepository.findByIdAndAvailableStatus(inputRequest.getMentor().getId(), AvailableStatus.ACTIVE);
             if (mentor == null) {
                 response.setStatusCode(400);
@@ -62,6 +66,7 @@ public class ClassService {
                 return response;
             }
 
+            // Tạo mới một lớp học
             Class newClass = new Class();
             newClass.setClassName(inputRequest.getClassName().trim());
             newClass.setDateCreated(LocalDateTime.now());
@@ -69,8 +74,8 @@ public class ClassService {
             newClass.setMentor(mentor);
             newClass.setAvailableStatus(AvailableStatus.ACTIVE);
             classRepository.save(newClass);
+            // Xử lý thành công
             if (newClass.getId() > 0) {
-
                 ClassDTO classDto = Converter.convertClassToClassDTO(newClass);
                 response.setClassDTO(classDto);
                 response.setStatusCode(200);
@@ -86,6 +91,9 @@ public class ClassService {
         return response;
     }
 
+    /**
+     *  Phương thức lấy tất cả danh sách lớp
+     */
     public Response getAllClasses() {
         Response response = new Response();
         try {
@@ -114,16 +122,19 @@ public class ClassService {
         return response;
     }
 
+    /**
+     *  Phương thức lấy tất cả danh sách lớp theo kì học
+     */
     public Response getClassesSemesterId(Long semesterId, String name) {
         Response response = new Response();
         try {
-            if(semesterId == null){
+            if (semesterId == null) {
                 throw new OurException("Null semesterId");
             }
             List<Class> classList;
-            if(name == null || name.isEmpty()){
+            if (name == null || name.isEmpty()) {
                 classList = classRepository.findClassBySemesterIdNotDeleted(semesterId, AvailableStatus.DELETED);
-            }else{
+            } else {
                 classList = classRepository.findClassByClassNameAndSemesterId(semesterId, name, AvailableStatus.DELETED);
             }
             List<ClassDTO> classListDTO = new ArrayList<>();
@@ -151,6 +162,9 @@ public class ClassService {
         return response;
     }
 
+    /**
+     *  Phương thức lấy tất cả danh sách lớp theo ID
+     */
     public Response getClassById(Long id) {
         Response response = new Response();
         ClassDTO classDTO = new ClassDTO();
@@ -176,6 +190,9 @@ public class ClassService {
         return response;
     }
 
+    /**
+     *  Phương thức xóa lớp học
+     */
     public Response deleteClass(Long id) {
         Response response = new Response();
         try {
@@ -184,14 +201,11 @@ public class ClassService {
             deletedClass.setAvailableStatus(AvailableStatus.DELETED);
             // Unset the mentor (and update mentor status if necessary)
             Mentors mentor = deletedClass.getMentor();
-            if (mentor != null) {
-                mentor.setAvailableStatus(AvailableStatus.DELETED);
-                mentorsRepository.save(mentor);
-            }
+            mentor.setAssignedClass(null);
 
             // Update status of related students to INACTIVE or DELETED
             for (Students student : deletedClass.getStudents()) {
-                student.setAvailableStatus(AvailableStatus.DELETED);
+                student.setAClass(null);
                 studentsRepository.save(student);
             }
 
@@ -213,6 +227,9 @@ public class ClassService {
         return response;
     }
 
+    /**
+     *  Phương thức cập nhập lớp học
+     */
     public Response updateClass(Long id, Class newClass) {
         Response response = new Response();
         try {
@@ -230,7 +247,7 @@ public class ClassService {
                 response.setMessage("Mentor not found");
                 return response;
             }
-
+            // Kiểm tra kì có tồn tại hay không
             Semester semester = semesterRepository.findByIdAndAvailableStatus(newClass.getSemester().getId(), AvailableStatus.ACTIVE);
             if (semester == null) {
                 response.setStatusCode(400);
@@ -239,12 +256,11 @@ public class ClassService {
             }
 
             // Cập nhật các thông tin khác của class ngoại trừ students
-            if(newClass.getClassName() != null) presentClass.setClassName(newClass.getClassName().trim());
-            if(newClass.getSemester() != null) presentClass.setSemester(semester);
-            if(newClass.getMentor() != null) presentClass.setMentor(mentor);
+            if (newClass.getClassName() != null) presentClass.setClassName(newClass.getClassName().trim());
+            if (newClass.getSemester() != null) presentClass.setSemester(semester);
+            if (newClass.getMentor() != null) presentClass.setMentor(mentor);
 
             classRepository.save(presentClass);
-
             ClassDTO dto = Converter.convertClassToClassDTO(presentClass);
             response.setClassDTO(dto);
             response.setStatusCode(200);
@@ -258,29 +274,35 @@ public class ClassService {
         }
         return response;
     }
-    public Response getClassesByName(String className){
+
+    /**
+     *  Phương thức tìm lớp học theo tên
+     */
+    public Response getClassesByName(String className) {
         Response response = new Response();
-        try{
+        try {
             List<Class> topicList = classRepository.findByClassNameContainingIgnoreCase(className);
-            if (topicList != null){
+            if (topicList != null) {
                 List<ClassDTO> classListDTO = topicList.stream()
                         .map(Converter::convertClassToClassDTO)
                         .collect(Collectors.toList());
                 response.setClassDTOList(classListDTO);
                 response.setStatusCode(200);
                 response.setMessage("Classes fetched successfully");
-            }else throw new OurException("Cannot find classes with the input: "+className);
-        }catch(OurException e){
+            } else throw new OurException("Cannot find classes with the input: " + className);
+        } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
-        }catch(Exception e){
+        } catch (Exception e) {
             response.setStatusCode(500);
             response.setMessage("Error occurred during get all classes " + e.getMessage());
         }
         return response;
     }
 
-
+    /**
+     *  Phương thức lấy tất danh sách mentor chưa có lớp học
+     */
     public Response getUnassignedMentors() {
         Response response = new Response();
         try {
@@ -297,16 +319,16 @@ public class ClassService {
                     .filter(mentor -> !assignedMentors.contains(mentor))
                     .collect(Collectors.toList());
 
-            // Chuyển đổi sang DTO nếu cần thiết
+            // Chuyển đổi sang DTO
             unassignedMentorsDTOs = unassignedMentors.stream()
                     .map(Converter::convertMentorToMentorDTO)
                     .collect(Collectors.toList());
 
-            if(!unassignedMentorsDTOs.isEmpty()){
+            if (!unassignedMentorsDTOs.isEmpty()) {
                 response.setMentorsDTOList(unassignedMentorsDTOs);
                 response.setStatusCode(200);
                 response.setMessage("Unassigned mentors fetched successfully");
-            }else{
+            } else {
                 response.setMentorsDTOList(unassignedMentorsDTOs);
                 response.setStatusCode(400);
                 response.setMessage("Class not found");
@@ -321,6 +343,9 @@ public class ClassService {
         return response;
     }
 
+    /**
+     *  Phương thức lấy danh sách lớp theo mentorID
+     */
     public Response getClassByMentorId(Long mentorId) {
         Response response = new Response();
         try {

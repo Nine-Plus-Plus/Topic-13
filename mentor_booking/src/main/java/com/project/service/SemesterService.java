@@ -211,42 +211,42 @@ public class SemesterService {
     /**
      * Phương thức tự động chuyển học kỳ sang trạng thái không hoạt động sau khi hết hạn
      */
-//    @Scheduled(fixedRate = 60000)  // Chạy mỗi 60 giây (1 phút)
-//    @Transactional
-//    public void inactiveSemesterAutomatically() {
-//        try {
-//            // Lấy danh sách các học kỳ đã hết hạn và đang ở trạng thái hoạt động
-//            List<Semester> inactiveSemester = semesterRepository.findExpiredSemester(LocalDate.now(), AvailableStatus.ACTIVE);
-//            for (Semester s : inactiveSemester) {
-//                s.setAvailableStatus(AvailableStatus.INACTIVE);
-//
-//                // Vô hiệu hóa tất cả các lớp và sinh viên trong học kỳ hết hạn
-//                List<Class> classList = classRepository.findClassBySemesterId(s.getId(), AvailableStatus.ACTIVE);
-//                for (Class c : classList) {
-//                    c.setAvailableStatus(AvailableStatus.INACTIVE);
-//                    c.setMentor(null);
-//                    List<Students> studentsList = studentsRepository.findStudentByClassId(c.getId(), AvailableStatus.ACTIVE);
-//                    for (Students std : studentsList) {
-//                        std.setAvailableStatus(AvailableStatus.INACTIVE);
-//                        std.getUser().setAvailableStatus(AvailableStatus.INACTIVE);
-//                    }
-//                }
-//
-//                // Vô hiệu hóa tất cả các đề tài liên quan đến học kỳ
-//                List<Topic> topicList = topicRepository.findTopicsBySemesterIdAndNotDeleted(s.getId(), AvailableStatus.DELETED);
-//                for (Topic t : topicList) {
-//                    t.setAvailableStatus(AvailableStatus.INACTIVE);
-//                }
-//
-//                // Tạo báo cáo đánh giá mentor
-//                mentorsService.generateMentorReportRating(s);
-//                // Lưu thông tin học kỳ đã cập nhật
-//                semesterRepository.save(s);
-//            }
-//            System.out.println("Semester inactive successfully.");
-//        } catch (Exception e) {
-//            System.err.println("Error while inactive semester: " + e.getMessage());
-//        }
-//    }
+    @Scheduled(fixedRate = 60000)  // Chạy mỗi 60 giây (1 phút)
+    @Transactional
+    public void inactiveSemesterAutomatically() {
+        try {
+            // Lấy danh sách các học kỳ đã hết hạn và đang ở trạng thái hoạt động
+            List<Semester> inactiveSemester = semesterRepository.findExpiredSemester(LocalDate.now(), AvailableStatus.ACTIVE);
+            for (Semester s : inactiveSemester) {
+                s.setAvailableStatus(AvailableStatus.INACTIVE);
+
+                // Vô hiệu hóa tất cả các lớp và sinh viên trong học kỳ hết hạn
+                List<Class> classList = classRepository.findClassBySemesterId(s.getId(), AvailableStatus.ACTIVE);
+                for (Class c : classList) {
+                    c.setAvailableStatus(AvailableStatus.INACTIVE);
+                    c.setMentor(null);
+                    List<Students> studentsList = studentsRepository.findStudentByClassId(c.getId(), AvailableStatus.ACTIVE);
+                    for (Students std : studentsList) {
+                        std.setAvailableStatus(AvailableStatus.INACTIVE);
+                        std.getUser().setAvailableStatus(AvailableStatus.INACTIVE);
+                    }
+                }
+
+                // Vô hiệu hóa tất cả các đề tài liên quan đến học kỳ
+                List<Topic> topicList = topicRepository.findTopicsBySemesterIdAndNotDeleted(s.getId(), AvailableStatus.DELETED);
+                for (Topic t : topicList) {
+                    t.setAvailableStatus(AvailableStatus.INACTIVE);
+                }
+
+                // Tạo báo cáo đánh giá mentor
+                mentorsService.generateMentorReportRating(s);
+                // Lưu thông tin học kỳ đã cập nhật
+                semesterRepository.save(s);
+            }
+            System.out.println("Semester inactive successfully.");
+        } catch (Exception e) {
+            System.err.println("Error while inactive semester: " + e.getMessage());
+        }
+    }
 
 }

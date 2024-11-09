@@ -609,6 +609,7 @@ public class MentorsService {
             mentorReportRepository.save(report);
 
             m.setStar(5.0f);
+            m.setTotalTimeRemain(150.0f);
             mentorsRepository.save(m);
         }
     }
@@ -616,6 +617,11 @@ public class MentorsService {
     public Response getMentorStarsReportBySemesterId(Long semesterId) {
         Response response = new Response();
         try {
+
+            if (semesterId == null) {
+                throw new OurException("Semester ID cannot be null");
+            }
+
             List<MentorReport> report = mentorReportRepository.findBySemesterId(semesterId);
             if (!report.isEmpty()) {
                 List<MentorReportDTO> reportDTO = report

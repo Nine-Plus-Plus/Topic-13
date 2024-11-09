@@ -357,4 +357,14 @@ public class Converter {
 
         return reviewsDTO;
     }
+    
+    public static MentorReportDTO convertReportToReportDTO(MentorReport convertReport){
+        MentorReportDTO mentorReportDTO = new MentorReportDTO();
+        mentorReportDTO.setId(convertReport.getId());
+        mentorReportDTO.setMentorsDTO(convertMentorToMentorDTO(convertReport.getMentor()));
+        mentorReportDTO.setSemesterDTO(convertSemesterToSemesterDTO(convertReport.getSemester()));
+        mentorReportDTO.setStarRating(convertReport.getStarRating());
+        
+        return mentorReportDTO;
+    }
 }

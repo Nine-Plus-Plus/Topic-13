@@ -199,9 +199,6 @@ public class ClassService {
             Class deletedClass = classRepository.findById(id)
                     .orElseThrow(() -> new OurException("Cannot find class with id: " + id));
             deletedClass.setAvailableStatus(AvailableStatus.DELETED);
-            // Unset the mentor (and update mentor status if necessary)
-            Mentors mentor = deletedClass.getMentor();
-            mentor.setAssignedClass(null);
 
             // Update status of related students to INACTIVE or DELETED
             for (Students student : deletedClass.getStudents()) {

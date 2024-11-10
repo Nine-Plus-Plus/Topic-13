@@ -27,6 +27,8 @@ public class Response {
     private List<GroupDTO> groupDTOList;
     private MeetingDTO meetingDTO;
     private List<MeetingDTO> meetingDTOList;
+    private MentorReportDTO mentorReportDTO;
+    private List<MentorReportDTO> mentorReportDTOList;
     private MentorScheduleDTO mentorScheduleDTO;
     private List<MentorScheduleDTO> mentorScheduleDTOList;
     private MentorsDTO mentorsDTO;

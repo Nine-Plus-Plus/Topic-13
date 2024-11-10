@@ -44,6 +44,9 @@ public class NotificationService {
     @Autowired
     EmailServiceImpl emailService;
 
+    /**
+     *  Phương thức tạo tin nhắn cho hệ thống
+     */
     public Response createNotification(NotificationsDTO notificationsDTO) {
         Response response = new Response();
         try {
@@ -91,7 +94,7 @@ public class NotificationService {
                 }
             }
 
-            // tạo mail
+            // Tạo email thông báo và gửi tới người nhận
             EmailRequest emailRequest = new EmailRequest();
             emailRequest.setRecipient(reciver.getEmail());
             emailRequest.setMsgBody(notificationsDTO.getMessage());

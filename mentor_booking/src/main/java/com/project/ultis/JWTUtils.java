@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class JWTUtils {
-    private static final long EXPIRATION_TIME = 86400000L; // 24 hours
+    private static final long EXPIRATION_TIME = 1800000L; // 30 minutes
     private final SecretKey Key;
 
     public JWTUtils() {

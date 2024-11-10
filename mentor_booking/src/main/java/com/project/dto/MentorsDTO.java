@@ -21,7 +21,7 @@ public class MentorsDTO {
     private List<SkillsDTO> skills;
     private List<BookingDTO> bookings;
     private List<MentorScheduleDTO> mentorSchedules;
-    private ClassDTO assignedClass;
+    private List<ClassDTO> assignedClass;
     private List<TopicDTO> topicDTOS;
     private List<TopicDTO> topicDTOSForSubMentor;
     private AvailableStatus availableStatus;

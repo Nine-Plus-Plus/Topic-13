@@ -42,14 +42,22 @@ public interface StudentsRepository extends JpaRepository<Students, Long>{
             @Param("classId") Long classId,
             @Param("availableStatus") AvailableStatus status);
 
+    //ADMIN
+    @Query("SELECT s FROM Students s WHERE s.aClass.id = :classId AND s.availableStatus <> :deletedStatus")
+    List<Students> findStudentByClassIdExcludingDeleted(
+            @Param("classId") Long classId,
+            @Param("deletedStatus") AvailableStatus deletedStatus);
+
     @Query("SELECT s FROM Students s " +
             "WHERE s.aClass.id = :classId " +
             "AND s.user.fullName LIKE %:fullName% " +
-            "AND s.availableStatus = :availableStatus")
+            "AND s.availableStatus <> :deletedStatus")
     List<Students> findStudentByClassIdAndFullName(
             @Param("classId") Long classId,
             @Param("fullName") String name,
-            @Param("availableStatus") AvailableStatus status);
+            @Param("deletedStatus") AvailableStatus deletedStatus);
+
+    List<Students> findByAvailableStatusNot(AvailableStatus status);
 
     List<Students> findByAvailableStatus(AvailableStatus status);
 

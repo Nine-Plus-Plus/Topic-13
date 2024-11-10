@@ -23,10 +23,10 @@ public class Topic {
     @Column(name = "topic_name")
     private String topicName;
 
-    @Column(name = "context")
+    @Column(name = "context", columnDefinition = "LONGTEXT")
     private String context;
 
-    @Column(name = "problems")
+    @Column(name = "problems", columnDefinition = "LONGTEXT")
     private String problems;
 
     @Column(name = "actor")

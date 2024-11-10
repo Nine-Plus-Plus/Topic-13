@@ -55,8 +55,11 @@ public class StudentsController {
     }
 
     @PostMapping("/admin/import-student")
-    public Response importStudents(@RequestParam("file") MultipartFile file) {
-        return studentsService.importStudentsFromExcel(file);
+    public Response importStudents(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("semester") Long semester
+    ) {
+        return studentsService.importStudentsFromExcel(file, semester);
     }
 
     @GetMapping("/admin/get-students-by-semester/{semesterId}")

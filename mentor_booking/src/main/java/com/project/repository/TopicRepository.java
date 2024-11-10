@@ -12,20 +12,22 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TopicRepository extends JpaRepository<Topic, Long> {
 
-    Optional<Topic> findByTopicName(String topicName);
+    Optional<Topic> findByTopicNameAndAvailableStatus(String topicName, AvailableStatus availableStatus);
 
-    @Query("SELECT t FROM Topic t WHERE t.semester.id = :semesterId and t.availableStatus = :availableStatus")
-    List<Topic> findTopicsBySemesterIdAndAvailableStatus(@Param("semesterId") Long semesterId,
-            @Param("availableStatus") AvailableStatus availableStatus);
+    //ADMIN
+    @Query("SELECT t FROM Topic t WHERE t.semester.id = :semesterId " +
+            "AND t.availableStatus <> :deletedStatus")
+    List<Topic> findTopicsBySemesterIdAndNotDeleted(@Param("semesterId") Long semesterId,
+                                                    @Param("deletedStatus") AvailableStatus deletedStatus);
 
     @Query("SELECT t FROM Topic t " +
             "WHERE t.semester.id = :semesterId " +
             "AND t.topicName LIKE %:topicName% " +
-            "AND t.availableStatus = :availableStatus")
-    List<Topic> findTopicsBySemesterIdAndTopicNameAvailableStatus(
+            "AND t.availableStatus <> :deletedStatus")
+    List<Topic> findTopicsBySemesterIdAndTopicNameNotDeleted(
             @Param("semesterId") Long semesterId,
             @Param("topicName") String name,
-            @Param("availableStatus") AvailableStatus availableStatus);
+            @Param("deletedStatus") AvailableStatus deletedStatus);
 
 //    @Query("SELECT t FROM Topic t WHERE t.topic_name LIKE %:topicName%")
     List<Topic> findByTopicNameContainingIgnoreCaseAndAvailableStatus(String topicName, AvailableStatus availableStatus);

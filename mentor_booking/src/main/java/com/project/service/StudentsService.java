@@ -15,6 +15,7 @@ import com.project.repository.UsersRepository;
 import com.project.security.AwsS3Service;
 import com.project.ultis.Converter;
 import com.project.ultis.ExcelHelper;
+import com.project.ultis.Ultis;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -49,7 +50,15 @@ public class StudentsService {
 
     @Autowired
     private RoleRepository roleRepository;
-    // Phương thức lấy tất cả sinh viên
+
+    @Autowired
+    private EmailServiceImpl emailService;
+
+    private static final String DEFAULT_AVATAR_URL = "https://mentor-booking-images.s3.amazonaws.com/images.jpeg";
+
+    /**
+     *  Phương thức lây tất cả danh sách học sinh
+     */
     public Response getAllStudents() {
         Response response = new Response();
         try {
@@ -78,7 +87,9 @@ public class StudentsService {
         return response;
     }
 
-    // Phương thức lấy sinh viên theo ID
+    /**
+     *  Phương thức lây tất cả danh sách học sinh theo studentID
+     */
     public Response getStudentById(Long id) {
         Response response = new Response();
         try {
@@ -104,6 +115,9 @@ public class StudentsService {
         return response;
     }
 
+    /**
+     *  Phương thức lây tất cả danh sách học sinh theo tên và chuyên ngành
+     */
     public Response findStudentByNameAndExpertise(Long classId, String name, String expertise) {
         Response response = new Response();
         try {
@@ -168,6 +182,9 @@ public class StudentsService {
         return str == null || str.trim().isEmpty();
     }
 
+    /**
+     *  Phương thức cập nhập sinh viên
+     */
     public Response updateStudent(Long userId, CreateStudentRequest updateRequest, MultipartFile avatarFile) {
         Response response = new Response();
         try {
@@ -220,23 +237,23 @@ public class StudentsService {
             Class aClass = classRepository.findById(updateRequest.getAClass().getId())
                     .orElseThrow(() -> new OurException("Class not found"));
             // Cập nhật thông tin Users
-            updateUser.setUsername(updateRequest.getUsername().trim());
-            updateUser.setEmail(updateRequest.getEmail().trim());
-            updateUser.setFullName(updateRequest.getFullName().trim());
-            updateUser.setBirthDate(updateRequest.getBirthDate());
-            updateUser.setAddress(updateRequest.getAddress().trim());
-            updateUser.setPhone(updateRequest.getPhone().trim());
-            updateUser.setGender(updateRequest.getGender());
+            if(updateRequest.getUsername()!= null) updateUser.setUsername(updateRequest.getUsername().trim());
+            if(updateRequest.getEmail()!= null) updateUser.setEmail(updateRequest.getEmail().trim());
+            if(updateRequest.getFullName()!= null) updateUser.setFullName(updateRequest.getFullName().trim());
+            if(updateRequest.getBirthDate()!= null) updateUser.setBirthDate(updateRequest.getBirthDate());
+            if(updateRequest.getAddress()!= null) updateUser.setAddress(updateRequest.getAddress().trim());
+            if(updateRequest.getPhone()!= null) updateUser.setPhone(updateRequest.getPhone().trim());
+            if(updateRequest.getGender()!= null) updateUser.setGender(updateRequest.getGender());
             updateUser.setDateUpdated(LocalDateTime.now());
             updateUser.setAvailableStatus(AvailableStatus.ACTIVE);
             usersRepository.save(updateUser);
 
             // Tạo đối tượng Student mới
             updateStudent.setUser(updateUser);
-            updateStudent.setExpertise(updateRequest.getExpertise().trim());
-            updateStudent.setStudentCode(updateRequest.getStudentCode().trim());
+            if(updateRequest.getExpertise()!= null) updateStudent.setExpertise(updateRequest.getExpertise().trim());
+            if(updateRequest.getStudentCode()!= null) updateStudent.setStudentCode(updateRequest.getStudentCode().trim());
             updateStudent.setDateUpdated(LocalDate.now());
-            updateStudent.setAClass(aClass);
+            if(aClass!=null) updateStudent.setAClass(aClass);
             updateStudent.setAvailableStatus(AvailableStatus.ACTIVE);
             studentsRepository.save(updateStudent);
 
@@ -255,6 +272,9 @@ public class StudentsService {
         return response;
     }
 
+    /**
+     *  Phương thức tìm danh sách sinh viên không có trong group
+     */
     public Response findStudentsNotInGroup(Long classId){
         Response response = new Response();
         try {
@@ -279,18 +299,21 @@ public class StudentsService {
         return response;
     }
 
+    /**
+     *  Phương thức tìm danh sách sinh viên theo kì học
+     */
     public Response getStudentBySemesterId(Long semesterId, String name){
         Response response = new Response();
         try{
-            List<Class> findClass = classRepository.findClassBySemesterId(semesterId, AvailableStatus.ACTIVE);
+            List<Class> findClass = classRepository.findClassBySemesterIdExcludingDeleted(semesterId, AvailableStatus.DELETED);
             if (findClass != null && !findClass.isEmpty()) {
                 List<StudentsDTO> allStudent = new ArrayList<>();
                 for (Class c : findClass) {
                     List<Students> studentsList;
                     if(name ==null || name.isEmpty()){
-                        studentsList = studentsRepository.findStudentByClassId(c.getId(), AvailableStatus.ACTIVE);
+                        studentsList = studentsRepository.findStudentByClassIdExcludingDeleted(c.getId(), AvailableStatus.DELETED);
                     }else{
-                        studentsList = studentsRepository.findStudentByClassIdAndFullName(c.getId(), name, AvailableStatus.ACTIVE);
+                        studentsList = studentsRepository.findStudentByClassIdAndFullName(c.getId(), name, AvailableStatus.DELETED);
                     }
                     if (studentsList != null && !studentsList.isEmpty()) {
                         for (Students student : studentsList) {
@@ -315,40 +338,29 @@ public class StudentsService {
         return response;
     }
 
-    public Response importStudentsFromExcel(MultipartFile file){
+    /**
+     *  Phương thức nhập sinh viên bằng excel
+     */
+    public Response importStudentsFromExcel(MultipartFile file, Long semesterId){
         Response response = new Response();
         try{
             List<CreateStudentRequest> studentRequests = ExcelHelper.excelToStudents(file);
-
             List<String> errors = new ArrayList<>();
+
             for (CreateStudentRequest request : studentRequests) {
-                try {
-                    Response createResponse = createStudentFormExcel(request);
-                    if (createResponse.getStatusCode() != 200) {
-                        errors.add("Error creating student: " + request.getUsername() +
-                                " [Username: " + request.getUsername() +
-                                ", Email: " + request.getEmail() +
-                                ", Password: " + request.getPassword() +
-                                ", FullName: " + request.getFullName() +
-                                ", BirthDate: " + request.getBirthDate() +
-                                ", Address: " + request.getAddress() +
-                                ", Phone: " + request.getPhone() +
-                                ", Gender: " + request.getGender() +
-                                ", Class Name: " + request.getClassName() +
-                                ", Expertise: " + request.getExpertise() +
-                                ", StudentCode: " + request.getStudentCode() + "]");
-                    }
-                } catch (OurException e) {
-                    errors.add("Error creating student: " + request.getUsername() + " - " + e.getMessage());
+                Response createResponse = createStudentFormExcel(request, semesterId);
+                if (createResponse.getStatusCode() != 200 && request.getFullName() != null) {
+                        errors.add(" [" + request.getFullName() + "] ");
                 }
             }
             if (!errors.isEmpty()) {
                 response.setStatusCode(400);
-                response.setMessage(String.join(", ", errors));
+                response.setMessage("Failed to import some students: " + String.join(", ", errors));
             } else {
                 response.setStatusCode(200);
-                response.setMessage("All students created successfully");
+                response.setMessage("All students imported successfully");
             }
+
         } catch (OurException e) {
             response.setStatusCode(400);
             response.setMessage(e.getMessage());
@@ -359,7 +371,10 @@ public class StudentsService {
         return response;
     }
 
-    public Response createStudentFormExcel(CreateStudentRequest request){
+    /**
+     *  Phương thức tao sinh viên khi nhập excel
+     */
+    public Response createStudentFormExcel(CreateStudentRequest request, Long semesterId){
         Response response = new Response();
         try{
             // Kiểm tra nếu username hoặc email đã tồn tại
@@ -377,7 +392,7 @@ public class StudentsService {
                 throw new OurException("StudentCode already exists");
             }
             // Kiểm tra Class
-            Class aClass = classRepository.findByClassNameContainingIgnoreCaseAndAvailableStatus(request.getClassName(), AvailableStatus.ACTIVE);
+            Class aClass = classRepository.findByClassNameContainingIgnoreCaseAndSemesterIdAndAvailableStatus(request.getClassName(),semesterId, AvailableStatus.ACTIVE);
             if (aClass == null) {
                 throw new OurException("Class not found");
             }
@@ -387,7 +402,7 @@ public class StudentsService {
                     .orElseThrow(() -> new OurException("No role name"));
 
             // Mã hóa mật khẩu
-            String encodedPassword = passwordEncoder.encode(request.getPassword());
+            String encodedPassword = passwordEncoder.encode(emailService.sendPasswordCreateUser(request.getEmail().trim(), request.getUsername()).trim());
 
             // Tạo đối tượng User mới
             Users newUser = new Users();
@@ -402,7 +417,7 @@ public class StudentsService {
             newUser.setDateCreated(LocalDateTime.now());
             newUser.setRole(role);
             newUser.setAvailableStatus(AvailableStatus.ACTIVE);
-            newUser.setAvatar("https://mentor-booking-images.s3.amazonaws.com/images.jpeg");
+            newUser.setAvatar(DEFAULT_AVATAR_URL);
 
             usersRepository.save(newUser);
 
@@ -434,4 +449,6 @@ public class StudentsService {
         }
         return response;
     }
+
+
 }

@@ -665,7 +665,7 @@ public class BookingService {
     public Response getBookingBySemesterId(Long semesterId) {
         Response response = new Response();
         try {
-            List<com.project.model.Class> findClass = classRepository.findClassBySemesterId(semesterId, AvailableStatus.ACTIVE);
+            List<com.project.model.Class> findClass = classRepository.findClassBySemesterIdExcludingDeleted(semesterId, AvailableStatus.DELETED);
 
             if (findClass != null && !findClass.isEmpty()) {
                 List<BookingDTO> allBookings = new ArrayList<>();

@@ -110,6 +110,8 @@ public class BookingService {
             booking.setAvailableStatus(AvailableStatus.ACTIVE);
 
             booking.setExpiredTime(LocalDateTime.now().plusHours(12));
+            
+            bookingRepository.save(booking);
 
             PointHistory pointHistory;
 
@@ -145,7 +147,6 @@ public class BookingService {
             }
             groupRepository.save(group);
 
-            bookingRepository.save(booking);
 
             if (booking.getId() > 0) {
                 BookingDTO dto = Converter.convertBookingToBookingDTO(booking);

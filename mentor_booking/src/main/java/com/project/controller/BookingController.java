@@ -73,6 +73,12 @@ public class BookingController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
     
+    @PostMapping("/student/cancel-pending-booking/{bookingId}")
+    public ResponseEntity<Response> cancelPedingBooking(@PathVariable Long bookingId) {
+        Response response = bookingService.cancelPendingBooking(bookingId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    } 
+    
     @GetMapping("/user/get-bookings-by-mentor-id/")
     public ResponseEntity<Response> getBookingsByMentorId(
             @RequestParam(required = false) Long mentorId,

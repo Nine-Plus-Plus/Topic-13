@@ -52,46 +52,42 @@ public class ExcelHelper {
                 }
 
                 if (row.getCell(2) != null && row.getCell(2).getCellType() == CellType.STRING) {
-                    studentRequest.setPassword(row.getCell(2).getStringCellValue());
+                    studentRequest.setFullName(row.getCell(2).getStringCellValue());
                 }
 
-                if (row.getCell(3) != null && row.getCell(3).getCellType() == CellType.STRING) {
-                    studentRequest.setFullName(row.getCell(3).getStringCellValue());
+                if (row.getCell(3) != null && row.getCell(3).getCellType() == CellType.NUMERIC) {
+                    studentRequest.setBirthDate(row.getCell(3).getDateCellValue().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
                 }
 
-                if (row.getCell(4) != null && row.getCell(4).getCellType() == CellType.NUMERIC) {
-                    studentRequest.setBirthDate(row.getCell(4).getDateCellValue().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+                if (row.getCell(4) != null && row.getCell(4).getCellType() == CellType.STRING) {
+                    studentRequest.setAddress(row.getCell(4).getStringCellValue());
                 }
 
-                if (row.getCell(5) != null && row.getCell(5).getCellType() == CellType.STRING) {
-                    studentRequest.setAddress(row.getCell(5).getStringCellValue());
-                }
-
-                if (row.getCell(6) != null) {
-                    if (row.getCell(6).getCellType() == CellType.NUMERIC) {
+                if (row.getCell(5) != null) {
+                    if (row.getCell(5).getCellType() == CellType.NUMERIC) {
                         // Chuyển đổi số thành chuỗi và bỏ phần thập phân
-                        studentRequest.setPhone(String.valueOf((long) row.getCell(6).getNumericCellValue()));
-                    } else if (row.getCell(6).getCellType() == CellType.STRING) {
-                        studentRequest.setPhone(row.getCell(6).getStringCellValue());
+                        studentRequest.setPhone(String.valueOf((long) row.getCell(5).getNumericCellValue()));
+                    } else if (row.getCell(5).getCellType() == CellType.STRING) {
+                        studentRequest.setPhone(row.getCell(5).getStringCellValue());
                     }
                 }
 
-                if (row.getCell(7) != null && row.getCell(7).getCellType() == CellType.STRING) {
-                    studentRequest.setGender(Gender.valueOf(row.getCell(7).getStringCellValue()));
+                if (row.getCell(6) != null && row.getCell(6).getCellType() == CellType.STRING) {
+                    studentRequest.setGender(Gender.valueOf(row.getCell(6).getStringCellValue()));
                 }
 
-                if (row.getCell(8) != null && row.getCell(8).getCellType() == CellType.STRING) {
-                    studentRequest.setStudentCode(row.getCell(8).getStringCellValue());
+                if (row.getCell(7) != null && row.getCell(7).getCellType() == CellType.STRING) {
+                    studentRequest.setStudentCode(row.getCell(7).getStringCellValue());
                 }
 
                 // Thêm cột expertise
-                if (row.getCell(9) != null && row.getCell(9).getCellType() == CellType.STRING) {
-                    studentRequest.setExpertise(row.getCell(9).getStringCellValue());
+                if (row.getCell(8) != null && row.getCell(8).getCellType() == CellType.STRING) {
+                    studentRequest.setExpertise(row.getCell(8).getStringCellValue());
                 }
 
                 // Thêm cột className
-                if (row.getCell(10) != null && row.getCell(10).getCellType() == CellType.STRING) {
-                    studentRequest.setClassName(row.getCell(10).getStringCellValue());
+                if (row.getCell(9) != null && row.getCell(9).getCellType() == CellType.STRING) {
+                    studentRequest.setClassName(row.getCell(9).getStringCellValue());
                 }
 
                 // Thêm đối tượng CreateStudentRequest vào danh sách
@@ -132,41 +128,37 @@ public class ExcelHelper {
                 }
 
                 if (row.getCell(2) != null && row.getCell(2).getCellType() == CellType.STRING) {
-                    mentorRequest.setPassword(row.getCell(2).getStringCellValue());
+                    mentorRequest.setFullName(row.getCell(2).getStringCellValue());
                 }
 
-                if (row.getCell(3) != null && row.getCell(3).getCellType() == CellType.STRING) {
-                    mentorRequest.setFullName(row.getCell(3).getStringCellValue());
+                if (row.getCell(3) != null && row.getCell(3).getCellType() == CellType.NUMERIC) {
+                    mentorRequest.setBirthDate(row.getCell(3).getDateCellValue().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
                 }
 
-                if (row.getCell(4) != null && row.getCell(4).getCellType() == CellType.NUMERIC) {
-                    mentorRequest.setBirthDate(row.getCell(4).getDateCellValue().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+                if (row.getCell(4) != null && row.getCell(4).getCellType() == CellType.STRING) {
+                    mentorRequest.setAddress(row.getCell(4).getStringCellValue());
                 }
 
-                if (row.getCell(5) != null && row.getCell(5).getCellType() == CellType.STRING) {
-                    mentorRequest.setAddress(row.getCell(5).getStringCellValue());
-                }
-
-                if (row.getCell(6) != null) {
-                    if (row.getCell(6).getCellType() == CellType.NUMERIC) {
+                if (row.getCell(5) != null) {
+                    if (row.getCell(5).getCellType() == CellType.NUMERIC) {
                         // Chuyển đổi số thành chuỗi và bỏ phần thập phân
-                        mentorRequest.setPhone(String.valueOf((long) row.getCell(6).getNumericCellValue()));
-                    } else if (row.getCell(6).getCellType() == CellType.STRING) {
-                        mentorRequest.setPhone(row.getCell(6).getStringCellValue());
+                        mentorRequest.setPhone(String.valueOf((long) row.getCell(5).getNumericCellValue()));
+                    } else if (row.getCell(5).getCellType() == CellType.STRING) {
+                        mentorRequest.setPhone(row.getCell(5).getStringCellValue());
                     }
                 }
 
-                if (row.getCell(7) != null && row.getCell(7).getCellType() == CellType.STRING) {
-                    mentorRequest.setGender(Gender.valueOf(row.getCell(7).getStringCellValue()));
+                if (row.getCell(6) != null && row.getCell(6).getCellType() == CellType.STRING) {
+                    mentorRequest.setGender(Gender.valueOf(row.getCell(6).getStringCellValue()));
                 }
 
-                if (row.getCell(8) != null && row.getCell(8).getCellType() == CellType.STRING) {
-                    mentorRequest.setMentorCode(row.getCell(8).getStringCellValue());
+                if (row.getCell(7) != null && row.getCell(7).getCellType() == CellType.STRING) {
+                    mentorRequest.setMentorCode(row.getCell(7).getStringCellValue());
                 }
 
                 // Thêm cột skills
-                if (row.getCell(9) != null && row.getCell(9).getCellType() == CellType.STRING) {
-                    String skillsString = row.getCell(9).getStringCellValue();
+                if (row.getCell(8) != null && row.getCell(8).getCellType() == CellType.STRING) {
+                    String skillsString = row.getCell(8).getStringCellValue();
                     List<String> skillsList = Arrays.stream(skillsString.split(","))
                             .map(String::trim)
                             .collect(Collectors.toList());
@@ -220,13 +212,13 @@ public class ExcelHelper {
 
                 if (row.getCell(4) != null && row.getCell(4).getCellType() == CellType.STRING) {
                     String requirementString = row.getCell(4).getStringCellValue();
-                    List<String> requirementList = Arrays.asList(requirementString.split(","));
+                    List<String> requirementList = Arrays.asList(requirementString.split("\\."));
                     topicRequest.setRequirement(requirementList);
                 }
 
                 if (row.getCell(5) != null && row.getCell(5).getCellType() == CellType.STRING) {
                     String nonFuncRequirementString = row.getCell(5).getStringCellValue();
-                    List<String> nonFuncReqList = Arrays.asList(nonFuncRequirementString.split(","));
+                    List<String> nonFuncReqList = Arrays.asList(nonFuncRequirementString.split("\\."));
                     topicRequest.setNonFunctionRequirement(nonFuncReqList);
                 }
 
@@ -236,10 +228,6 @@ public class ExcelHelper {
 
                 if (row.getCell(7) != null && row.getCell(7).getCellType() == CellType.STRING) {
                     topicRequest.setSubMentorName(row.getCell(7).getStringCellValue());
-                }
-
-                if (row.getCell(8) != null && row.getCell(8).getCellType() == CellType.STRING) {
-                    topicRequest.setSemesterName(  row.getCell(8).getStringCellValue());
                 }
 
                 topicRequests.add(topicRequest);

@@ -14,6 +14,7 @@ public class GroupDTO {
     private Long id;
     private String groupName;
     private int totalPoint;
+    private String fileURL;
     private LocalDate dateCreated;
     private LocalDate dateUpdated;
     private List<StudentsDTO> students;  // Một nhóm có thể chứa nhiều sinh viên

@@ -6,6 +6,7 @@ import com.project.exception.OurException;
 import com.project.repository.GroupRepository;
 import com.project.repository.UsersRepository;
 import com.project.ultis.JWTUtils;
+import com.project.ultis.Ultis;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,16 +40,21 @@ public class EmailServiceImpl {
     @Value("${spring.mail.username}")
     private String sender;
 
+    /**
+     * Phương thức gửi email dạng HTML
+     */
     public Response sendHtmlMail(EmailRequest emailRequest) {
         Response response = new Response();
         try {
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
 
+            // Thiết lập thông tin người gửi, người nhận và tiêu đề email
             helper.setFrom(sender);
             helper.setTo(emailRequest.getRecipient());
             helper.setSubject(emailRequest.getSubject());
 
+            // Nội dung HTML của email
             String htmlContent = "<div style='text-align: center; font-family: Arial, sans-serif; padding: 20px; background-color: #f9f9f9; border-radius: 5px;'>" +
                     "<h1 style='color: #FFBF00;'>Thông báo mới</h1>" +
                     "<p style='font-size: 16px; color: #333;'>" + emailRequest.getMsgBody() + "</p>" +
@@ -76,6 +82,9 @@ public class EmailServiceImpl {
         return response;
     }
 
+    /**
+     * Phương thức gửi email OTP dạng HTML
+     */
     public void sendOTP(EmailRequest emailRequest){
         Response response = new Response();
         try{
@@ -110,5 +119,18 @@ public class EmailServiceImpl {
             response.setStatusCode(500);
             response.setMessage("Đã xảy ra lỗi khi gửi email: " + e.getMessage());
         }
+    }
+
+    public String sendPasswordCreateUser(String email, String username){
+        String password = Ultis.generateRandomString();
+        // tạo mail
+
+        EmailRequest emailRequest = new EmailRequest();
+        emailRequest.setRecipient(email);
+        emailRequest.setMsgBody(username + " " +password);
+        emailRequest.setSubject("PASSWORD");
+        sendHtmlMail(emailRequest);
+
+        return password;
     }
 }

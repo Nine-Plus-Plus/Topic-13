@@ -69,4 +69,11 @@ public class MentorsController {
         return ResponseEntity.status(response.getStatusCode()).body(response);
     }
 
+    @GetMapping("/admin/get-mentor-stars-report-by-semester-id/{semesterId}")
+    public ResponseEntity<Response> getMentorStarsReportBySemesterId(@PathVariable Long semesterId) {
+        Response response = mentorsService.getMentorStarsReportBySemesterId(semesterId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+
 }

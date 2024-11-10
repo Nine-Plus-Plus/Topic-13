@@ -51,15 +51,25 @@ public class MentorsService {
     @Autowired
     private RoleRepository roleRepository;
 
-    // Phương thức lấy tất cả mentors
+    @Autowired
+    private EmailServiceImpl emailService;
+
+    @Autowired
+    private MentorReportRepository mentorReportRepository;
+
+    private static final String DEFAULT_AVATAR_URL = "https://mentor-booking-images.s3.amazonaws.com/images.jpeg";
+
+    /**
+     *  Phương thức lấy toàn bộ danh sách mentor
+     */
     public Response getAllMentors(String name) {
         Response response = new Response();
         List<MentorsDTO> mentorsDTOList = new ArrayList<>();
         try {
             List<Mentors> mentorsList;
-            if(name == null || name.isEmpty()){
+            if (name == null || name.isEmpty()) {
                 mentorsList = mentorsRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
-            }else{
+            } else {
                 mentorsList = mentorsRepository.findByName(name, AvailableStatus.ACTIVE);
             }
 
@@ -86,7 +96,9 @@ public class MentorsService {
         return response;
     }
 
-    // Phương thức lấy mentor theo ID
+    /**
+     *  Phương thức lấy toàn bộ danh sách theo mentorID
+     */
     public Response getMentorById(Long id) {
         Response response = new Response();
         MentorsDTO mentorsDTO = new MentorsDTO();
@@ -113,7 +125,9 @@ public class MentorsService {
         return response;
     }
 
-
+    /**
+     *  Phương thức cập nhập thông tin của mentor
+     */
     public Response updateMentor(Long userId, CreateMentorRequest updateRequest, MultipartFile avatarFile) {
         Response response = new Response();
         try {
@@ -139,45 +153,44 @@ public class MentorsService {
                 System.out.println("Avatar URL: " + avatarUrl); // Kiểm tra URL
             }
             // Kiểm tra nếu username đã thay đổi và đã tồn tại trong hệ thống
-            if (!updateRequest.getUsername().equals(updateUser.getUsername())){
-                if(usersRepository.findByUsernameAndAvailableStatus(updateRequest.getUsername(), AvailableStatus.ACTIVE).isPresent()){
+            if (!updateRequest.getUsername().equals(updateUser.getUsername())) {
+                if (usersRepository.findByUsernameAndAvailableStatus(updateRequest.getUsername(), AvailableStatus.ACTIVE).isPresent()) {
                     throw new OurException("Username already exists");
                 }
             }
             // Kiểm tra nếu email đã thay đổi và đã tồn tại trong hệ thống
-            if (!updateRequest.getEmail().equals(updateUser.getEmail())){
-                if(usersRepository.findByEmailAndAvailableStatus(updateRequest.getEmail(), AvailableStatus.ACTIVE).isPresent()){
+            if (!updateRequest.getEmail().equals(updateUser.getEmail())) {
+                if (usersRepository.findByEmailAndAvailableStatus(updateRequest.getEmail(), AvailableStatus.ACTIVE).isPresent()) {
                     throw new OurException("Email already exists");
                 }
             }
             // Kiểm tra nếu số điện thoại đã thay đổi và đã tồn tại trong hệ thống
-            if (!updateRequest.getPhone().equals(updateUser.getPhone())){
-                if(usersRepository.findByPhoneAndAvailableStatus(updateRequest.getPhone(), AvailableStatus.ACTIVE).isPresent()){
+            if (!updateRequest.getPhone().equals(updateUser.getPhone())) {
+                if (usersRepository.findByPhoneAndAvailableStatus(updateRequest.getPhone(), AvailableStatus.ACTIVE).isPresent()) {
                     throw new OurException("Phone already exists");
                 }
             }
 
             // Kiểm tra nếu mentorCode đã thay đổi và đã tồn tại trong hệ thống
-            if (!updateRequest.getMentorCode().equals(mentorUpdate.getMentorCode())){
-                if(mentorsRepository.findByMentorCodeAndAvailableStatus(updateRequest.getMentorCode(), AvailableStatus.ACTIVE).isPresent()){
+            if (!updateRequest.getMentorCode().equals(mentorUpdate.getMentorCode())) {
+                if (mentorsRepository.findByMentorCodeAndAvailableStatus(updateRequest.getMentorCode(), AvailableStatus.ACTIVE).isPresent()) {
                     throw new OurException("MentorCode already exists");
                 }
             }
             // Cập nhật thông tin người dùng hiện có
-            updateUser.setUsername(updateRequest.getUsername().trim());
-            updateUser.setEmail(updateRequest.getEmail().trim());
-            updateUser.setFullName(updateRequest.getFullName().trim());
-            updateUser.setBirthDate(updateRequest.getBirthDate());
-            updateUser.setAddress(updateRequest.getAddress().trim());
-            updateUser.setPhone(updateRequest.getPhone().trim());
+            if(updateRequest.getUsername()!= null) updateUser.setUsername(updateRequest.getUsername().trim());
+            if(updateRequest.getEmail()!= null) updateUser.setEmail(updateRequest.getEmail().trim());
+            if(updateRequest.getFullName()!= null) updateUser.setFullName(updateRequest.getFullName().trim());
+            if(updateRequest.getBirthDate()!= null) updateUser.setBirthDate(updateRequest.getBirthDate());
+            if(updateRequest.getAddress()!= null) updateUser.setAddress(updateRequest.getAddress().trim());
+            if(updateRequest.getPhone()!= null) updateUser.setPhone(updateRequest.getPhone().trim());
             updateUser.setGender(updateRequest.getGender());
             updateUser.setDateUpdated(LocalDateTime.now());
             usersRepository.save(updateUser);
 
             // Cập nhật thông tin mentor
-            mentorUpdate.setMentorCode(updateRequest.getMentorCode().trim());
+            if(updateRequest.getMentorCode()!= null) mentorUpdate.setMentorCode(updateRequest.getMentorCode().trim());
             mentorUpdate.setDateUpdated(LocalDate.now());
-            mentorUpdate.setStar(updateRequest.getStar());
             mentorUpdate.setTotalTimeRemain(updateRequest.getTotalTimeRemain());
 
             // Cập nhật danh sách kỹ năng (skills)
@@ -204,6 +217,9 @@ public class MentorsService {
         return str == null || str.trim().isEmpty();
     }
 
+    /**
+     *  Phương thức tìm metor theo avaibility schedule và skills
+     */
     public Response findMentorWithNameAndSkillsAndAvaibility(String name, List<Long> skillIds, LocalDateTime availableFrom, LocalDateTime availableTo) {
         Response response = new Response();
         try {
@@ -216,16 +232,14 @@ public class MentorsService {
                         .stream()
                         .map(Converter::convertMentorToMentorDTO)
                         .collect(Collectors.toList());
-            }
-            // 2. Nếu chỉ có name
+            } // 2. Nếu chỉ có name
             else if (!isNullOrEmpty(name) && (skillIds == null || skillIds.isEmpty()) && availableFrom == null && availableTo == null) {
                 List<Mentors> mentorsList = mentorsRepository.findByName(name, AvailableStatus.ACTIVE);
                 mentorsDTOList = mentorsList
                         .stream()
                         .map(Converter::convertMentorToMentorDTO)
                         .collect(Collectors.toList());
-            }
-            // 3. Nếu chỉ có skills
+            } // 3. Nếu chỉ có skills
             else if (((skillIds != null)) && (isNullOrEmpty(name)) && availableFrom == null && availableTo == null) {
                 // Tìm các đối tượng Skills dựa trên skillIds
                 List<Skills> skillsList = skillsRepository.findAllById(skillIds);
@@ -239,24 +253,21 @@ public class MentorsService {
                         .stream()
                         .map(Converter::convertMentorToMentorDTO)
                         .collect(Collectors.toList());
-            }
-            // 4. Nếu chỉ có availableTo
+            } // 4. Nếu chỉ có availableTo
             else if (isNullOrEmpty(name) && (skillIds == null || skillIds.isEmpty()) && availableFrom == null && availableTo != null) {
                 List<Mentors> mentorsList = mentorScheduleRepository.findMentorsByAvailableTo(availableTo, AvailableStatus.ACTIVE);
                 mentorsDTOList = mentorsList
                         .stream()
                         .map(Converter::convertMentorToMentorDTO)
                         .collect(Collectors.toList());
-            }
-            // 5. Nếu chỉ có availableFrom
+            } // 5. Nếu chỉ có availableFrom
             else if (isNullOrEmpty(name) && (skillIds == null || skillIds.isEmpty()) && availableFrom != null && availableTo == null) {
                 List<Mentors> mentorsList = mentorScheduleRepository.findMentorsByAvailableFrom(availableFrom, AvailableStatus.ACTIVE);
                 mentorsDTOList = mentorsList
                         .stream()
                         .map(Converter::convertMentorToMentorDTO)
                         .collect(Collectors.toList());
-            }
-            // 6. Nếu có cả name và skills
+            } // 6. Nếu có cả name và skills
             else if (!isNullOrEmpty(name) && (skillIds != null && !skillIds.isEmpty()) && availableFrom == null && availableTo == null) {
                 // Tìm các đối tượng Skills dựa trên skillIds
                 List<Skills> skillsList = skillsRepository.findAllById(skillIds);
@@ -270,24 +281,21 @@ public class MentorsService {
                         .stream()
                         .map(Converter::convertMentorToMentorDTO)
                         .collect(Collectors.toList());
-            }
-            // 7. Nếu có cả name và availableTo
+            } // 7. Nếu có cả name và availableTo
             else if (!isNullOrEmpty(name) && availableTo != null && availableFrom == null && (skillIds == null || skillIds.isEmpty())) {
                 List<Mentors> mentorsList = mentorScheduleRepository.findMentorsByNameAndAvailableTo(name, availableTo, AvailableStatus.ACTIVE);
                 mentorsDTOList = mentorsList
                         .stream()
                         .map(Converter::convertMentorToMentorDTO)
                         .collect(Collectors.toList());
-            }
-            // 8. Nếu có cả name và availableFrom
+            } // 8. Nếu có cả name và availableFrom
             else if (!isNullOrEmpty(name) && availableTo == null && availableFrom != null && (skillIds == null || skillIds.isEmpty())) {
                 List<Mentors> mentorsList = mentorScheduleRepository.findMentorsByNameAndAvailableFrom(name, availableFrom, AvailableStatus.ACTIVE);
                 mentorsDTOList = mentorsList
                         .stream()
                         .map(Converter::convertMentorToMentorDTO)
                         .collect(Collectors.toList());
-            }
-            // 9. Nếu có cả skills và availableTo
+            } // 9. Nếu có cả skills và availableTo
             else if (isNullOrEmpty(name) && availableTo != null && availableFrom == null && (skillIds != null || !skillIds.isEmpty())) {
                 // Tìm các đối tượng Skills dựa trên skillIds
                 List<Skills> skillsList = skillsRepository.findAllById(skillIds);
@@ -301,8 +309,7 @@ public class MentorsService {
                         .stream()
                         .map(Converter::convertMentorToMentorDTO)
                         .collect(Collectors.toList());
-            }
-            // 10. Nếu có cả skills và availableFrom
+            } // 10. Nếu có cả skills và availableFrom
             else if (isNullOrEmpty(name) && availableTo == null && availableFrom != null && (skillIds != null || !skillIds.isEmpty())) {
                 // Tìm các đối tượng Skills dựa trên skillIds
                 List<Skills> skillsList = skillsRepository.findAllById(skillIds);
@@ -316,32 +323,28 @@ public class MentorsService {
                         .stream()
                         .map(Converter::convertMentorToMentorDTO)
                         .collect(Collectors.toList());
-            }
-            // 11. Nếu có cả availableTo và availableFrom
+            } // 11. Nếu có cả availableTo và availableFrom
             else if (isNullOrEmpty(name) && availableTo != null && availableFrom != null && (skillIds == null || skillIds.isEmpty())) {
                 List<Mentors> mentorsList = mentorScheduleRepository.findMentorsByAvailableFromAndTo(availableFrom, availableTo, AvailableStatus.ACTIVE);
                 mentorsDTOList = mentorsList
                         .stream()
                         .map(Converter::convertMentorToMentorDTO)
                         .collect(Collectors.toList());
-            }
-            // 12. Nếu có cả name, skills, availableTo
+            } // 12. Nếu có cả name, skills, availableTo
             else if (!isNullOrEmpty(name) && availableTo != null && availableFrom == null && (skillIds != null || !skillIds.isEmpty())) {
                 List<Mentors> mentorsList = mentorScheduleRepository.findMentorsByNameSkillsAndAvailableTo(name, skillIds, availableTo, AvailableStatus.ACTIVE);
                 mentorsDTOList = mentorsList
                         .stream()
                         .map(Converter::convertMentorToMentorDTO)
                         .collect(Collectors.toList());
-            }
-            // 13. Nếu có cả name, skills, availableFrom
+            } // 13. Nếu có cả name, skills, availableFrom
             else if (!isNullOrEmpty(name) && skillIds != null && !skillIds.isEmpty() && availableFrom != null) {
                 List<Mentors> mentorsList = mentorScheduleRepository.findMentorsByNameSkillsAndAvailableFrom(name, skillIds, availableFrom, AvailableStatus.ACTIVE);
                 mentorsDTOList = mentorsList
                         .stream()
                         .map(Converter::convertMentorToMentorDTO)
                         .collect(Collectors.toList());
-            }
-            // 14. Nếu có cả skills, availableTo, availableFrom
+            } // 14. Nếu có cả skills, availableTo, availableFrom
             else if (skillIds != null && !skillIds.isEmpty() && availableFrom != null && availableTo != null) {
                 // Kiểm tra nếu availableFrom không sau availableTo
                 if (availableFrom.isAfter(availableTo)) {
@@ -356,8 +359,7 @@ public class MentorsService {
                         .stream()
                         .map(Converter::convertMentorToMentorDTO)
                         .collect(Collectors.toList());
-            }
-            // 15. Nếu có cả name, availableFrom và availableTo
+            } // 15. Nếu có cả name, availableFrom và availableTo
             else if (!isNullOrEmpty(name) && availableFrom != null && availableTo != null) {
                 // Kiểm tra nếu availableFrom không sau availableTo
                 if (availableFrom.isAfter(availableTo)) {
@@ -372,8 +374,7 @@ public class MentorsService {
                         .stream()
                         .map(Converter::convertMentorToMentorDTO)
                         .collect(Collectors.toList());
-            }
-            // 16. Nếu có cả name, skills, availableTo, availableFrom
+            } // 16. Nếu có cả name, skills, availableTo, availableFrom
             else if (!isNullOrEmpty(name) && skillIds != null && !skillIds.isEmpty() && availableFrom != null && availableTo != null) {
                 // Kiểm tra nếu availableFrom không sau availableTo
                 if (availableFrom.isAfter(availableTo)) {
@@ -420,6 +421,9 @@ public class MentorsService {
         return response;
     }
 
+    /**
+     *  Phương thức lấy thông tin của mentor
+     */
     public UsersDTO getMentorInformation(Long mentorId) {
         Response response = new Response();
 
@@ -440,6 +444,9 @@ public class MentorsService {
         return usersDTO;
     }
 
+    /**
+     *  Phương thức lấy danh sách kĩ năng của mentor
+     */
     public List<SkillsDTO> getSkillsByMentor(Long mentorId) {
         List<SkillsDTO> skillsDTOList = new ArrayList<>();
         List<Skills> skillsList = mentorsRepository.findByIdAndAvailableStatus(mentorId, AvailableStatus.ACTIVE).getSkills();
@@ -450,36 +457,23 @@ public class MentorsService {
         return skillsDTOList;
     }
 
+    /**
+     *  Phương thức nhập mentor từ Excel
+     */
     public Response importMentorFromExcel(MultipartFile file) {
         Response response = new Response();
         try {
             List<CreateMentorRequest> createMentorRequests = ExcelHelper.excelToMentors(file);
-
             List<String> errors = new ArrayList<>();
             for (CreateMentorRequest request : createMentorRequests) {
-                try {
-                    Response createResponse = createMentorFormExcel(request);
-                    if (createResponse == null) {
-                        errors.add("Error creating mentor: " + request.getUsername() +
-                                " [Username: " + request.getUsername() +
-                                ", Email: " + request.getEmail() +
-                                ", Password: " + request.getPassword() +
-                                ", FullName: " + request.getFullName() +
-                                ", BirthDate: " + request.getBirthDate() +
-                                ", Address: " + request.getAddress() +
-                                ", Phone: " + request.getPhone() +
-                                ", Gender: " + request.getGender() +
-                                ", MentorCode: " + request.getMentorCode() +
-                                ", Skills: " + request.getSkilllNamesList() +
-                                "]");
-                    }
-                } catch (OurException e) {
-                    errors.add("Error creating mentor: " + request.getUsername() + " - " + e.getMessage());
+                Response createResponse = createMentorFormExcel(request);
+                if (createResponse.getStatusCode() != 200 && request.getFullName() != null) {
+                    errors.add(" [" + request.getFullName() + "] ");
                 }
             }
             if (!errors.isEmpty()) {
                 response.setStatusCode(400);
-                response.setMessage(String.join(", ", errors));
+                response.setMessage("Failed to import some mentors: " + String.join(", ", errors));
             } else {
                 response.setStatusCode(200);
                 response.setMessage("All mentors created successfully");
@@ -494,15 +488,18 @@ public class MentorsService {
         return response;
     }
 
+    /**
+     *  Phương thức tạo mentor từ Excel
+     */
     public Response createMentorFormExcel(CreateMentorRequest request) {
         Response response = new Response();
-        try{
+        try {
             // Kiểm tra nếu username hoặc email đã tồn tại
             if (usersRepository.findByUsernameAndAvailableStatus(request.getUsername(), AvailableStatus.ACTIVE).isPresent()) {
                 throw new OurException("Username already exists");
             }
             // Kiểm tra email
-            if (usersRepository.findByEmailAndAvailableStatus(request.getEmail(),AvailableStatus.ACTIVE).isPresent()) {
+            if (usersRepository.findByEmailAndAvailableStatus(request.getEmail(), AvailableStatus.ACTIVE).isPresent()) {
                 throw new OurException("Email already exists");
             }
             if (usersRepository.findByPhoneAndAvailableStatus(request.getPhone(), AvailableStatus.ACTIVE).isPresent()) {
@@ -517,7 +514,7 @@ public class MentorsService {
                     .orElseThrow(() -> new OurException("No role name"));
 
             // Mã hóa mật khẩu
-            String encodedPassword = passwordEncoder.encode(request.getPassword());
+            String encodedPassword = passwordEncoder.encode(emailService.sendPasswordCreateUser(request.getEmail().trim(), request.getUsername().trim()));
 
             // Tạo đối tượng User mới
             Users newUser = new Users();
@@ -532,7 +529,7 @@ public class MentorsService {
             newUser.setDateCreated(LocalDateTime.now());
             newUser.setRole(role);
             newUser.setAvailableStatus(AvailableStatus.ACTIVE);
-            newUser.setAvatar("https://mentor-booking-images.s3.amazonaws.com/images.jpeg");
+            newUser.setAvatar(DEFAULT_AVATAR_URL);
 
             usersRepository.save(newUser);
 
@@ -549,7 +546,7 @@ public class MentorsService {
                 List<String> skillsNameList = request.getSkilllNamesList();
                 List<Skills> skillsList = skillsNameList.stream()
                         .map(skillName -> skillsRepository.findBySkillNameExcel(skillName, AvailableStatus.ACTIVE)
-                                .orElseThrow(() -> new OurException("Skill not found: " + skillName)))
+                        .orElseThrow(() -> new OurException("Skill not found: " + skillName)))
                         .collect(Collectors.toList());
 
                 mentor.setSkills(skillsList);
@@ -557,6 +554,9 @@ public class MentorsService {
 
                 newUser.setMentor(mentor);
                 usersRepository.save(newUser);
+
+                response.setStatusCode(200);
+                response.setMessage("Student created successfully");
             }
         } catch (OurException e) {
             response.setStatusCode(400);
@@ -568,10 +568,13 @@ public class MentorsService {
         return response;
     }
 
+    /**
+     *  Phương thức lấy top 3 mentor có số số sao và thời lượng booking cao nhất
+     */
     public Response getTopMentors(){
         Response response = new Response();
         List<MentorsDTO> mentorsDTOList = new ArrayList<>();
-        try{
+        try {
             Pageable topThree = PageRequest.of(0, 3);
             List<Mentors> topMentors = mentorsRepository.findTopMentors(topThree, AvailableStatus.ACTIVE);
             mentorsDTOList = topMentors
@@ -587,6 +590,57 @@ public class MentorsService {
         } catch (Exception e) {
             response.setStatusCode(500);
             response.setMessage("Error occurred during get mentor: " + e.getMessage());
+        }
+        return response;
+    }
+
+    /**
+     *  Phương thức tạo report rating cho mentor theo kì
+     */
+    public void generateMentorReportRating(Semester semester){
+        List<Mentors> mentorsList = mentorsRepository.findByAvailableStatus(AvailableStatus.ACTIVE);
+
+        for (Mentors m : mentorsList) {
+            MentorReport report = new MentorReport();
+            report.setMentor(m);
+            report.setSemester(semester);
+            report.setStarRating(m.getStar());
+            report.setDateCreated(LocalDate.now());
+            mentorReportRepository.save(report);
+
+            m.setStar(5.0f);
+            m.setTotalTimeRemain(150.0f);
+            mentorsRepository.save(m);
+        }
+    }
+
+    public Response getMentorStarsReportBySemesterId(Long semesterId) {
+        Response response = new Response();
+        try {
+
+            if (semesterId == null) {
+                throw new OurException("Semester ID cannot be null");
+            }
+
+            List<MentorReport> report = mentorReportRepository.findBySemesterId(semesterId);
+            if (!report.isEmpty()) {
+                List<MentorReportDTO> reportDTO = report
+                        .stream()
+                        .map(Converter::convertReportToReportDTO)
+                        .collect(Collectors.toList());
+                response.setStatusCode(200);
+                response.setMessage("Report fetched successfully");
+                response.setMentorReportDTOList(reportDTO);
+            } else {
+                throw new OurException("No report found with semester id: " + semesterId);
+            }
+        } catch (OurException e) {
+            response.setStatusCode(400);
+            response.setMessage(e.getMessage());
+            response.setMentorReportDTOList(new ArrayList<>());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error occurred during get report by semester id: " + e.getMessage());
         }
         return response;
     }

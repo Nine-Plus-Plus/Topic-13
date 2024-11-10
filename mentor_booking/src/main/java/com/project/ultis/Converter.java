@@ -1,5 +1,6 @@
 package com.project.ultis;
 
+import com.project.enums.AvailableStatus;
 import com.project.model.*;
 import com.project.model.Class;
 import com.project.dto.*;
@@ -65,7 +66,11 @@ public class Converter {
         mentorsDTO.setAvailableStatus(convertMentor.getAvailableStatus());
 
         if (convertMentor.getAssignedClass() != null) {
-            mentorsDTO.setAssignedClass(convertClassToClassDTO(convertMentor.getAssignedClass()));
+            List<ClassDTO> classesDTOList = convertMentor.getAssignedClass().stream()
+                    .filter(aClass -> aClass.getAvailableStatus().equals(AvailableStatus.ACTIVE))
+                    .map(Converter::convertClassToClassDTO)
+                    .collect(Collectors.toList());
+            mentorsDTO.setAssignedClass(classesDTOList);
         }
 
         if (convertMentor.getUser() != null) {
@@ -73,6 +78,7 @@ public class Converter {
         }
         if (convertMentor.getSkills() != null) {
             List<SkillsDTO> skillsDTOList = convertMentor.getSkills().stream()
+                    .filter(skills -> skills.getAvailableStatus().equals(AvailableStatus.ACTIVE))
                     .map(Converter::convertSkillToSkillDTO)
                     .collect(Collectors.toList());
             mentorsDTO.setSkills(skillsDTOList);
@@ -170,6 +176,7 @@ public class Converter {
         groupDTO.setGroupName(convertGroup.getGroupName());
         groupDTO.setTotalPoint(convertGroup.getTotalPoint());
         groupDTO.setDateCreated(convertGroup.getDateCreated());
+        groupDTO.setFileURL(convertGroup.getFileURL());
 
         for (Students student : convertGroup.getStudents()) {
             studentsDTO = new StudentsDTO();
@@ -352,5 +359,15 @@ public class Converter {
         }
 
         return reviewsDTO;
+    }
+    
+    public static MentorReportDTO convertReportToReportDTO(MentorReport convertReport){
+        MentorReportDTO mentorReportDTO = new MentorReportDTO();
+        mentorReportDTO.setId(convertReport.getId());
+        mentorReportDTO.setMentorsDTO(convertMentorToMentorDTO(convertReport.getMentor()));
+        mentorReportDTO.setSemesterDTO(convertSemesterToSemesterDTO(convertReport.getSemester()));
+        mentorReportDTO.setStarRating(convertReport.getStarRating());
+        
+        return mentorReportDTO;
     }
 }

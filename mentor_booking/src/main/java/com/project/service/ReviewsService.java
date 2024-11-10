@@ -80,20 +80,19 @@ public class ReviewsService {
     }
 
     private void updateMentorStar(Long mentorId) {
-        List<Reviews> reviews = reviewsRepository.findByUserReceiveId(mentorId,  Sort.by(Sort.Direction.DESC, "dateCreated"));
+        List<Reviews> reviews = reviewsRepository.findByUserReceiveId(mentorId, Sort.by(Sort.Direction.DESC, "dateCreated"));
         double sumRatings = reviews.stream()
-                                   .mapToInt(Reviews::getRating)
-                                   .sum(); 
+                .mapToInt(Reviews::getRating)
+                .sum();
         Mentors mentor = mentorsRepository.findByUser_Id(mentorId);
-        if (mentor == null) {
-            throw new OurException("Mentor not found");
-        }
-        double currentAverageRating = mentor.getStar();
-        double totalRatings = sumRatings + currentAverageRating;
-        double averageRating = totalRatings / (reviews.size() + 1);  //Rule of average for this project
+        if (mentor != null) {
+            double currentAverageRating = mentor.getStar();
+            double totalRatings = sumRatings + currentAverageRating;
+            double averageRating = totalRatings / (reviews.size() + 1);  //Rule of average for this project
 
-        mentor.setStar((float) averageRating);
-        mentorsRepository.save(mentor);
+            mentor.setStar((float) averageRating);
+            mentorsRepository.save(mentor);
+        }
     }
 
     private Reviews mapToEntity(ReviewsDTO dto) {

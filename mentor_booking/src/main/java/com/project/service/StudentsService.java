@@ -55,7 +55,10 @@ public class StudentsService {
     private EmailServiceImpl emailService;
 
     private static final String DEFAULT_AVATAR_URL = "https://mentor-booking-images.s3.amazonaws.com/images.jpeg";
-    // Phương thức lấy tất cả sinh viên
+
+    /**
+     *  Phương thức lây tất cả danh sách học sinh
+     */
     public Response getAllStudents() {
         Response response = new Response();
         try {
@@ -84,7 +87,9 @@ public class StudentsService {
         return response;
     }
 
-    // Phương thức lấy sinh viên theo ID
+    /**
+     *  Phương thức lây tất cả danh sách học sinh theo studentID
+     */
     public Response getStudentById(Long id) {
         Response response = new Response();
         try {
@@ -110,6 +115,9 @@ public class StudentsService {
         return response;
     }
 
+    /**
+     *  Phương thức lây tất cả danh sách học sinh theo tên và chuyên ngành
+     */
     public Response findStudentByNameAndExpertise(Long classId, String name, String expertise) {
         Response response = new Response();
         try {
@@ -174,6 +182,9 @@ public class StudentsService {
         return str == null || str.trim().isEmpty();
     }
 
+    /**
+     *  Phương thức cập nhập sinh viên
+     */
     public Response updateStudent(Long userId, CreateStudentRequest updateRequest, MultipartFile avatarFile) {
         Response response = new Response();
         try {
@@ -226,23 +237,23 @@ public class StudentsService {
             Class aClass = classRepository.findById(updateRequest.getAClass().getId())
                     .orElseThrow(() -> new OurException("Class not found"));
             // Cập nhật thông tin Users
-            updateUser.setUsername(updateRequest.getUsername().trim());
-            updateUser.setEmail(updateRequest.getEmail().trim());
-            updateUser.setFullName(updateRequest.getFullName().trim());
-            updateUser.setBirthDate(updateRequest.getBirthDate());
-            updateUser.setAddress(updateRequest.getAddress().trim());
-            updateUser.setPhone(updateRequest.getPhone().trim());
-            updateUser.setGender(updateRequest.getGender());
+            if(updateRequest.getUsername()!= null) updateUser.setUsername(updateRequest.getUsername().trim());
+            if(updateRequest.getEmail()!= null) updateUser.setEmail(updateRequest.getEmail().trim());
+            if(updateRequest.getFullName()!= null) updateUser.setFullName(updateRequest.getFullName().trim());
+            if(updateRequest.getBirthDate()!= null) updateUser.setBirthDate(updateRequest.getBirthDate());
+            if(updateRequest.getAddress()!= null) updateUser.setAddress(updateRequest.getAddress().trim());
+            if(updateRequest.getPhone()!= null) updateUser.setPhone(updateRequest.getPhone().trim());
+            if(updateRequest.getGender()!= null) updateUser.setGender(updateRequest.getGender());
             updateUser.setDateUpdated(LocalDateTime.now());
             updateUser.setAvailableStatus(AvailableStatus.ACTIVE);
             usersRepository.save(updateUser);
 
             // Tạo đối tượng Student mới
             updateStudent.setUser(updateUser);
-            updateStudent.setExpertise(updateRequest.getExpertise().trim());
-            updateStudent.setStudentCode(updateRequest.getStudentCode().trim());
+            if(updateRequest.getExpertise()!= null) updateStudent.setExpertise(updateRequest.getExpertise().trim());
+            if(updateRequest.getStudentCode()!= null) updateStudent.setStudentCode(updateRequest.getStudentCode().trim());
             updateStudent.setDateUpdated(LocalDate.now());
-            updateStudent.setAClass(aClass);
+            if(aClass!=null) updateStudent.setAClass(aClass);
             updateStudent.setAvailableStatus(AvailableStatus.ACTIVE);
             studentsRepository.save(updateStudent);
 
@@ -261,6 +272,9 @@ public class StudentsService {
         return response;
     }
 
+    /**
+     *  Phương thức tìm danh sách sinh viên không có trong group
+     */
     public Response findStudentsNotInGroup(Long classId){
         Response response = new Response();
         try {
@@ -285,6 +299,9 @@ public class StudentsService {
         return response;
     }
 
+    /**
+     *  Phương thức tìm danh sách sinh viên theo kì học
+     */
     public Response getStudentBySemesterId(Long semesterId, String name){
         Response response = new Response();
         try{
@@ -321,6 +338,9 @@ public class StudentsService {
         return response;
     }
 
+    /**
+     *  Phương thức nhập sinh viên bằng excel
+     */
     public Response importStudentsFromExcel(MultipartFile file, Long semesterId){
         Response response = new Response();
         try{
@@ -351,6 +371,9 @@ public class StudentsService {
         return response;
     }
 
+    /**
+     *  Phương thức tao sinh viên khi nhập excel
+     */
     public Response createStudentFormExcel(CreateStudentRequest request, Long semesterId){
         Response response = new Response();
         try{

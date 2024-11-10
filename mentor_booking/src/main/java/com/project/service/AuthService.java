@@ -84,6 +84,9 @@ public class AuthService {
         return response;
     }
 
+    /**
+     *  Phương thức đổi password
+     */
     public Response changePassword(Response changeResponse) {
         Response response = new Response();
         try {
@@ -111,6 +114,9 @@ public class AuthService {
         return response;
     }
 
+    /**
+     *  Phương thức đổi password khi đăng nhập
+     */
     public Response changePasswordInUser(Response changeResponse) {
         Response response = new Response();
         try {
@@ -148,6 +154,9 @@ public class AuthService {
         return response;
     }
 
+    /**
+     *  Phương thức xử lý đăng nhập bằng google
+     */
     public Response processOAuthPostLogin(String email, String fullName) {
         Response response = new Response();
         try {
@@ -171,6 +180,9 @@ public class AuthService {
         return response;
     }
 
+    /**
+     *  Phương thức nhập gmail để đổi password
+     */
     public Response findByGmailChangePassword(Response responseEmail){
         Response response = new Response();
         try{

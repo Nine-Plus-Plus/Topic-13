@@ -62,7 +62,9 @@ public class UsersService {
 
     private static final String DEFAULT_AVATAR_URL = "https://mentor-booking-images.s3.amazonaws.com/images.jpeg";
 
-    // Phương thức tạo user
+    /**
+     *  Phương thức tạo người dùng ( chỉ áp dụng admin)
+     */
     public Response createUser(UsersDTO registerRequest) {
         Response response = new Response();
         try {
@@ -114,7 +116,9 @@ public class UsersService {
         return response;
     }
 
-    // Phương thức tạo học sinh
+    /**
+     *  Phương thức tạo học sinh
+     */
     public Response createStudents(CreateStudentRequest request) {
         Response response = new Response();
         try {
@@ -198,7 +202,9 @@ public class UsersService {
         return response;
     }
 
-    // Phương thức tạo mentor
+    /**
+     *  Phương thức tạo mới giảng viên
+     */
     public Response createMentors(CreateMentorRequest request) {
         Response response = new Response();
         try {
@@ -283,7 +289,9 @@ public class UsersService {
         return response;
     }
 
-    // Phương thức trả về tất cả người dùng
+    /**
+     *  Phương thức lấy toàn bộ danh sách người dùng
+     */
     public Response getAllUser() {
         Response response = new Response();
         try {
@@ -313,7 +321,9 @@ public class UsersService {
         return response;
     }
 
-    // Phương thức tìm người dùng theo id
+    /**
+     *  Phương thức lấy toàn bộ danh sách người dùng theo ID
+     */
     public Response getUserById(Long id) {
         Response response = new Response();
         try {
@@ -339,7 +349,9 @@ public class UsersService {
         return response;
     }
 
-    // Phương thức xóa người dùng theo id
+    /**
+     *  Phương thức xóa người dùng theo ID
+     */
     public Response deleteUser(Long id) {
         Response response = new Response();
         try {
@@ -372,7 +384,9 @@ public class UsersService {
         return response;
     }
 
-    // Phương thức lấy thông tin profile của người dùng dựa trên email
+    /**
+     *  Phương thức lấy thông tin người dùng giựa trên gmail
+     */
     public Response getMyProfile(String username) {
         Response response = new Response();
         try {
@@ -403,7 +417,12 @@ public class UsersService {
                 response.setMentorsDTO(Converter.convertMentorToMentorDTO(mentor));
                 response.setStatusCode(200);
                 response.setMessage("Successfully");
-            } else {
+            } else if (userProfile.getRole().getRoleName().equalsIgnoreCase("ADMIN")){
+                response.setUsersDTO(Converter.convertUserToUserDTO(userProfile));
+                response.setStatusCode(200);
+                response.setMessage("Successfully");
+            }
+            else {
                 response.setStatusCode(400);
                 response.setMessage("User not found");
             }
@@ -417,7 +436,9 @@ public class UsersService {
         return response;
     }
 
-    // Phương thức lấy thông tin detail của người dùng dựa trên id
+    /**
+     *  Phương thức lấy chi tiết thông tin người dùng dưaj trên ID
+     */
     public Response viewDetailUser(Long id) {
         Response response = new Response();
         try {
@@ -425,6 +446,7 @@ public class UsersService {
             StudentsDTO studentsDTO = new StudentsDTO();
             MentorsDTO mentorsDTO = new MentorsDTO();
 
+            // Kiểm tra người dùng theo ID
             Users userProfile = usersRepository.findByIdAndAvailableStatus(id, AvailableStatus.ACTIVE);
             if (userProfile == null) {
                 response.setUsersDTO(usersDTO);

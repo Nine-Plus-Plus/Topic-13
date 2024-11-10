@@ -224,7 +224,6 @@ public class SemesterService {
                 List<Class> classList = classRepository.findClassBySemesterId(s.getId(), AvailableStatus.ACTIVE);
                 for (Class c : classList) {
                     c.setAvailableStatus(AvailableStatus.INACTIVE);
-                    c.setMentor(null);
                     List<Students> studentsList = studentsRepository.findStudentByClassId(c.getId(), AvailableStatus.ACTIVE);
                     for (Students std : studentsList) {
                         std.setAvailableStatus(AvailableStatus.INACTIVE);

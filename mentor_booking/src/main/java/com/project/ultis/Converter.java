@@ -1,5 +1,6 @@
 package com.project.ultis;
 
+import com.project.enums.AvailableStatus;
 import com.project.model.*;
 import com.project.model.Class;
 import com.project.dto.*;
@@ -66,6 +67,7 @@ public class Converter {
 
         if (convertMentor.getAssignedClass() != null) {
             List<ClassDTO> classesDTOList = convertMentor.getAssignedClass().stream()
+                    .filter(aClass -> aClass.getAvailableStatus().equals(AvailableStatus.ACTIVE))
                     .map(Converter::convertClassToClassDTO)
                     .collect(Collectors.toList());
             mentorsDTO.setAssignedClass(classesDTOList);
@@ -76,6 +78,7 @@ public class Converter {
         }
         if (convertMentor.getSkills() != null) {
             List<SkillsDTO> skillsDTOList = convertMentor.getSkills().stream()
+                    .filter(skills -> skills.getAvailableStatus().equals(AvailableStatus.ACTIVE))
                     .map(Converter::convertSkillToSkillDTO)
                     .collect(Collectors.toList());
             mentorsDTO.setSkills(skillsDTOList);

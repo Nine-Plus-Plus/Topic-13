@@ -143,7 +143,7 @@ public class UsersService {
             Role role = roleRepository.findByRoleName("STUDENT")
                     .orElseThrow(() -> new OurException("No role name"));
             // Mã hóa mật khẩu và gửi cho học sinh
-            String encodedPassword = passwordEncoder.encode(emailService.sendPasswordCreateUser(request.getEmail().trim()));
+            String encodedPassword = passwordEncoder.encode(emailService.sendPasswordCreateUser(request.getEmail().trim(), request.getUsername()).trim());
 
             // Tạo đối tượng User mới
             Users newUser = new Users();
@@ -226,8 +226,7 @@ public class UsersService {
             Role role = roleRepository.findByRoleName("MENTOR")
                     .orElseThrow(() -> new OurException("No role name"));
             // Mã hóa mật khẩu
-            String encodedPassword = passwordEncoder.encode(emailService.sendPasswordCreateUser(request.getEmail().trim()));
-
+            String encodedPassword = passwordEncoder.encode(emailService.sendPasswordCreateUser(request.getEmail().trim(), request.getUsername()).trim());
             // Tạo đối tượng User mới
             Users newUser = new Users();
             newUser.setUsername(request.getUsername().trim());

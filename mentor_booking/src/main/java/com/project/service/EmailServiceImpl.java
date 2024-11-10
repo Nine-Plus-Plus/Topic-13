@@ -121,13 +121,13 @@ public class EmailServiceImpl {
         }
     }
 
-    public String sendPasswordCreateUser(String email){
+    public String sendPasswordCreateUser(String email, String username){
         String password = Ultis.generateRandomString();
         // tạo mail
 
         EmailRequest emailRequest = new EmailRequest();
         emailRequest.setRecipient(email);
-        emailRequest.setMsgBody(password);
+        emailRequest.setMsgBody(username + " " +password);
         emailRequest.setSubject("PASSWORD");
         sendHtmlMail(emailRequest);
 

@@ -78,7 +78,6 @@ public class Converter {
         }
         if (convertMentor.getSkills() != null) {
             List<SkillsDTO> skillsDTOList = convertMentor.getSkills().stream()
-                    .filter(skills -> skills.getAvailableStatus().equals(AvailableStatus.ACTIVE))
                     .map(Converter::convertSkillToSkillDTO)
                     .collect(Collectors.toList());
             mentorsDTO.setSkills(skillsDTOList);

@@ -362,8 +362,10 @@ public class UsersService {
             if (deleteMentor != null) {
                 deleteMentor.setAvailableStatus(AvailableStatus.DELETED);
                 Class classMentor = classRepository.findByMentorAndAvailableStatus(deleteMentor, AvailableStatus.ACTIVE);
-                classMentor.setMentor(null);
-                classRepository.save(classMentor);
+                if(classMentor!=null){
+                    classMentor.setMentor(null);
+                    classRepository.save(classMentor);
+                }
                 mentorsRepository.save(deleteMentor);
             }
 

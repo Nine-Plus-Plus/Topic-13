@@ -343,7 +343,7 @@ public class BookingService {
                 booking.setAvailableStatus(AvailableStatus.INACTIVE);
                 booking.setDateUpdated(LocalDateTime.now());
                 booking.setExpiredTime(null);
-                
+
                 PointHistory pointHistory;
 
                 List<PointHistory> pointHistoryList;
@@ -522,7 +522,7 @@ public class BookingService {
                 booking.setAvailableStatus(AvailableStatus.DELETED);
                 booking.setDateUpdated(LocalDateTime.now());
                 booking.setExpiredTime(null);
-                
+
                 PointHistory pointHistory;
 
                 List<PointHistory> pointHistoryList;
@@ -708,6 +708,41 @@ public class BookingService {
                     booking.setAvailableStatus(AvailableStatus.INACTIVE);
                     booking.setDateUpdated(LocalDateTime.now());
                     booking.setExpiredTime(null);
+                    PointHistory pointHistory;
+
+                    List<PointHistory> pointHistoryList;
+
+                    List<Students> groupMembers = booking.getGroup().getStudents();
+
+                    Group group = groupRepository.findByIdAndAvailableStatus(booking.getGroup().getId(), AvailableStatus.ACTIVE);
+                    group.setStudents(groupMembers);
+                    group.setTotalPoint(group.getTotalPoint() + booking.getPointPay());
+
+                    int newPoint = group.getTotalPoint() / groupMembers.size();
+
+                    for (Students member : groupMembers) {
+                        int adjustedPoint = newPoint - member.getPoint();
+                        member.setPoint(newPoint);
+                        pointHistory = new PointHistory();
+                        pointHistory.setStatus(PointHistoryStatus.ADJUSTED);
+                        pointHistory.setAvailableStatus(AvailableStatus.ACTIVE);
+                        pointHistory.setStudent(member);
+                        pointHistory.setDateCreated(LocalDateTime.now());
+                        pointHistory.setDateUpdated(LocalDateTime.now());
+                        pointHistory.setPoint(adjustedPoint);
+                        pointHistory.setBooking(booking);
+                        pointHistoryRepository.save(pointHistory);
+
+                        if (member.getPointHistories() == null) {
+                            pointHistoryList = new ArrayList<>();
+                        } else {
+                            pointHistoryList = member.getPointHistories();
+                        }
+                        pointHistoryList.add(pointHistory);
+                        member.setPointHistories(pointHistoryList);
+                    }
+                    groupRepository.save(group);
+
                     bookingRepository.save(booking);
                 }
             }
@@ -720,6 +755,41 @@ public class BookingService {
                     booking.setAvailableStatus(AvailableStatus.INACTIVE);
                     booking.setDateUpdated(LocalDateTime.now());
                     booking.setExpiredTime(null);
+
+                    PointHistory pointHistory;
+
+                    List<PointHistory> pointHistoryList;
+
+                    List<Students> groupMembers = booking.getGroup().getStudents();
+
+                    Group group = groupRepository.findByIdAndAvailableStatus(booking.getGroup().getId(), AvailableStatus.ACTIVE);
+                    group.setStudents(groupMembers);
+                    group.setTotalPoint(group.getTotalPoint() + booking.getPointPay());
+
+                    int newPoint = group.getTotalPoint() / groupMembers.size();
+
+                    for (Students member : groupMembers) {
+                        int adjustedPoint = newPoint - member.getPoint();
+                        member.setPoint(newPoint);
+                        pointHistory = new PointHistory();
+                        pointHistory.setStatus(PointHistoryStatus.ADJUSTED);
+                        pointHistory.setAvailableStatus(AvailableStatus.ACTIVE);
+                        pointHistory.setStudent(member);
+                        pointHistory.setDateCreated(LocalDateTime.now());
+                        pointHistory.setDateUpdated(LocalDateTime.now());
+                        pointHistory.setPoint(adjustedPoint);
+                        pointHistory.setBooking(booking);
+                        pointHistoryRepository.save(pointHistory);
+
+                        if (member.getPointHistories() == null) {
+                            pointHistoryList = new ArrayList<>();
+                        } else {
+                            pointHistoryList = member.getPointHistories();
+                        }
+                        pointHistoryList.add(pointHistory);
+                        member.setPointHistories(pointHistoryList);
+                    }
+                    groupRepository.save(group);
                     bookingRepository.save(booking);
                 }
             }

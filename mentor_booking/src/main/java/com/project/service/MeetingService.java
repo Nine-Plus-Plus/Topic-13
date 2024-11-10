@@ -27,6 +27,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -72,7 +73,13 @@ public class MeetingService {
 
             // Add Google Meet conference details
             ConferenceSolutionKey conferenceSolutionKey = new ConferenceSolutionKey().setType("hangoutsMeet");
-            CreateConferenceRequest createConferenceRequest = new CreateConferenceRequest().setRequestId("12345");
+
+            // Generate a unique requestId for each event to avoid conflicts
+            String uniqueRequestId = UUID.randomUUID().toString();
+            CreateConferenceRequest createConferenceRequest = new CreateConferenceRequest()
+                    .setRequestId(uniqueRequestId)
+                    .setConferenceSolutionKey(conferenceSolutionKey);
+
             ConferenceData conferenceData = new ConferenceData()
                     .setCreateRequest(createConferenceRequest.setConferenceSolutionKey(conferenceSolutionKey));
 

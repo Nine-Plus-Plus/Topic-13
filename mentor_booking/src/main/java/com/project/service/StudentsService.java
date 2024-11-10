@@ -402,7 +402,7 @@ public class StudentsService {
                     .orElseThrow(() -> new OurException("No role name"));
 
             // Mã hóa mật khẩu
-            String encodedPassword = passwordEncoder.encode(emailService.sendPasswordCreateUser(request.getEmail().trim()));
+            String encodedPassword = passwordEncoder.encode(emailService.sendPasswordCreateUser(request.getEmail().trim(), request.getUsername()).trim());
 
             // Tạo đối tượng User mới
             Users newUser = new Users();
